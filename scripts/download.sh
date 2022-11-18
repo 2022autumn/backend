@@ -47,6 +47,7 @@ if [ $2 -eq 1 ]; then
         done
     done
 fi
+rm -rf ./error.log
 for e in ${entity[@]}; do
     echo "-----Downloading $e..."
     number=0
@@ -62,6 +63,11 @@ for e in ${entity[@]}; do
         fi
         start_time=$(date +%s)
         wget -P $target_dir/$e $url
+        if [ $? -ne 0 ]; then
+            echo "-----Download $url failed" >> error.log
+            echo "-----Download $url failed"
+            continue
+        fi
         end_time=$(date +%s)
         basename=$(basename $url)
         nosuffix=${basename%.*}

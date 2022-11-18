@@ -1,5 +1,0 @@
-https://openalex.s3.amazonaws.com/data/concepts/updated_date=2022-07-05/part_000.gz
-https://openalex.s3.amazonaws.com/data/concepts/updated_date=2022-08-23/part_000.gz
-https://openalex.s3.amazonaws.com/data/concepts/updated_date=2022-09-03/part_000.gz
-https://openalex.s3.amazonaws.com/data/concepts/updated_date=2022-09-22/part_000.gz
-https://openalex.s3.amazonaws.com/data/concepts/updated_date=2022-10-01/part_000.gz
