@@ -1,0 +1,3 @@
+https://openalex.s3.amazonaws.com/data/authors/updated_date=2022-05-27/part_000.gz
+https://openalex.s3.amazonaws.com/data/authors/updated_date=2022-05-28/part_000.gz
+https://openalex.s3.amazonaws.com/data/authors/updated_date=2022-06-25/part_000.gz

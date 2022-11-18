@@ -1,0 +1,8 @@
+https://openalex.s3.amazonaws.com/data/institutions/updated_date=2022-06-01/part_000.gz
+https://openalex.s3.amazonaws.com/data/institutions/updated_date=2022-07-03/part_000.gz
+https://openalex.s3.amazonaws.com/data/institutions/updated_date=2022-07-04/part_000.gz
+https://openalex.s3.amazonaws.com/data/institutions/updated_date=2022-07-05/part_000.gz
+https://openalex.s3.amazonaws.com/data/institutions/updated_date=2022-07-07/part_000.gz
+https://openalex.s3.amazonaws.com/data/institutions/updated_date=2022-07-10/part_000.gz
+https://openalex.s3.amazonaws.com/data/institutions/updated_date=2022-07-11/part_000.gz
+https://openalex.s3.amazonaws.com/data/institutions/updated_date=2022-07-13/part_000.gz
