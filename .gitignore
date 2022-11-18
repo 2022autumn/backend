@@ -4,4 +4,7 @@
 /media/
 /main
 *log
+scripts/urls/
+scripts/manifests
+
 
