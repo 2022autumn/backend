@@ -7,10 +7,10 @@ import re
 # 本脚本需要在scripts文件夹下运行,该文件夹内有若干相关文件
 # download_size 是下载数据量大小参数
 # openAlex 一共330G压缩数据，解压后1.6T
-# 那么gzip的压缩率算作是5 我们的磁盘空间一共有950G，可用空间为888G，所以我们的下载数据量大小为850/5=170G
+# 那么gzip的压缩率算作是5 我们的磁盘空间一共有950G，可用空间为888G，所以我们的下载数据量大小为800/5=160G(100G留作余量)
 # 由于openAlex数据冗余的情况比较明显，可能经过数据清洗后，我们的数据量会更小。后期可以再进行调整
 GB = 1024 * 1024 * 1024
-download_size = 170 * GB
+download_size = 160 * GB
 manifests_path = os.path.join('.', 'manifests')
 entries = []
 urls = []
