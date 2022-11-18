@@ -1,13 +1,17 @@
+# -*- coding: utf-8 -*-
 # 读取manifest文件夹下的json文件
 import json
 import os
 import re
 
+# 本脚本需要在scripts文件夹下运行,该文件夹内有若干相关文件
 # download_size 是下载数据量大小参数
-download_size = 1024 * 1024 * 1024   # 1GB
-
-
-manifests_path = os.path.join('.', 'scripts', 'manifests')
+# openAlex 一共330G压缩数据，解压后1.6T
+# 那么gzip的压缩率算作是5 我们的磁盘空间一共有950G，可用空间为888G，所以我们的下载数据量大小为850/5=170G
+# 由于openAlex数据冗余的情况比较明显，可能经过数据清洗后，我们的数据量会更小。后期可以再进行调整
+GB = 1024 * 1024 * 1024
+download_size = 170 * GB
+manifests_path = os.path.join('.', 'manifests')
 entries = []
 urls = []
 # 将所有json文件中的entries合并到一个list中
@@ -20,7 +24,7 @@ for directory, subdir_list, file_list in os.walk(manifests_path):
 date_pattern = r'\d{4}-\d{2}-\d{2}'
 entries.sort(key=lambda x: re.search(date_pattern, x['url']).group())
 # 计算最多能下载的文件url
-max_storage = download_size  # gzip 压缩率算作是5 160GB的数据解压后相当于800GB
+max_storage = download_size  
 current_size = 0
 for entry in entries:
     current_size += entry['meta']['content_length']
@@ -44,10 +48,14 @@ for url in urls:
         insititutions_url.append(url)
     elif('venues' in url):
         venues_url.append(url)
-urls_path = os.path.join('.', 'scripts', 'urls')
+urls_path = os.path.join('.', 'urls')
 # 前缀
 prefix = 'https://openalex.s3.amazonaws.com/'
 url_pattern = r'data*'
+# 先清除url_path中之前的文件
+for directory, subdir_list, file_list in os.walk(urls_path):
+    for file in file_list:
+        os.remove(os.path.join(urls_path, file))
 # 将url写入文件
 with open(os.path.join(urls_path, 'works_url.txt'), 'w') as f:
     for url in works_url:
