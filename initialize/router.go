@@ -1,8 +1,8 @@
 package initialize
 
 import (
-	"2022autumn/docs"
-	"2022autumn/middleware"
+	"IShare/docs"
+	"IShare/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

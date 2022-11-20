@@ -1,10 +1,10 @@
 package main
 
 import (
-	"2022autumn/global"
-	"2022autumn/initialize"
-
 	"github.com/gin-gonic/gin"
+
+	"IShare/global"
+	"IShare/initialize"
 )
 
 func main() {

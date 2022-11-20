@@ -1,12 +1,13 @@
 package utils
 
 import (
-	"2022autumn/global"
 	"errors"
 	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+
+	"IShare/global"
 )
 
 // GenerateToken 生成一个token

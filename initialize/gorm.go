@@ -1,17 +1,19 @@
 package initialize
 
 import (
-	"2022autumn/global"
 	"fmt"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+
+	"IShare/global"
 )
 
 func InitMySQL() {
 	// 配置数据
 	var addr, port, user, password, dbname string
 	addr = global.VP.GetString("db.addr")
+	fmt.Println("addr is: " + addr)
 	port = global.VP.GetString("db.port")
 	user = global.VP.GetString("db.user")
 	password = global.VP.GetString("db.password")

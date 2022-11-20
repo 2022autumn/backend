@@ -1,4 +1,4 @@
-module 2022autumn
+module IShare
 
 go 1.18
 

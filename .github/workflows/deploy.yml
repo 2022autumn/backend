@@ -1,0 +1,46 @@
+name: deploy backend to HUAWEIYUN and runserver
+on:
+  #监听push操作
+  push:
+    branches:
+      - main
+      - dev
+jobs:
+  # 任务ID
+  deploy:
+    # 运行环境
+    runs-on: ubuntu-latest
+    # 步骤
+    steps:
+    # 使用别人的action
+    - uses: actions/checkout@v2
+    # 步骤名称
+    # 命名这个任务为发布Deploy
+    - name: build
+      # 运行命令
+      run: |
+        go build -o IShare
+    - name: Deploy to HUAWEIYUN Server
+      uses: easingthemes/ssh-deploy@v2.2.11
+      with:
+      # Private Key
+        SSH_PRIVATE_KEY: ${{ secrets.HUAWEIYUN_SERVER_ACCESS_TOKEN }}
+      # Remote host
+        REMOTE_HOST: ${{ secrets.HUAWEIYUN_SERVER_HOST }}
+      # Remote user
+        REMOTE_USER: ${{ secrets.HUAWEIYUN_REMOTE_USER }}
+      # Remote port
+        REMOTE_PORT: 22
+      # local directory
+        SOURCE: "./IShare"
+      # Target directory
+        TARGET: ${{ secrets.HUAWEIYUN_TARGET }}
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+          host: ${{ secrets.HUAWEIYUN_SERVER_HOST }}
+          username: ${{ secrets.HUAWEIYUN_REMOTE_USER }}
+          key: ${{ secrets.HUAWEIYUN_SERVER_ACCESS_TOKEN }}
+          port: 22
+          script: bash ${{ secrets.HUAWEIYUN_SHELL_SCRIPT_ADDRESS }}
+      

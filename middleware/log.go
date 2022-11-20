@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"2022autumn/global"
 	"fmt"
 	"os"
 	"path"
@@ -12,6 +11,8 @@ import (
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
+
+	"IShare/global"
 )
 
 func LoggerToFile() gin.HandlerFunc {

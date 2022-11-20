@@ -1,9 +1,11 @@
 package initialize
 
 import (
-	"2022autumn/global"
+	"fmt"
 
 	"github.com/spf13/viper"
+
+	"IShare/global"
 )
 
 func InitViper() (err error) {
@@ -12,10 +14,10 @@ func InitViper() (err error) {
 	v := viper.New()
 	v.SetConfigFile("./config.yml")
 	err = v.ReadInConfig()
-	// if err != nil {
-	// 	panic(fmt.Errorf("Fatal error config file: %s \n", err))
-	// }
-	// v.Set("root_path", "./")
+	if err != nil {
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+	v.Set("root_path", "./")
 
 	global.VP = v
 	return err
