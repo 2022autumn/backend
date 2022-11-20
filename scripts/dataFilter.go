@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"reflect"
 	"strings"
 )
@@ -303,28 +305,22 @@ func main() {
 
 	// 初始化过滤map
 	filter := initFilter()
-	// fmt.Println(filter["works"])
-	// value, ok := filter["works"]["mesh"]
-	// if ok {
-	// 	fmt.Println(value)
-	// }
 	processFile("/home/horik/backend/scripts/", "test.json", filter["works"])
+	// 过滤数据部分
+	data_dir_path := []string{"/data/openalex/authors", "/data/openalex/concepts", "/data/openalex/institutions", "/data/openalex/works", "/data/openalex/venues"}
+	// 获取每个文件夹下的文件列表
+	for _, dir_path := range data_dir_path {
+		// 获取文件目录的最后一个目录名
+		current_dir_name := path.Base(dir_path)
+		current_filter := filter[current_dir_name]
 
-	// data_dir_path := []string{"/data/openalex/authors", "/data/openalex/concepts", "/data/openalex/institutions", "/data/openalex/works", "/data/openalex/venues"}
-
-	// // 获取每个文件夹下的文件列表
-	// for _, dir_path := range data_dir_path {
-	// 	// 获取文件目录的最后一个目录名
-	// 	current_dir_name := path.Base(dir_path)
-	// 	current_filter := filter[current_dir_name]
-
-	// 	files, err := ioutil.ReadDir(dir_path)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	// 启动一个处理文件的协程
-	// 	for _, file := range files {
-	// 		go processFile(dir_path+"/"+file.Name(), current_filter)
-	// 	}
-	// }
+		files, err := ioutil.ReadDir(dir_path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// 启动一个处理文件的协程
+		for _, file := range files {
+			go processFile(dir_path, file.Name(), current_filter)
+		}
+	}
 }
