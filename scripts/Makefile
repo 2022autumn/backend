@@ -7,13 +7,4 @@ filter:
 	cat /data/openalex/venues/venues_data_1.json > ./venue.json
 
 clean:
-	rm -f ./work.json
-	rm -f ./author.json
-	rm -f ./institution.json
-	rm -f ./concept.json
-	rm -f ./venue.json
-	rm -f ./filterred_work.json
-	rm -f ./filterred_author.json
-	rm -f ./filterred_institution.json
-	rm -f ./filterred_concept.json
-	rm -f ./filterred_venue.json
+	rm -f *.json

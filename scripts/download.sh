@@ -60,6 +60,12 @@ for e in ${entity[@]}; do
                 number=$((number + 1))
                 continue
             fi
+            # if the file filterred, continue
+            if [ -f $target_dir/$e/filterred_${e}_data_${number}.json]; then
+                echo "-----$target_dir/$e/filterred_${e}_data_${number}.json filterred, continue..."
+                number=$((number + 1))
+                continue
+            fi
         fi
         start_time=$(date +%s)
         wget -P $target_dir/$e $url

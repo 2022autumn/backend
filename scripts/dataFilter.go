@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"reflect"
 	"strings"
 	"time"
@@ -86,16 +88,7 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 				return
 			}
 			// 3.2 写入新的json文件
-			// 3.2.1 判断是否存在新的json文件，不存在则创建
-			if _, err := os.Stat("filterred_" + fileName); os.IsNotExist(err) {
-				// 创建文件
-				_, err := os.Create("filterred_" + fileName)
-				if err != nil {
-					log.Println("create file error: ", err)
-					return
-				}
-			}
-			// 3.2.2 按行把jsonstr写入文件
+			// 按行把jsonstr写入文件
 			_, err = outfile.WriteString(string(jsonStr) + "\n")
 			if err != nil {
 				log.Println("write file error: ", err)
@@ -312,26 +305,27 @@ func test() {
 
 func main() {
 
-	test()
+	// test()
 
-	// // 初始化过滤map
-	// filter := initFilter()
+	// 初始化过滤map
+	filter := initFilter()
 
-	// // 过滤数据部分
-	// data_dir_path := []string{"/data/openalex/authors", "/data/openalex/concepts", "/data/openalex/institutions", "/data/openalex/works", "/data/openalex/venues"}
-	// // 获取每个文件夹下的文件列表
-	// for _, dir_path := range data_dir_path {
-	// 	// 获取文件目录的最后一个目录名
-	// 	current_dir_name := path.Base(dir_path)
-	// 	current_filter := filter[current_dir_name]
-
-	// 	files, err := ioutil.ReadDir(dir_path)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	// 启动一个处理文件的协程
-	// 	for _, file := range files {
-	// 		go processFile(dir_path, file.Name(), current_filter)
-	// 	}
-	// }
+	// 过滤数据部分
+	// data_dir_path := []string{"/data/openalex/authors/", "/data/openalex/concepts/", "/data/openalex/institutions/", "/data/openalex/works/", "/data/openalex/venues/"}
+	data_dir_path := []string{"/data/openalex/venues/"}
+	// 获取每个文件夹下的文件列表
+	for _, dir_path := range data_dir_path {
+		// 获取文件目录的最后一个目录名
+		current_dir_name := path.Base(dir_path)
+		current_filter := filter[current_dir_name]
+		// fmt.Println(current_dir_name)
+		files, err := ioutil.ReadDir(dir_path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// 启动一个处理文件的协程
+		for _, file := range files {
+			processFile(dir_path, file.Name(), current_filter)
+		}
+	}
 }
