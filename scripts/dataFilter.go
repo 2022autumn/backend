@@ -264,9 +264,6 @@ func initWorksfilter() map[string]interface{} {
 	// 向worksfilter.authorships中添加元素map
 	worksfilter["authorships"] = append(worksfilter["authorships"].([]map[string]interface{}), authorship)
 
-	// 向worksfilter["authorships"]中加入authorship
-	worksfilter["authorships"] = append(worksfilter["authorships"].([]map[string]interface{}), authorship)
-
 	worksfilter["biblio"] = false
 	worksfilter["is_retracted"] = false
 	worksfilter["is_paratext"] = false
