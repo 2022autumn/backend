@@ -101,7 +101,7 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 		}
 	}
 	// 4. 删除旧的json文件
-	os.Remove(fileName)
+	os.Remove(dir_path + fileName)
 	// 5. 计算时间
 	endTime := time.Now().UnixNano()
 	log.Printf("processFile: %s, time: %d ms", fileName, (endTime-startTime)/1000000)
@@ -305,14 +305,16 @@ func test() {
 
 func main() {
 
-	// test()
+	if false {
+		test()
+		return
+	}
 
 	// 初始化过滤map
 	filter := initFilter()
 
 	// 过滤数据部分
-	// data_dir_path := []string{"/data/openalex/authors/", "/data/openalex/concepts/", "/data/openalex/institutions/", "/data/openalex/works/", "/data/openalex/venues/"}
-	data_dir_path := []string{"/data/openalex/venues/"}
+	data_dir_path := []string{"/data/openalex/authors/", "/data/openalex/concepts/", "/data/openalex/institutions/", "/data/openalex/works/", "/data/openalex/venues/"}
 	// 获取每个文件夹下的文件列表
 	for _, dir_path := range data_dir_path {
 		// 获取文件目录的最后一个目录名
@@ -325,6 +327,10 @@ func main() {
 		}
 		// 启动一个处理文件的协程
 		for _, file := range files {
+			// 如果是filter过的文件则跳过
+			if strings.Contains(file.Name(), "filter") {
+				continue
+			}
 			processFile(dir_path, file.Name(), current_filter)
 		}
 	}
