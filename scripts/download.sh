@@ -9,7 +9,7 @@ if [ $# -lt 2 ]; then
     exit 1
 fi
 start=$(date +%s)
-entity=('authors' 'concepts' 'works' 'institutions' 'venues')
+entity=('concepts' 'institutions' 'venues' 'works' 'authors')
 target_dir=$1
 mkdir -p $target_dir
 if [ ! -d $target_dir ]; then
