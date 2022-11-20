@@ -301,11 +301,23 @@ func initVenuesfilter() map[string]interface{} {
 	return venuesfilter
 }
 
+// 执行test之前需要先make filter获取数据
+func test() {
+	filter := initFilter()
+	go processFile("/home/horik/backend/scripts/", "work.json", filter["works"])
+	go processFile("/home/horik/backend/scripts/", "author.json", filter["authors"])
+	go processFile("/home/horik/backend/scripts/", "venue.json", filter["venues"])
+	go processFile("/home/horik/backend/scripts/", "institution.json", filter["institutions"])
+	go processFile("/home/horik/backend/scripts/", "concept.json", filter["concepts"])
+}
+
 func main() {
+
+	// test()
 
 	// 初始化过滤map
 	filter := initFilter()
-	processFile("/home/horik/backend/scripts/", "test.json", filter["works"])
+
 	// 过滤数据部分
 	data_dir_path := []string{"/data/openalex/authors", "/data/openalex/concepts", "/data/openalex/institutions", "/data/openalex/works", "/data/openalex/venues"}
 	// 获取每个文件夹下的文件列表
