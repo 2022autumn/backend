@@ -4,12 +4,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"reflect"
 	"strings"
+	"time"
 )
 
 //--------------------- datafilter ---------------------
@@ -37,7 +36,8 @@ import (
  */
 func processFile(dir_path string, fileName string, filter map[string]interface{}) {
 	log.Println("processFile: ", dir_path+fileName)
-
+	// 获取当前时间
+	startTime := time.Now().UnixNano()
 	file, err := os.Open(dir_path + fileName)
 	if err != nil {
 		log.Println("open file error: ", err)
@@ -59,7 +59,6 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 	reader := bufio.NewReader(file)
 
 	for {
-		log.Println("read line")
 		// 1. 按行读取文件
 		line, err := reader.ReadString('\n')
 		if err != nil {
@@ -110,6 +109,9 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 	}
 	// 4. 删除旧的json文件
 	os.Remove(fileName)
+	// 5. 计算时间
+	endTime := time.Now().UnixNano()
+	log.Printf("processFile: %s, time: %d ms", fileName, (endTime-startTime)/1000000)
 }
 
 // 保证filter中的key在data中存在
@@ -304,35 +306,35 @@ func initVenuesfilter() map[string]interface{} {
 // 执行test之前需要先make filter获取数据
 func test() {
 	filter := initFilter()
-	go processFile("/home/horik/backend/scripts/", "work.json", filter["works"])
-	go processFile("/home/horik/backend/scripts/", "author.json", filter["authors"])
-	go processFile("/home/horik/backend/scripts/", "venue.json", filter["venues"])
-	go processFile("/home/horik/backend/scripts/", "institution.json", filter["institutions"])
-	go processFile("/home/horik/backend/scripts/", "concept.json", filter["concepts"])
+	processFile("/home/horik/backend/scripts/", "work.json", filter["works"])
+	processFile("/home/horik/backend/scripts/", "author.json", filter["authors"])
+	processFile("/home/horik/backend/scripts/", "venue.json", filter["venues"])
+	processFile("/home/horik/backend/scripts/", "institution.json", filter["institutions"])
+	processFile("/home/horik/backend/scripts/", "concept.json", filter["concepts"])
 }
 
 func main() {
 
-	// test()
+	test()
 
-	// 初始化过滤map
-	filter := initFilter()
+	// // 初始化过滤map
+	// filter := initFilter()
 
-	// 过滤数据部分
-	data_dir_path := []string{"/data/openalex/authors", "/data/openalex/concepts", "/data/openalex/institutions", "/data/openalex/works", "/data/openalex/venues"}
-	// 获取每个文件夹下的文件列表
-	for _, dir_path := range data_dir_path {
-		// 获取文件目录的最后一个目录名
-		current_dir_name := path.Base(dir_path)
-		current_filter := filter[current_dir_name]
+	// // 过滤数据部分
+	// data_dir_path := []string{"/data/openalex/authors", "/data/openalex/concepts", "/data/openalex/institutions", "/data/openalex/works", "/data/openalex/venues"}
+	// // 获取每个文件夹下的文件列表
+	// for _, dir_path := range data_dir_path {
+	// 	// 获取文件目录的最后一个目录名
+	// 	current_dir_name := path.Base(dir_path)
+	// 	current_filter := filter[current_dir_name]
 
-		files, err := ioutil.ReadDir(dir_path)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// 启动一个处理文件的协程
-		for _, file := range files {
-			go processFile(dir_path, file.Name(), current_filter)
-		}
-	}
+	// 	files, err := ioutil.ReadDir(dir_path)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	// 启动一个处理文件的协程
+	// 	for _, file := range files {
+	// 		go processFile(dir_path, file.Name(), current_filter)
+	// 	}
+	// }
 }

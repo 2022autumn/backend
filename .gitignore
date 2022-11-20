@@ -6,7 +6,4 @@
 *log
 scripts/urls/
 scripts/manifests
-scripts/test.json
-scripts/filterred_test.json
-scripts/a.json
-scripts/b.json
+scripts/*.json
