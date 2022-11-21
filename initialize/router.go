@@ -21,7 +21,7 @@ func SetupRouter(r *gin.Engine) {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	r.GET("/test", testGin)
+	r.GET("/api/test", testGin)
 
 	// baseGroup := r.Group("/api/v1")
 	// {
