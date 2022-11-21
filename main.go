@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-
 	"IShare/global"
 	"IShare/initialize"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	initialize.InitViper()
 
 	initialize.InitMySQL()
-	defer initialize.Close()
+	defer initialize.CloseMySQL()
 
 	initialize.InitMedia()
+	initialize.InitElasticSearch()
 
 	r := gin.Default()
 	initialize.SetupRouter(r)
