@@ -20,6 +20,14 @@ jobs:
       # 运行命令
       run: |
         go build -o IShare
+    - name: executing remote ssh commands using password[delete old file]
+      uses: appleboy/ssh-action@master
+      with:
+          host: ${{ secrets.HUAWEIYUN_SERVER_HOST }}
+          username: ${{ secrets.HUAWEIYUN_REMOTE_USER }}
+          key: ${{ secrets.HUAWEIYUN_SERVER_ACCESS_TOKEN }}
+          port: 22
+          script: bash ${{ secrets.HUAWEIYUN_SHELL_SCRIPT_ADDRESS }} delete
     - name: Deploy to HUAWEIYUN Server
       uses: easingthemes/ssh-deploy@v2.2.11
       with:
@@ -42,5 +50,5 @@ jobs:
           username: ${{ secrets.HUAWEIYUN_REMOTE_USER }}
           key: ${{ secrets.HUAWEIYUN_SERVER_ACCESS_TOKEN }}
           port: 22
-          script: bash ${{ secrets.HUAWEIYUN_SHELL_SCRIPT_ADDRESS }}
+          script: bash ${{ secrets.HUAWEIYUN_SHELL_SCRIPT_ADDRESS }} start
       
