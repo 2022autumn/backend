@@ -15,7 +15,22 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/es/test_es": {
+            "post": {
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "queryWord",
+                        "name": "queryWord",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

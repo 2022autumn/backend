@@ -1,4 +1,13 @@
 info:
   contact: {}
-paths: {}
+paths:
+  /es/test_es:
+    post:
+      parameters:
+      - description: queryWord
+        in: formData
+        name: queryWord
+        required: true
+        type: string
+      responses: {}
 swagger: "2.0"
