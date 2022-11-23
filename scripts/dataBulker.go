@@ -61,8 +61,8 @@ func get_filepath() {
 }
 
 const (
-	Limit  = 100 // 同时运行的goroutine上限
-	Weight = 1   // 信号量的权重
+	Limit  = 50 // 同时运行的goroutine上限
+	Weight = 1  // 信号量的权重
 )
 
 var sem = semaphore.NewWeighted(Limit)
