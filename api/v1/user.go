@@ -18,11 +18,13 @@ func GetData(c *gin.Context) {
 		"password": password,
 	})
 }
+
+// Register 注册
 func Register(c *gin.Context) {
 	// 获取请求数据
 	username := c.PostForm("username")
-	password1 := c.PostForm("password1")
-	password2 := c.PostForm("password2")
+	password1 := c.PostForm("password_1")
+	password2 := c.PostForm("password_2")
 	if password1 != password2 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -40,7 +42,7 @@ func Register(c *gin.Context) {
 		return
 	}
 	// 成功创建用户
-	if err := service.CreateUser(&database.User{Name: username, Password: password}); err != nil {
+	if err := service.CreateUser(&database.User{Username: username, Password: password}); err != nil {
 		panic("CreateUser: create user error")
 	}
 	// 返回响应
@@ -51,6 +53,8 @@ func Register(c *gin.Context) {
 		"password": password,
 	})
 }
+
+// Login 登录
 func Login(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")
