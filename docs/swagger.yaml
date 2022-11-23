@@ -1,6 +1,27 @@
 info:
   contact: {}
 paths:
+  /es/basequery:
+    post:
+      description: 基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找
+      parameters:
+      - description: 搜索词
+        in: query
+        name: query
+        required: true
+        type: string
+      responses: {}
+  /es/get/{id}:
+    get:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
   /es/test_es:
     post:
       parameters:
