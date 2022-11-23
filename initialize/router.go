@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	v1 "IShare/api/v1"
 	"IShare/docs"
 	"IShare/middleware"
 	"net/http"
@@ -16,20 +17,24 @@ func SetupRouter(r *gin.Engine) {
 
 	docs.SwaggerInfo.Title = "?"
 	docs.SwaggerInfo.Version = "v1"
-	docs.SwaggerInfo.BasePath = "/api/v1"
+	docs.SwaggerInfo.BasePath = "/api"
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	r.GET("/api/test", testGin)
 
-	// baseGroup := r.Group("/api/v1")
+	baseGroup := r.Group("/api")
 	// {
 	// 	baseGroup.POST("/register", v1.Register)
 	// 	baseGroup.POST("/login", v1.Login)
 	// 	baseGroup.Static("/media", "./media")
 	// }
-
+	esGroup := baseGroup.Group("/es")
+	{
+		esGroup.POST("test_es", v1.TestEsSearch)
+		esGroup.GET("get/:id", v1.GetObject)
+	}
 	// userGroup := baseGroup.Group("/user", middleware.AuthRequired())
 	// {
 	// 	userGroup.POST("/upload_avatar", v1.UploadAvatar)

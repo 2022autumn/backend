@@ -15,7 +15,55 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/es/basequery": {
+            "post": {
+                "description": "基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "搜索词",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/es/get/{id}": {
+            "get": {
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/es/test_es": {
+            "post": {
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "queryWord",
+                        "name": "queryWord",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
