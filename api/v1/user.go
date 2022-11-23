@@ -3,8 +3,12 @@ package v1
 import (
 	"IShare/global"
 	"IShare/model/database"
+	"IShare/model/response"
 	"IShare/service"
+	"IShare/utils"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
 )
@@ -41,8 +45,13 @@ func Register(c *gin.Context) {
 		})
 		return
 	}
+	// 将密码进行哈希处理
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		panic("CreateUser: hash password error")
+	}
 	// 成功创建用户
-	if err := service.CreateUser(&database.User{Username: username, Password: password}); err != nil {
+	if err := service.CreateUser(&database.User{Username: username, Password: string(hashedPassword)}); err != nil {
 		panic("CreateUser: create user error")
 	}
 	// 返回响应
@@ -57,8 +66,11 @@ func Register(c *gin.Context) {
 // Login 登录
 func Login(c *gin.Context) {
 	username := c.PostForm("username")
-	password := c.PostForm("password")
-	// 用户的用户名已经注册过的情况
+	//password := c.PostForm("password")	//不用data在hash比较时候会出错？？？
+	//password := c.Request.FormValue("password")
+	data := utils.BindJsonAndValid(c, &response.LoginQ{}).(*response.LoginQ)
+	fmt.Print(data)
+	// 用户不存在
 	user, notFound := service.GetUserByUsername(username)
 	if notFound {
 		c.JSON(http.StatusOK, gin.H{
@@ -68,7 +80,11 @@ func Login(c *gin.Context) {
 		return
 	}
 	// 密码错误的情况
-	if user.Password != password {
+	fmt.Print(user.Password)
+	//hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	//fmt.Print(hashedPassword)
+	//fmt.Print(password)
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password)); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "密码错误",

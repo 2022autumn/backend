@@ -18,4 +18,7 @@ type User struct {
 	Email       string `gorm:"size:32;" json:"email"`         //邮箱
 	Fields      string `gorm:"size:256;" json:"fields"`       //研究领域
 	InterestTag string `gorm:"size:256;" json:"interest_tag"` //兴趣词
+
+	AuthorName string `gorm:"size:64;" json:"author_name"`        //被申请作者姓名
+	AuthorID   string `gorm:"type:varchar(32);" json:"author_id"` // 被申请的作者ID
 }
