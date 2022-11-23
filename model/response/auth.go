@@ -21,3 +21,5 @@ type RegisterQ struct {
 	Name     string `json:"name" binding:"min=3,max=100,required"`
 	Password string `json:"password" binding:"gte=6,required"`
 }
+
+//

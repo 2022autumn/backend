@@ -6,7 +6,7 @@ import "time"
 type User struct {
 	UserID   uint64    `gorm:"primary_key; autoIncrement; not null;" json:"user_id"`
 	Username string    `gorm:"size:32; not null; unique;" json:"username"` //用户名
-	Password string    `gorm:"size:128; not null;" json:"password"`        //密码
+	Password string    `gorm:"size:256; not null;" json:"password"`        //密码
 	RegTime  time.Time `gorm:"autoCreateTime" json:"regTime"`              //注册时间
 
 	UserType uint64 `gorm:"default:0" json:"user_type"` // 0: 普通用户，1: 认证机构用户,2 管理员
