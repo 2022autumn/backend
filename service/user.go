@@ -40,3 +40,24 @@ func GetUserByUsername(username string) (user database.User, notFound bool) {
 		return user, false
 	}
 }
+
+// QueryAUserByID 根据用户 ID 查询某个用户
+func QueryAUserByID(userID uint64) (user database.User, notFound bool) {
+	err := global.DB.Where("user_id = ?", userID).First(&user).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return user, true
+	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		panic(err)
+	} else {
+		return user, false
+	}
+}
+
+// UpdateAUser 更新用户的用户名、密码、个人信息
+func UpdateAUser(user *database.User, username string, password string, userInfo string) error {
+	user.Username = username
+	user.Password = password
+	user.UserInfo = userInfo
+	err := global.DB.Save(user).Error
+	return err
+}
