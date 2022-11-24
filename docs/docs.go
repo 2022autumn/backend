@@ -16,21 +16,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/es/basequery": {
-            "post": {
-                "description": "基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "搜索词",
-                        "name": "query",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
         "/es/get/{id}": {
             "get": {
                 "parameters": [
@@ -47,6 +32,36 @@ const docTemplate = `{
                         "description": "OK"
                     }
                 }
+            }
+        },
+        "/es/search/base": {
+            "post": {
+                "description": "基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "搜索词",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/es/search/doi": {
+            "post": {
+                "description": "使用doi查找work，未测试，请勿使用",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "doi",
+                        "name": "doi",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
             }
         },
         "/es/test_es": {

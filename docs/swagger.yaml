@@ -1,16 +1,6 @@
 info:
   contact: {}
 paths:
-  /es/basequery:
-    post:
-      description: 基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找
-      parameters:
-      - description: 搜索词
-        in: query
-        name: query
-        required: true
-        type: string
-      responses: {}
   /es/get/{id}:
     get:
       parameters:
@@ -22,6 +12,26 @@ paths:
       responses:
         "200":
           description: OK
+  /es/search/base:
+    post:
+      description: 基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找
+      parameters:
+      - description: 搜索词
+        in: query
+        name: query
+        required: true
+        type: string
+      responses: {}
+  /es/search/doi:
+    post:
+      description: 使用doi查找work，未测试，请勿使用
+      parameters:
+      - description: doi
+        in: query
+        name: doi
+        required: true
+        type: string
+      responses: {}
   /es/test_es:
     post:
       parameters:

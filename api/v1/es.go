@@ -70,7 +70,7 @@ func GetObject(c *gin.Context) {
 // BaseSearch
 // @Description 基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找
 // @Param query query string true "搜索词"
-// @Router /es/basequery [POST]
+// @Router /es/search/base [POST]
 func BaseSearch(c *gin.Context) {
 	queryWord := c.Query("query")
 	boolQuery := elastic.NewBoolQuery()
@@ -91,6 +91,39 @@ func BaseSearch(c *gin.Context) {
 	})
 }
 
-func AdvanceSearch(c *gin.Context) {
+type AdvanceQuery struct {
+	conditions []map[string]string
+	page       int
+	size       int
+	min_year   int
+	max_year   int
+}
 
+// AdvanceSearch
+// @Description 高级搜索，搜索条件通过body传入
+// @Router /es/search/advance [POST]
+func AdvanceSearch(c *gin.Context) {
+}
+
+// DoiSearch
+// @Description 使用doi查找work，未测试，请勿使用
+// @Param doi query string true "doi"
+// @Router /es/search/doi [POST]
+func DoiSearch(c *gin.Context) {
+	doi := c.Query("doi")
+	boolQuery := elastic.NewBoolQuery()
+	doiQuery := elastic.NewMatchQuery("doi", doi)
+	boolQuery.Must(doiQuery)
+	res, err := service.GetWork(boolQuery)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status": 201,
+			"err":    err,
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"status": 200,
+		"res":    res,
+	})
 }
