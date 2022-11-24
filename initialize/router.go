@@ -41,8 +41,10 @@ func SetupRouter(r *gin.Engine) {
 	// }
 	esGroup := baseGroup.Group("/es")
 	{
-		esGroup.POST("test_es", v1.TestEsSearch)
-		esGroup.GET("get/:id", v1.GetObject)
+		esGroup.POST("/test_es", v1.TestEsSearch)
+		esGroup.GET("/get/:id", v1.GetObject)
+		esGroup.POST("/search/base", v1.BaseSearch)
+		esGroup.POST("/search/doi", v1.DoiSearch)
 		esGroup.POST("base_query", v1.BaseSearch)
 	}
 	// userGroup := baseGroup.Group("/user", middleware.AuthRequired())
