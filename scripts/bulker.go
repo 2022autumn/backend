@@ -3,6 +3,7 @@ package main
 import (
 	"IShare/global"
 	"IShare/initialize"
+	"IShare/utils"
 	"bufio"
 	"context"
 	"encoding/json"
@@ -20,7 +21,7 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-var DEBUG = false
+var DEBUG = true
 var BULK_SIZE = 10000
 var BATCH_SIZE = 10
 
@@ -36,9 +37,13 @@ func main() {
 	initialize.InitElasticSearch()
 	filter := initFilter()
 	data_dir_path := []string{"/data/openalex/authors/", "/data/openalex/concepts/", "/data/openalex/institutions/", "/data/openalex/works/", "/data/openalex/venues/"}
+	if DEBUG {
+		data_dir_path = []string{"/data/openalex/testdata/authors/", "/data/openalex/testdata/concepts/", "/data/openalex/testdata/institutions/", "/data/openalex/testdata/works/", "/data/openalex/testdata/venues/"}
+	}
 	var wg sync.WaitGroup
 	for _, dir_path := range data_dir_path {
 		current_dir_name := path.Base(dir_path)
+		index := current_dir_name
 		current_filter := filter[current_dir_name]
 		files, err := ioutil.ReadDir(dir_path)
 		if err != nil {
@@ -48,7 +53,10 @@ func main() {
 		// 启动一个处理文件的协程
 		for _, file := range files {
 			wg.Add(1)
-			go processFile(dir_path, file.Name(), current_filter, &wg, current_dir_name)
+			if DEBUG {
+				index = current_dir_name + "_test"
+			}
+			go processFile(dir_path, file.Name(), current_filter, &wg, index)
 		}
 	}
 	wg.Wait()
@@ -56,7 +64,6 @@ func main() {
 	log.Println("total time: ", end_time.Sub(start_time))
 }
 
-//------- 2. 过滤json文件 filter初始化-------//
 // create filter map
 func initFilter() map[string]map[string]interface{} {
 	filter := make(map[string]map[string]interface{})
@@ -290,6 +297,10 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 // 保证filter中的key在data中存在
 func filterData(data *map[string]interface{}, filter *map[string]interface{}) {
 	for k, v := range *filter {
+		if k == "abstract_inverted_index" {
+			abstract := utils.TransInvertedIndex2String(v)
+			(*data)["abstract_inverted_index"] = abstract
+		}
 		// 如果v为bool类型，若为true则修改，若为false则删除
 		if reflect.TypeOf(v).Kind() == reflect.Bool {
 			if v.(bool) {
@@ -318,10 +329,12 @@ func filterData(data *map[string]interface{}, filter *map[string]interface{}) {
 			}
 		} else if reflect.TypeOf(v).Kind() == reflect.Slice {
 			// 如果v为map的数组类型，则遍历data数组，递归
-			inner_filter := v.([]map[string]interface{})[0]
-			for _, value := range (*data)[k].([]interface{}) {
-				inner_data := value.(map[string]interface{})
-				filterData(&inner_data, &inner_filter)
+			if (*data)[k] != nil {
+				inner_filter := v.([]map[string]interface{})[0]
+				for _, value := range (*data)[k].([]interface{}) {
+					inner_data := value.(map[string]interface{})
+					filterData(&inner_data, &inner_filter)
+				}
 			}
 		}
 	}
