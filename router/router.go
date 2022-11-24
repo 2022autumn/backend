@@ -13,4 +13,10 @@ func InitRouter(r *gin.Engine) {
 		UserRouter.POST("/login", v1.Login)       //登录
 	}
 	r.POST("/GetData", v1.GetData) //测试数据接收获取
+
+	ApplicationRouter := r.Group("/application")
+	{
+		ApplicationRouter.POST("/create", v1.CreateApplication)
+	}
+
 }
