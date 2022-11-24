@@ -16,7 +16,7 @@ rm -f /data/openalex/testdata/venues/*
 # create real test data
 echo "...Copying test data from /data/openalex to /data/openalex/testdata..."
 echo "Copying authors..."
-for i in {0..5}; do cp /data/openalex/authors/authors_data_$i.json /data/openalex/testdata/authors/;echo "finish copy authors_data_$i.json";done
+for i in {0..3}; do cp /data/openalex/authors/authors_data_$i.json /data/openalex/testdata/authors/;echo "finish copy authors_data_$i.json";done
 echo "Copying institutions..."
 for i in {0..5}; do cp /data/openalex/institutions/institutions_data_$i.json /data/openalex/testdata/institutions/;echo "finish copy institutions_data_$i.json"; done
 echo "Copying works..."

@@ -21,7 +21,7 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-var DEBUG = true
+var DEBUG = false
 var BULK_SIZE = 10000
 var BATCH_SIZE = 10
 
@@ -34,11 +34,16 @@ var sem = semaphore.NewWeighted(Limit)
 
 func main() {
 	start_time := time.Now()
+	initialize.InitViper()
 	initialize.InitElasticSearch()
 	filter := initFilter()
 	data_dir_path := []string{"/data/openalex/authors/", "/data/openalex/concepts/", "/data/openalex/institutions/", "/data/openalex/works/", "/data/openalex/venues/"}
 	if DEBUG {
 		data_dir_path = []string{"/data/openalex/testdata/authors/", "/data/openalex/testdata/concepts/", "/data/openalex/testdata/institutions/", "/data/openalex/testdata/works/", "/data/openalex/testdata/venues/"}
+		// single test for works
+		if true {
+			data_dir_path = []string{"/data/openalex/testdata/works/"}
+		}
 	}
 	var wg sync.WaitGroup
 	for _, dir_path := range data_dir_path {
@@ -205,6 +210,8 @@ func initWorksfilter() map[string]interface{} {
 	worksfilter["mesh"] = false
 	worksfilter["alternate_host_venues"] = false
 
+	worksfilter["abstract_inverted_index"] = "trans"
+
 	worksfilter["referenced_works"] = true
 	worksfilter["related_works"] = true
 
@@ -298,8 +305,11 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 func filterData(data *map[string]interface{}, filter *map[string]interface{}) {
 	for k, v := range *filter {
 		if k == "abstract_inverted_index" {
-			abstract := utils.TransInvertedIndex2String(v)
-			(*data)["abstract_inverted_index"] = abstract
+			abstract := utils.TransInvertedIndex2String((*data)[k])
+			// 删去abstract_inverted_index
+			delete(*data, "abstract_inverted_index")
+			// 添加abstract字段
+			(*data)["abstract"] = abstract
 		}
 		// 如果v为bool类型，若为true则修改，若为false则删除
 		if reflect.TypeOf(v).Kind() == reflect.Bool {
