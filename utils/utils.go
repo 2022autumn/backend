@@ -54,3 +54,8 @@ func TransObjPrefix(id string) (ty string, err error) {
 		return "error type", errors.New("error type")
 	}
 }
+
+func TransInvertedIndex2String(map[string]interface{}) string {
+
+	return ""
+}

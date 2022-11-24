@@ -23,7 +23,6 @@ func InitMySQL() {
 	global.DB, err = gorm.Open("mysql", dsn)
 	if err != nil {
 		panic(fmt.Errorf("数据库出问题啦: %s \n", err))
-		return
 	}
 	// 迁移
 	global.DB.AutoMigrate(
