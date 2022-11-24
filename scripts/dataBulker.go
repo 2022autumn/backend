@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 	"golang.org/x/sync/semaphore"
 )
 

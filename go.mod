@@ -16,8 +16,6 @@ require (
 	github.com/swaggo/swag v1.8.1
 )
 
-require github.com/fortytw2/leaktest v1.3.0 // indirect
-
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
