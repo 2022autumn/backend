@@ -77,7 +77,7 @@ func BaseSearch(c *gin.Context) {
 	tiQuery := elastic.NewMatchPhraseQuery("title", queryWord)
 	abQuery := elastic.NewMatchPhraseQuery("abstract", queryWord)
 	boolQuery.Should(tiQuery, abQuery)
-	res, err := service.CommonWorkSearch(0, 10, boolQuery, 0, false)
+	res, err := service.CommonWorkSearch(1, 10, boolQuery, 0, false)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"status": 201,
