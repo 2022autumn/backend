@@ -7,7 +7,7 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
-var LIMITCOUNT = 100
+var LIMITCOUNT = 10000000
 
 func GetObject(index string, id string) (res *elastic.SearchResult, err error) {
 	termQuery := elastic.NewMatchQuery("id", id)

@@ -4,14 +4,14 @@
         "contact": {}
     },
     "paths": {
-        "/es/basequery": {
+        "/es/base_query": {
             "post": {
                 "description": "基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "搜索词",
-                        "name": "query",
+                        "name": "query_word",
                         "in": "query",
                         "required": true
                     }

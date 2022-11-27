@@ -69,10 +69,10 @@ func GetObject(c *gin.Context) {
 
 // BaseSearch
 // @Description 基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找
-// @Param query query string true "搜索词"
-// @Router /es/basequery [POST]
+// @Param query_word query string true "搜索词"
+// @Router /es/base_query [POST]
 func BaseSearch(c *gin.Context) {
-	queryWord := c.Query("query")
+	queryWord := c.Query("query_word")
 	boolQuery := elastic.NewBoolQuery()
 	tiQuery := elastic.NewMatchPhraseQuery("title", queryWord)
 	abQuery := elastic.NewMatchPhraseQuery("abstract", queryWord)
