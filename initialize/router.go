@@ -32,6 +32,10 @@ func SetupRouter(r *gin.Engine) {
 		baseGroup.POST("/userinfo", v1.UserInfo)  //个人中心
 		baseGroup.POST("/usermod", v1.ModifyUser) //编辑个人信息
 	}
+	ApplicationRouter := baseGroup.Group("/application")
+	{
+		ApplicationRouter.POST("/create", v1.CreateApplication)
+	}
 	// {
 	// 	baseGroup.Static("/media", "./media")
 	// }

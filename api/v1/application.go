@@ -87,7 +87,7 @@ func HandleApplication(c *gin.Context) {
 	if notFound {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "申请不存在", "status": 404})
 	}
-	fmt.Println("check user application", user.ID)
+	fmt.Println("check user application", user.UserID)
 	if application.Status != 0 {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "已审核过该申请", "status": 406})
 		return
