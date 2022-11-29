@@ -1,27 +1,75 @@
+definitions:
+  response.BaseSearchQ:
+    properties:
+      conds:
+        additionalProperties:
+          type: string
+        type: object
+      kind:
+        type: string
+      page:
+        type: integer
+      queryWord:
+        type: string
+      size:
+        type: integer
+    type: object
 info:
   contact: {}
 paths:
-  /es/base_query:
-    post:
-      description: 基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找
-      parameters:
-      - description: 搜索词
-        in: query
-        name: query_word
-        required: true
-        type: string
-      responses: {}
-  /es/get/{id}:
+  /es/get/:
     get:
+      description: 根据id获取对象，可以是author，work，institution,venue,concept
       parameters:
       - description: id
-        in: path
+        in: query
         name: id
         required: true
         type: string
       responses:
         "200":
-          description: OK
+          description: '{"status":201,"msg":"id type error"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - esSearch
+  /es/search/advance:
+    post:
+      description: 高级搜索，搜索条件通过body传入，未完成
+      responses: {}
+  /es/search/base:
+    post:
+      consumes:
+      - application/json
+      description: 基本搜索2
+      parameters:
+      - description: 搜索条件
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.BaseSearchQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status":201,"err":"es search err"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - esSearch
+  /es/search/doi:
+    post:
+      description: 使用doi查找work，未测试，请勿使用
+      parameters:
+      - description: doi
+        in: query
+        name: doi
+        required: true
+        type: string
+      responses: {}
   /es/test_es:
     post:
       parameters:

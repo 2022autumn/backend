@@ -4,10 +4,10 @@ import (
 	"IShare/global"
 	"context"
 	"fmt"
+	"github.com/olivere/elastic/v7"
 	"log"
 	"os"
 	"time"
-	"github.com/olivere/elastic/v7"
 )
 
 func InitElasticSearch() {
@@ -15,10 +15,13 @@ func InitElasticSearch() {
 	ctx := context.Background()
 	client, err := elastic.NewClient(
 		elastic.SetURL(host),
+		elastic.SetBasicAuth("elastic", "superes2021"),
 		elastic.SetSniff(false),
 		elastic.SetHealthcheckInterval(10*time.Second),
 		//elastic.SetGzip(true),
-		elastic.SetErrorLog(log.New(os.Stderr, "ELASTIC ", log.LstdFlags)),
+		elastic.SetErrorLog(log.New(os.Stderr,
+
+			"ELASTIC ", log.LstdFlags)),
 		elastic.SetInfoLog(log.New(os.Stdout, "", log.LstdFlags)),
 	)
 	if err != nil {
