@@ -15,7 +15,7 @@ func SetupRouter(r *gin.Engine) {
 	r.Use(middleware.Cors()) // 跨域
 	// r.Use(middleware.LoggerToFile()) // 日志
 
-	docs.SwaggerInfo.Title = "?"
+	docs.SwaggerInfo.Title = "ishare backend doc"
 	docs.SwaggerInfo.Version = "v1"
 	docs.SwaggerInfo.BasePath = "/api"
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
@@ -42,10 +42,9 @@ func SetupRouter(r *gin.Engine) {
 	esGroup := baseGroup.Group("/es")
 	{
 		esGroup.POST("/test_es", v1.TestEsSearch)
-		esGroup.GET("/get/:id", v1.GetObject)
+		esGroup.GET("/get", v1.GetObject)
 		esGroup.POST("/search/base", v1.BaseSearch)
 		esGroup.POST("/search/doi", v1.DoiSearch)
-		esGroup.POST("base_query", v1.BaseSearch)
 	}
 	// userGroup := baseGroup.Group("/user", middleware.AuthRequired())
 	// {

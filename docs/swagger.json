@@ -4,37 +4,85 @@
         "contact": {}
     },
     "paths": {
-        "/es/base_query": {
-            "post": {
-                "description": "基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "搜索词",
-                        "name": "query_word",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/es/get/{id}": {
+        "/es/get/": {
             "get": {
+                "description": "根据id获取对象，可以是author，work，institution,venue,concept",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "id",
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "{\"status\":201,\"msg\":\"id type error\"}",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
+            }
+        },
+        "/es/search/advance": {
+            "post": {
+                "description": "高级搜索，搜索条件通过body传入，未完成",
+                "responses": {}
+            }
+        },
+        "/es/search/base": {
+            "post": {
+                "description": "基本搜索2",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "搜索条件",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSearchQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":201,\"err\":\"es search err\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/es/search/doi": {
+            "post": {
+                "description": "使用doi查找work，未测试，请勿使用",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "doi",
+                        "name": "doi",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
             }
         },
         "/es/test_es": {
@@ -49,6 +97,31 @@
                     }
                 ],
                 "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "response.BaseSearchQ": {
+            "type": "object",
+            "properties": {
+                "conds": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "queryWord": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
             }
         }
     }
