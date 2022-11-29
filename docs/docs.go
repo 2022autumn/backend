@@ -50,7 +50,7 @@ const docTemplate = `{
         },
         "/es/search/base": {
             "post": {
-                "description": "基本搜索2",
+                "description": "基本搜索，Cond里面填筛选条件，key仅包含[\"types\", \"authors\", \"institutions\", \"publishers\", \"venues\", \"publication_years\"]",
                 "consumes": [
                     "application/json"
                 ],
