@@ -144,7 +144,9 @@ func AdvanceSearch(c *gin.Context) {
 }
 
 // DoiSearch
+// @Summary     txc
 // @Description 使用doi查找work，未测试，请勿使用
+// @Tags 	  esSearch
 // @Param       doi query string true "doi"
 // @Router      /es/search/doi [POST]
 func DoiSearch(c *gin.Context) {
