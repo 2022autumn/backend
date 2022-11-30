@@ -44,7 +44,6 @@ func SetupRouter(r *gin.Engine) {
 		esGroup.POST("/test_es", v1.TestEsSearch)
 		esGroup.GET("/get/", v1.GetObject)
 		esGroup.POST("/search/base", v1.BaseSearch)
-		esGroup.POST("/search/base2", v1.BaseSearch2)
 		esGroup.POST("/search/doi", v1.DoiSearch)
 		esGroup.POST("/search/advanced", v1.AdvancedSearch)
 	}

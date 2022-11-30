@@ -18,6 +18,7 @@ type BaseSearchA struct {
 type AdvancedSearchQ struct {
 	Conds []map[string]string
 	Page  int
+	Size  int
 }
 type DoiSearchQ struct {
 	Doi string

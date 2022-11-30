@@ -40,29 +40,6 @@ paths:
     post:
       description: 高级搜索，搜索条件通过body传入，未完成
       responses: {}
-  /es/search/base:
-    post:
-      consumes:
-      - application/json
-      description: 基本搜索，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher",
-        "venue", "publication_year"]
-      parameters:
-      - description: 搜索条件
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/response.BaseSearchQ'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"status":201,"err":"es search err"}'
-          schema:
-            type: string
-      summary: txc
-      tags:
-      - esSearch
   /es/search/base2:
     post:
       consumes:
