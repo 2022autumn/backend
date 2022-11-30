@@ -350,4 +350,5 @@ func UploadHeadshot(c *gin.Context) {
 		"status":  200,
 		"data":    user,
 	})
+	return
 }
