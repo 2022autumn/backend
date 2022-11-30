@@ -48,7 +48,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/es/search/base2": {
+        "/es/search/base": {
             "post": {
                 "description": "基本搜索2，Cond里面填筛选条件，key仅包含[\"type\", \"author\", \"institution\", \"publisher\", \"venue\", \"publication_year\"]",
                 "consumes": [

@@ -40,7 +40,7 @@ paths:
     post:
       description: 高级搜索，搜索条件通过body传入，未完成
       responses: {}
-  /es/search/base2:
+  /es/search/base:
     post:
       consumes:
       - application/json
