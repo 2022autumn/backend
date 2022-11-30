@@ -3,9 +3,7 @@ package v1
 import (
 	"IShare/global"
 	"IShare/model/database"
-	"IShare/model/response"
 	"IShare/service"
-	"IShare/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -17,19 +15,24 @@ import (
 // @Summary     ccf
 // @Description 注册
 // @Tags        用户
+// @Param       username query string true "username"
+// @Param       password1 query string true "password1"
+// @Param       password2 query string true "password2"
 // @Accept      json
 // @Produce     json
-//
+// @Success		200 {string} json   "{"status":200,"success":true,"msg":"register success","username":{object},"password":{object}}"
+// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"passwords differ"}"
+// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"username exists"}"
 // @Router      /register [POST]
 func Register(c *gin.Context) {
 	// 获取请求数据
-	username := c.PostForm("username")
-	password1 := c.PostForm("password_1")
-	password2 := c.PostForm("password_2")
+	username := c.Query("username")
+	password1 := c.Query("password_1")
+	password2 := c.Query("password_2")
 	if password1 != password2 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "两次输入密码不同",
+			"msg":     "passwords differ",
 		})
 		return
 	}
@@ -38,7 +41,7 @@ func Register(c *gin.Context) {
 	if _, notFound := service.GetUserByUsername(username); !notFound {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "用户已存在",
+			"msg":     "username exists",
 		})
 		return
 	}
@@ -54,7 +57,7 @@ func Register(c *gin.Context) {
 	// 返回响应
 	c.JSON(http.StatusOK, gin.H{
 		"success":  true,
-		"message":  "注册成功",
+		"msg":      "register success",
 		"username": username,
 		"password": password,
 	})
@@ -64,21 +67,28 @@ func Register(c *gin.Context) {
 // @Summary     ccf
 // @Description 登录
 // @Tags        用户
+// @Param       username query string true "username"
+// @Param       password query string true "password"
 // @Accept      json
 // @Produce     json
+// @Success		200 {string} json   "{"status":200,"success":true,"msg":"login success","token": 666}"
+// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"username doesn't exist"}"
+// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"password doesn't match"}"
 // @Router      /login [POST]
 func Login(c *gin.Context) {
-	username := c.PostForm("username")
+	username := c.Query("username")
+	password := c.Query("password")
 	//password := c.PostForm("password")	//不用data在hash比较时候会出错？？？
 	//password := c.Request.FormValue("password")
-	data := utils.BindJsonAndValid(c, &response.LoginQ{}).(*response.LoginQ)
-	fmt.Print(data)
+	//data := utils.BindJsonAndValid(c, &response.LoginQ{}).(*response.LoginQ)
+	//password := data.Password
+	//fmt.Print(data)
 	// 用户不存在
 	user, notFound := service.GetUserByUsername(username)
 	if notFound {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "登录失败，用户名不存在",
+			"msg":     "username doesn't exist",
 		})
 		return
 	}
@@ -87,17 +97,17 @@ func Login(c *gin.Context) {
 	//hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	//fmt.Print(hashedPassword)
 	//fmt.Print(password)
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "密码错误",
+			"msg":     "password doesn't match",
 		})
 		return
 	}
 	// 成功返回响应
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "登录成功",
+		"msg":     "login success",
 		"token":   666,
 	})
 }
@@ -106,25 +116,27 @@ func Login(c *gin.Context) {
 // @Summary     ccf
 // @Description 查看用户个人信息
 // @Tags        用户
+// @Param       user_id query string true "user_id"
 // @Accept      json
 // @Produce     json
+// @Success		200 {string} json   "{"status":200,"success":true,"msg":"get UserInfo","data":{object}}"
+// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"userID not exist"}"
 // @Router      /userinfo [POST]
 func UserInfo(c *gin.Context) {
-	userID := c.PostForm("userID")
+	userID := c.Query("user_id")
+	//userID := c.PostForm("userID")
 	id, _ := strconv.ParseInt(userID, 0, 64)
 	user, notFoundUserByID := service.QueryAUserByID(uint64(id))
 	if notFoundUserByID {
-		c.JSON(404, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"status":  404,
-			"message": "用户ID不存在",
+			"msg":     "userID not exist",
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"status":  200,
-		"message": "查看用户信息成功",
+		"msg":     "get UserInfo",
 		"data":    user,
 	})
 }
@@ -133,21 +145,30 @@ func UserInfo(c *gin.Context) {
 // @Summary     ccf
 // @Description 编辑用户信息
 // @Tags        用户
+// @Param       user_id query string true "user_id"
+// @Param       user_info query string true "个性签名"
+// @Param       phone_number query string true "电话号码"
+// @Param       email query string true "Email"
 // @Accept      json
 // @Produce     json
+// @Success		200 {string} json   "{"status":200,"success":true,"msg":"修改成功","data":{object}}"
+// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"用户ID不存在"}"
+// @Failure		200 {string} json   "{"status":200,"success":false,"msg":err.Error()}"
 // @Router      /usermod [POST]
 func ModifyUser(c *gin.Context) {
-	userID, _ := strconv.ParseUint(c.Request.FormValue("user_id"), 0, 64)
-	userInfo := c.Request.FormValue("user_info")
-	phoneNum := c.Request.FormValue("phone_number")
-	email := c.Request.FormValue("email")
+	userId := c.Query("user_id")
+	userID, _ := strconv.ParseUint(userId, 0, 64)
+	//userID, _ := strconv.ParseUint(c.Request.FormValue("user_id"), 0, 64)
+	userInfo := c.Query("user_info")
+	phoneNum := c.Query("phone_number")
+	email := c.Query("email")
+	//email := c.Request.FormValue("email")
 
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"status":  404,
-			"message": "用户ID不存在",
+			"msg":     "用户ID不存在",
 		})
 		return
 	}
@@ -159,16 +180,14 @@ func ModifyUser(c *gin.Context) {
 	if err != nil {
 		c.JSON(400, gin.H{
 			"success": false,
-			"status":  500,
-			"message": err.Error(),
+			"msg":     err.Error(),
 		})
 		return
 	}
 	//修改成功
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "修改成功",
-		"status":  200,
+		"msg":     "修改成功",
 		"data":    user,
 	})
 }
