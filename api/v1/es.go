@@ -76,7 +76,7 @@ func GetObject(c *gin.Context) {
 
 // BaseSearch
 // @Summary     txc
-// @Description 基本搜索2，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher", "venue", "publication_year"]
+// @Description 基本搜索，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher", "venue", "publication_year"]
 // @Tags        esSearch
 // @Accept      json
 // @Produce     json
@@ -122,7 +122,7 @@ func BaseSearch(c *gin.Context) {
 			boolQuery.Filter(elastic.NewMatchQuery("publication_year", v))
 		}
 	}
-	res, err := service.CommonWorkSearch(boolQuery, d.Page, d.Size, 0, false, aggs)
+	res, err := service.CommonWorkSearch(boolQuery, d.Page, d.Size, d.Sort, d.Asc, aggs)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"status": 201,
@@ -136,9 +136,9 @@ func BaseSearch(c *gin.Context) {
 		data.Works = append(data.Works, v.Source)
 	}
 	data.Aggs = make(map[string]interface{})
+	var tmp = make(map[string]interface{})
 	for k, v := range res.Aggregations {
 		by, _ := v.MarshalJSON()
-		var tmp = make(map[string]interface{})
 		_ = json.Unmarshal(by, &tmp)
 		data.Aggs[k] = tmp["buckets"].([]interface{})
 	}
@@ -148,11 +148,95 @@ func BaseSearch(c *gin.Context) {
 	})
 }
 
+var cond2field = map[string]string{
+	"type":             "type.keyword",
+	"author":           "authorships.author.display_name.keyword",
+	"institution":      "authorships.institutions.display_name.keyword",
+	"publisher":        "host_venue.publisher.keyword",
+	"venue":            "host_venue.display_name.keyword",
+	"publication_year": "publication_years",
+}
+var query2field = map[string]string{
+	"title":       "title",
+	"abstract":    "abstract",
+	"venue":       "host_venue.display_name",
+	"publisher":   "host_venue.publisher",
+	"author":      "authorships.author.display_name",
+	"institution": "authorships.institutions.display_name",
+	"concept":     "concepts.display_name",
+}
+
 // AdvancedSearch
-// @Description 高级搜索，搜索条件通过body传入，未完成
+// @Summary     txc
+// @Description 高级搜索，query是一个map列表， 每个map包含"content" "field" "logic"
+// @Description logic 仅包含["and", "or", "not"]
+// @Description field 仅包含["title", "abstract", "venue", "publisher", "author", "institution", "concept"]
+// @Description 对于年份的筛选，在query里面 field是"publication_date" logic默认为and， 该map下有"begin" "end"分别是开始和结束
+// @Description sort=0为默认排序（降序） =1为按引用数降序 =2按发表日期由近到远
+// @Description asc=0为降序 =1为升序
+// @Description { "asc": false,"conds": {"venue":"International Journal for Research in Applied Science and Engineering Technology","author": "Zenith Nandy"},"page": 1,"query": [{"field": "title","content": "python","logic": "and"},{"field": "publication_date","begin": "2021-12-01","end":"2022-06-01","logic": "and"}],"size": 8,"sort": 0}
+// @Tags        esSearch
+// @Accept      json
+// @Produce     json
+// @Param       data body response.AdvancedSearchQ true "data"
 // @Router      /es/search/advanced [POST]
 func AdvancedSearch(c *gin.Context) {
-	// author title abstract venue institution publisher publication_year
+	// author title abstract venue institution publisher publication_year concept
+	var d response.AdvancedSearchQ
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	boolQuery := elastic.NewBoolQuery()
+	subQuery := elastic.NewBoolQuery()
+	for _, i := range d.Query {
+		if i["logic"] == "and" {
+			if i["field"] == "publication_date" {
+				subQuery.Must(elastic.NewRangeQuery("publication_date").Gte(i["begin"]).Lte(i["end"]))
+			} else {
+				subQuery.Must(elastic.NewMatchPhraseQuery(query2field[i["field"]], i["content"]))
+			}
+		} else if i["logic"] == "or" {
+			subQuery.Should(elastic.NewMatchPhraseQuery(query2field[i["field"]], i["content"]))
+		} else if i["logic"] == "not" {
+			subQuery.MustNot(elastic.NewMatchPhraseQuery(query2field[i["field"]], i["content"]))
+		}
+	}
+	boolQuery.Must(subQuery)
+	var aggs = make(map[string]bool)
+	var aggList = [6]string{"types", "authors", "institutions", "publishers", "venues", "publication_years"}
+	for _, k := range aggList {
+		aggs[k] = true
+	}
+	for k, v := range d.Conds {
+		if kk, ok := cond2field[k]; ok {
+			aggs[kk] = false
+			boolQuery.Filter(elastic.NewMatchQuery(kk, v))
+		}
+	}
+	res, err := service.CommonWorkSearch(boolQuery, d.Page, d.Size, d.Sort, d.Asc, aggs)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status": 201,
+			"msg":    "es search err",
+			"err":    err,
+		})
+		return
+	}
+	var data = response.BaseSearchA{Hits: res.Hits.TotalHits.Value}
+	for _, v := range res.Hits.Hits {
+		data.Works = append(data.Works, v.Source)
+	}
+	data.Aggs = make(map[string]interface{})
+	var tmp = make(map[string]interface{})
+	for k, v := range res.Aggregations {
+		by, _ := v.MarshalJSON()
+		_ = json.Unmarshal(by, &tmp)
+		data.Aggs[k] = tmp["buckets"].([]interface{})
+	}
+	c.JSON(200, gin.H{
+		"status": 200,
+		"res":    data,
+	})
 }
 
 // DoiSearch
