@@ -29,8 +29,8 @@ func SetupRouter(r *gin.Engine) {
 		//用户模块
 		baseGroup.POST("/register", v1.Register)  //注册
 		baseGroup.POST("/login", v1.Login)        //登录
-		baseGroup.POST("/userinfo", v1.UserInfo)  //个人中心
-		baseGroup.POST("/usermod", v1.ModifyUser) //编辑个人信息
+		baseGroup.POST("user/info", v1.UserInfo)  //个人中心
+		baseGroup.POST("user/mod", v1.ModifyUser) //编辑个人信息
 	}
 	ApplicationRouter := baseGroup.Group("/application")
 	{

@@ -121,7 +121,7 @@ func Login(c *gin.Context) {
 // @Produce     json
 // @Success		200 {string} json   "{"status":200,"success":true,"msg":"get UserInfo","data":{object}}"
 // @Failure		200 {string} json   "{"status":200,"success":false,"msg":"userID not exist"}"
-// @Router      /userinfo [POST]
+// @Router      user/info [POST]
 func UserInfo(c *gin.Context) {
 	userID := c.Query("user_id")
 	//userID := c.PostForm("userID")
@@ -154,7 +154,7 @@ func UserInfo(c *gin.Context) {
 // @Success		200 {string} json   "{"status":200,"success":true,"msg":"修改成功","data":{object}}"
 // @Failure		200 {string} json   "{"status":200,"success":false,"msg":"用户ID不存在"}"
 // @Failure		200 {string} json   "{"status":200,"success":false,"msg":err.Error()}"
-// @Router      /usermod [POST]
+// @Router      user/mod [POST]
 func ModifyUser(c *gin.Context) {
 	userId := c.Query("user_id")
 	userID, _ := strconv.ParseUint(userId, 0, 64)
@@ -162,7 +162,6 @@ func ModifyUser(c *gin.Context) {
 	userInfo := c.Query("user_info")
 	phoneNum := c.Query("phone_number")
 	email := c.Query("email")
-	//email := c.Request.FormValue("email")
 
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
@@ -172,10 +171,15 @@ func ModifyUser(c *gin.Context) {
 		})
 		return
 	}
-
-	user.UserInfo = userInfo
-	user.Phone = phoneNum
-	user.Email = email
+	if len(userInfo) != 0 {
+		user.UserInfo = userInfo
+	}
+	if len(phoneNum) != 0 {
+		user.Phone = phoneNum
+	}
+	if len(email) != 0 {
+		user.Email = email
+	}
 	err := global.DB.Save(user).Error
 	if err != nil {
 		c.JSON(400, gin.H{
