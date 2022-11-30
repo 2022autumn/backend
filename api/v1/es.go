@@ -45,7 +45,7 @@ func TestEsSearch(c *gin.Context) {
 // @Summary     txc
 // @Description 根据id获取对象，可以是author，work，institution,venue,concept
 // @Tags        esSearch
-// @Param       id  query     string true "id"
+// @Param       id  query    string true "id"
 // @Success     200 {string} json   "{"status":200,"res":{obeject}}"
 // @Failure     200 {string} json   "{"status":201,"msg":"es get err"}"
 // @Failure     200 {string} json   "{"status":201,"msg":"id type error"}"
@@ -80,9 +80,9 @@ func GetObject(c *gin.Context) {
 // @Tags        esSearch
 // @Accept      json
 // @Produce     json
-// @Param       data body response.BaseSearchQ true "搜索条件"
-// @Success     200        {string} json   "{"status":200,"res":{obeject}}"
-// @Failure     200        {string} json   "{"status":201,"err":"es search err"}"
+// @Param       data body     response.BaseSearchQ true "搜索条件"
+// @Success     200  {string} json                 "{"status":200,"res":{obeject}}"
+// @Failure     200  {string} json                 "{"status":201,"err":"es search err"}"
 // @Router      /es/search/base [POST]
 func BaseSearch(c *gin.Context) {
 	var d response.BaseSearchQ
@@ -143,9 +143,9 @@ func BaseSearch(c *gin.Context) {
 // @Tags        esSearch
 // @Accept      json
 // @Produce     json
-// @Param       data body response.BaseSearchQ true "搜索条件"
-// @Success     200        {string} json   "{"status":200,"res":{obeject}}"
-// @Failure     200        {string} json   "{"status":201,"err":"es search err"}"
+// @Param       data body     response.BaseSearchQ true "搜索条件"
+// @Success     200  {string} json                 "{"status":200,"res":{obeject}}"
+// @Failure     200  {string} json                 "{"status":201,"err":"es search err"}"
 // @Router      /es/search/base2 [POST]
 func BaseSearch2(c *gin.Context) {
 	var d response.BaseSearchQ
@@ -211,16 +211,16 @@ func BaseSearch2(c *gin.Context) {
 	})
 }
 
-// AdvanceSearch
+// AdvancedSearch
 // @Description 高级搜索，搜索条件通过body传入，未完成
-// @Router      /es/search/advance [POST]
-func AdvanceSearch(c *gin.Context) {
+// @Router      /es/search/advanced [POST]
+func AdvancedSearch(c *gin.Context) {
 }
 
 // DoiSearch
 // @Summary     txc
 // @Description 使用doi查找work，未测试，请勿使用
-// @Tags 	  esSearch
+// @Tags        esSearch
 // @Param       doi query string true "doi"
 // @Router      /es/search/doi [POST]
 func DoiSearch(c *gin.Context) {

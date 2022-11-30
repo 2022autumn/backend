@@ -13,17 +13,14 @@ import (
 	"strconv"
 )
 
-func GetData(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "success",
-		"username": username,
-		"password": password,
-	})
-}
-
 // Register 注册
+// @Summary     ccf
+// @Description 注册
+// @Tags        用户
+// @Accept      json
+// @Produce     json
+//
+// @Router      /register [POST]
 func Register(c *gin.Context) {
 	// 获取请求数据
 	username := c.PostForm("username")
@@ -64,6 +61,12 @@ func Register(c *gin.Context) {
 }
 
 // Login 登录
+// @Summary     ccf
+// @Description 登录
+// @Tags        用户
+// @Accept      json
+// @Produce     json
+// @Router      /login [POST]
 func Login(c *gin.Context) {
 	username := c.PostForm("username")
 	//password := c.PostForm("password")	//不用data在hash比较时候会出错？？？
@@ -100,6 +103,12 @@ func Login(c *gin.Context) {
 }
 
 // UserInfo 查看用户个人信息
+// @Summary     ccf
+// @Description 查看用户个人信息
+// @Tags        用户
+// @Accept      json
+// @Produce     json
+// @Router      /userinfo [POST]
 func UserInfo(c *gin.Context) {
 	userID := c.PostForm("userID")
 	id, _ := strconv.ParseInt(userID, 0, 64)
@@ -121,6 +130,12 @@ func UserInfo(c *gin.Context) {
 }
 
 // ModifyUser 编辑用户信息
+// @Summary     ccf
+// @Description 编辑用户信息
+// @Tags        用户
+// @Accept      json
+// @Produce     json
+// @Router      /usermod [POST]
 func ModifyUser(c *gin.Context) {
 	userID, _ := strconv.ParseUint(c.Request.FormValue("user_id"), 0, 64)
 	userInfo := c.Request.FormValue("user_info")
@@ -159,6 +174,11 @@ func ModifyUser(c *gin.Context) {
 }
 
 // ModifyPassword 编辑用户信息
+// @Summary     ccf
+// @Description 编辑用户信息
+// @Tags        用户
+// @Accept      json
+// @Produce     json
 func ModifyPassword(c *gin.Context) {
 	userID, _ := strconv.ParseUint(c.Request.FormValue("user_id"), 0, 64)
 	passwordOld := c.Request.FormValue("password_old")

@@ -42,7 +42,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/es/search/advance": {
+        "/es/search/advanced": {
             "post": {
                 "description": "高级搜索，搜索条件通过body传入，未完成",
                 "responses": {}
@@ -146,6 +146,70 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
+                "responses": {}
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "登录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "responses": {}
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "注册",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "responses": {}
+            }
+        },
+        "/userinfo": {
+            "post": {
+                "description": "查看用户个人信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "responses": {}
+            }
+        },
+        "/usermod": {
+            "post": {
+                "description": "编辑用户信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
                 "responses": {}
             }
         }

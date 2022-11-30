@@ -36,7 +36,7 @@ paths:
       summary: txc
       tags:
       - esSearch
-  /es/search/advance:
+  /es/search/advanced:
     post:
       description: 高级搜索，搜索条件通过body传入，未完成
       responses: {}
@@ -108,4 +108,48 @@ paths:
         required: true
         type: string
       responses: {}
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: 登录
+      produces:
+      - application/json
+      responses: {}
+      summary: ccf
+      tags:
+      - 用户
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: 注册
+      produces:
+      - application/json
+      responses: {}
+      summary: ccf
+      tags:
+      - 用户
+  /userinfo:
+    post:
+      consumes:
+      - application/json
+      description: 查看用户个人信息
+      produces:
+      - application/json
+      responses: {}
+      summary: ccf
+      tags:
+      - 用户
+  /usermod:
+    post:
+      consumes:
+      - application/json
+      description: 编辑用户信息
+      produces:
+      - application/json
+      responses: {}
+      summary: ccf
+      tags:
+      - 用户
 swagger: "2.0"

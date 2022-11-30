@@ -15,5 +15,10 @@ type BaseSearchA struct {
 	Aggs  map[string]interface{}
 	Hits  int64
 }
-type SearchA struct {
+type AdvancedSearchQ struct {
+	Conds []map[string]string
+	Page  int
+}
+type DoiSearchQ struct {
+	Doi string
 }
