@@ -12,7 +12,7 @@ type BaseSearchQ struct {
 }
 type BaseSearchA struct {
 	Works []json.RawMessage
-	Aggs  map[string][]interface{}
+	Aggs  map[string]interface{}
 	Hits  int64
 }
 type SearchA struct {

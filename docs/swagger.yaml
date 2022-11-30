@@ -13,6 +13,8 @@ definitions:
         type: string
       size:
         type: integer
+      sort:
+        type: integer
     type: object
 info:
   contact: {}
@@ -42,8 +44,31 @@ paths:
     post:
       consumes:
       - application/json
-      description: 基本搜索，Cond里面填筛选条件，key仅包含["types", "authors", "institutions", "publishers",
-        "venues", "publication_years"]
+      description: 基本搜索，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher",
+        "venue", "publication_year"]
+      parameters:
+      - description: 搜索条件
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.BaseSearchQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status":201,"err":"es search err"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - esSearch
+  /es/search/base2:
+    post:
+      consumes:
+      - application/json
+      description: 基本搜索2，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher",
+        "venue", "publication_year"]
       parameters:
       - description: 搜索条件
         in: body
@@ -71,6 +96,9 @@ paths:
         required: true
         type: string
       responses: {}
+      summary: txc
+      tags:
+      - esSearch
   /es/test_es:
     post:
       parameters:

@@ -6,6 +6,7 @@ import (
 	"IShare/service"
 	"IShare/utils"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -138,7 +139,7 @@ func BaseSearch(c *gin.Context) {
 
 // BaseSearch2
 // @Summary     txc
-// @Description 基本搜索，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher", "venue", "publication_year"]
+// @Description 基本搜索2，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher", "venue", "publication_year"]
 // @Tags        esSearch
 // @Accept      json
 // @Produce     json
@@ -197,9 +198,13 @@ func BaseSearch2(c *gin.Context) {
 	for _, v := range res.Hits.Hits {
 		data.Works = append(data.Works, v.Source)
 	}
-	//for k, v := range res.Aggregations {
-	//	data.Aggs[k] = v
-	//}
+	data.Aggs = make(map[string]interface{})
+	for k, v := range res.Aggregations {
+		by, _ := v.MarshalJSON()
+		var tmp = make(map[string]interface{})
+		_ = json.Unmarshal(by, &tmp)
+		data.Aggs[k] = tmp["buckets"].([]interface{})
+	}
 	c.JSON(200, gin.H{
 		"status": 200,
 		"res":    data,
