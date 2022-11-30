@@ -50,7 +50,7 @@ func TestEsSearch(c *gin.Context) {
 // @Failure     200 {string} json   "{"status":201,"msg":"id type error"}"
 // @Router      /es/get/ [GET]
 func GetObject(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Query("id")
 	idx, err := utils.TransObjPrefix(id)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -75,7 +75,7 @@ func GetObject(c *gin.Context) {
 
 // BaseSearch
 // @Summary     txc
-// @Description 基本搜索，Cond里面填筛选条件，key仅包含["types", "authors", "institutions", "publishers", "venues", "publication_years"]
+// @Description 基本搜索，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher", "venue", "publication_year"]
 // @Tags        esSearch
 // @Accept      json
 // @Produce     json
@@ -121,7 +121,6 @@ func BaseSearch(c *gin.Context) {
 			boolQuery.Filter(elastic.NewMatchQuery("publication_year", v))
 		}
 	}
-
 	res, err := service.CommonWorkSearch(boolQuery, d.Page, d.Size, 0, false, aggs)
 	if err != nil {
 		c.JSON(200, gin.H{
@@ -134,6 +133,76 @@ func BaseSearch(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status": 200,
 		"res":    res,
+	})
+}
+
+// BaseSearch2
+// @Summary     txc
+// @Description 基本搜索，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher", "venue", "publication_year"]
+// @Tags        esSearch
+// @Accept      json
+// @Produce     json
+// @Param       data body response.BaseSearchQ true "搜索条件"
+// @Success     200        {string} json   "{"status":200,"res":{obeject}}"
+// @Failure     200        {string} json   "{"status":201,"err":"es search err"}"
+// @Router      /es/search/base2 [POST]
+func BaseSearch2(c *gin.Context) {
+	var d response.BaseSearchQ
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	boolQuery := elastic.NewBoolQuery()
+	tiQuery := elastic.NewMatchPhraseQuery("title", d.QueryWord)
+	abQuery := elastic.NewMatchPhraseQuery("abstract", d.QueryWord)
+	b2Query := elastic.NewBoolQuery()
+	b2Query.Should(tiQuery, abQuery)
+	boolQuery.Must(b2Query)
+	var aggs = make(map[string]bool)
+	var aggList = [6]string{"types", "authors", "institutions", "publishers", "venues", "publication_years"}
+	for _, k := range aggList {
+		aggs[k] = true
+	}
+	for k, v := range d.Conds {
+		switch k {
+		case "type":
+			aggs["types"] = false
+			boolQuery.Filter(elastic.NewMatchQuery("type.keyword", v))
+		case "institution":
+			aggs["institutions"] = false
+			boolQuery.Filter(elastic.NewMatchQuery("authorships.institutions.display_name.keyword", v))
+		case "publisher":
+			aggs["publishers"] = false
+			boolQuery.Filter(elastic.NewMatchQuery("host_venue.publisher.keyword", v))
+		case "venue":
+			aggs["venues"] = false
+			boolQuery.Filter(elastic.NewMatchQuery("host_venue.display_name.keyword", v))
+		case "author":
+			aggs["authors"] = false
+			boolQuery.Filter(elastic.NewMatchQuery("authorships.author.display_name.keyword", v))
+		case "publication_year":
+			aggs["publication_years"] = false
+			boolQuery.Filter(elastic.NewMatchQuery("publication_year", v))
+		}
+	}
+	res, err := service.CommonWorkSearch(boolQuery, d.Page, d.Size, 0, false, aggs)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status": 201,
+			"msg":    "es search err",
+			"err":    err,
+		})
+		return
+	}
+	var data = response.BaseSearchA{Hits: res.Hits.TotalHits.Value}
+	for _, v := range res.Hits.Hits {
+		data.Works = append(data.Works, v.Source)
+	}
+	//for k, v := range res.Aggregations {
+	//	data.Aggs[k] = v
+	//}
+	c.JSON(200, gin.H{
+		"status": 200,
+		"res":    data,
 	})
 }
 
