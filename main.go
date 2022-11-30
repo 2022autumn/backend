@@ -3,11 +3,13 @@ package main
 import (
 	"IShare/global"
 	"IShare/initialize"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	log.Println("Start Backend Service...")
 	initialize.InitViper()
 
 	initialize.InitMySQL()

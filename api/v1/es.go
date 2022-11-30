@@ -6,7 +6,6 @@ import (
 	"IShare/service"
 	"IShare/utils"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -131,17 +130,9 @@ func BaseSearch(c *gin.Context) {
 		})
 		return
 	}
-	var data = response.BaseSearchA{Hits: res.Hits.TotalHits.Value}
-	for _, v := range res.Hits.Hits {
-		data.Works = append(data.Works, v.Source)
-	}
-	data.Aggs = make(map[string]interface{})
-	var tmp = make(map[string]interface{})
-	for k, v := range res.Aggregations {
-		by, _ := v.MarshalJSON()
-		_ = json.Unmarshal(by, &tmp)
-		data.Aggs[k] = tmp["buckets"].([]interface{})
-	}
+
+	var data = response.BaseSearchA{}
+	data.Hits, data.Works, data.Aggs, _ = utils.NormalizationSearchResult(res)
 	c.JSON(200, gin.H{
 		"status": 200,
 		"res":    data,
@@ -222,17 +213,8 @@ func AdvancedSearch(c *gin.Context) {
 		})
 		return
 	}
-	var data = response.BaseSearchA{Hits: res.Hits.TotalHits.Value}
-	for _, v := range res.Hits.Hits {
-		data.Works = append(data.Works, v.Source)
-	}
-	data.Aggs = make(map[string]interface{})
-	var tmp = make(map[string]interface{})
-	for k, v := range res.Aggregations {
-		by, _ := v.MarshalJSON()
-		_ = json.Unmarshal(by, &tmp)
-		data.Aggs[k] = tmp["buckets"].([]interface{})
-	}
+	var data = response.BaseSearchA{}
+	data.Hits, data.Works, data.Aggs, _ = utils.NormalizationSearchResult(res)
 	c.JSON(200, gin.H{
 		"status": 200,
 		"res":    data,
