@@ -83,7 +83,7 @@ func GetObject(c *gin.Context) {
 // @Param       data body     response.BaseSearchQ true "搜索条件"
 // @Success     200  {string} json                 "{"status":200,"res":{obeject}}"
 // @Failure     200  {string} json                 "{"status":201,"err":"es search err"}"
-// @Router      /es/search/base2 [POST]
+// @Router      /es/search/base [POST]
 func BaseSearch(c *gin.Context) {
 	var d response.BaseSearchQ
 	if err := c.ShouldBind(&d); err != nil {
