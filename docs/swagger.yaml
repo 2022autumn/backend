@@ -16,6 +16,19 @@ definitions:
       sort:
         type: integer
     type: object
+  response.RegisterQ:
+    properties:
+      password:
+        minLength: 6
+        type: string
+      username:
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - password
+    - username
+    type: object
 info:
   contact: {}
 paths:
@@ -90,9 +103,24 @@ paths:
       consumes:
       - application/json
       description: 登录
+      parameters:
+      - description: username
+        in: query
+        name: username
+        required: true
+        type: string
+      - description: password
+        in: query
+        name: password
+        required: true
+        type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: '{"status":202,"success":false,"msg":"password doesn''t match"}'
+          schema:
+            type: string
       summary: ccf
       tags:
       - 用户
@@ -100,10 +128,21 @@ paths:
     post:
       consumes:
       - application/json
-      description: 注册
+      description: 填入用户名和密码注册
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.RegisterQ'
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: '{"status":201,"msg":"username exists"}'
+          schema:
+            type: string
       summary: ccf
       tags:
       - 用户
@@ -112,9 +151,19 @@ paths:
       consumes:
       - application/json
       description: 查看用户个人信息
+      parameters:
+      - description: user_id
+        in: query
+        name: user_id
+        required: true
+        type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: '{"status":200,"success":false,"msg":"userID not exist"}'
+          schema:
+            type: string
       summary: ccf
       tags:
       - 用户
@@ -123,9 +172,34 @@ paths:
       consumes:
       - application/json
       description: 编辑用户信息
+      parameters:
+      - description: user_id
+        in: query
+        name: user_id
+        required: true
+        type: string
+      - description: 个性签名
+        in: query
+        name: user_info
+        required: true
+        type: string
+      - description: 电话号码
+        in: query
+        name: phone_number
+        required: true
+        type: string
+      - description: Email
+        in: query
+        name: email
+        required: true
+        type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: '{"status":200,"success":false,"msg":err.Error()}'
+          schema:
+            type: string
       summary: ccf
       tags:
       - 用户

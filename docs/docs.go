@@ -128,12 +128,35 @@ const docTemplate = `{
                     "用户"
                 ],
                 "summary": "ccf",
-                "responses": {}
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "username",
+                        "name": "username",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "password",
+                        "name": "password",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":202,\"success\":false,\"msg\":\"password doesn't match\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/register": {
             "post": {
-                "description": "注册",
+                "description": "填入用户名和密码注册",
                 "consumes": [
                     "application/json"
                 ],
@@ -144,7 +167,25 @@ const docTemplate = `{
                     "用户"
                 ],
                 "summary": "ccf",
-                "responses": {}
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.RegisterQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":201,\"msg\":\"username exists\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/userinfo": {
@@ -160,7 +201,23 @@ const docTemplate = `{
                     "用户"
                 ],
                 "summary": "ccf",
-                "responses": {}
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"success\":false,\"msg\":\"userID not exist\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/usermod": {
@@ -176,7 +233,44 @@ const docTemplate = `{
                     "用户"
                 ],
                 "summary": "ccf",
-                "responses": {}
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "个性签名",
+                        "name": "user_info",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "电话号码",
+                        "name": "phone_number",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"success\":false,\"msg\":err.Error()}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         }
     },
@@ -204,6 +298,24 @@ const docTemplate = `{
                 },
                 "sort": {
                     "type": "integer"
+                }
+            }
+        },
+        "response.RegisterQ": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
                 }
             }
         }

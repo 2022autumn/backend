@@ -3,6 +3,7 @@ package v1
 import (
 	"IShare/global"
 	"IShare/model/database"
+	"IShare/model/response"
 	"IShare/service"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -13,53 +14,46 @@ import (
 
 // Register 注册
 // @Summary     ccf
-// @Description 注册
+// @Description 填入用户名和密码注册
 // @Tags        用户
-// @Param       username query string true "username"
-// @Param       password1 query string true "password1"
-// @Param       password2 query string true "password2"
 // @Accept      json
 // @Produce     json
-// @Success		200 {string} json   "{"status":200,"success":true,"msg":"register success","username":{object},"password":{object}}"
-// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"passwords differ"}"
-// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"username exists"}"
+// @Param       data body     response.RegisterQ true "data"
+// @Success     200  {string} json               "{"status":200,"msg":"register success","userid": 666}"
+// @Failure     200  {string} json               "{"status":201,"msg":"username exists"}"
 // @Router      /register [POST]
 func Register(c *gin.Context) {
 	// 获取请求数据
-	username := c.Query("username")
-	password1 := c.Query("password_1")
-	password2 := c.Query("password_2")
-	if password1 != password2 {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"msg":     "passwords differ",
-		})
-		return
+	var d response.RegisterQ
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
 	}
-	var password = password1
 	// 用户的用户名已经注册过的情况
-	if _, notFound := service.GetUserByUsername(username); !notFound {
+	if _, notFound := service.GetUserByUsername(d.Username); !notFound {
 		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"msg":     "username exists",
+			"status": 201,
+			"msg":    "username exists",
 		})
 		return
 	}
 	// 将密码进行哈希处理
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(d.Password), bcrypt.DefaultCost)
 	if err != nil {
 		panic("CreateUser: hash password error")
 	}
+	user := database.User{
+		Username: d.Username,
+		Password: string(hashedPassword),
+	}
 	// 成功创建用户
-	if err := service.CreateUser(&database.User{Username: username, Password: string(hashedPassword)}); err != nil {
+	if err := service.CreateUser(&user); err != nil {
 		panic("CreateUser: create user error")
 	}
 	// 返回响应
 	c.JSON(http.StatusOK, gin.H{
-		"success":  true,
-		"msg":      "register success",
-		"username": username,
-		"password": password,
+		"status": 200,
+		"msg":    "register success",
+		"userid": user.UserID,
 	})
 }
 
@@ -71,9 +65,9 @@ func Register(c *gin.Context) {
 // @Param       password query string true "password"
 // @Accept      json
 // @Produce     json
-// @Success		200 {string} json   "{"status":200,"success":true,"msg":"login success","token": 666}"
-// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"username doesn't exist"}"
-// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"password doesn't match"}"
+// @Success     200 {string} json "{"status":200,"success":true,"msg":"login success","token": 666}"
+// @Failure     200 {string} json "{"status":201,"success":false,"msg":"username doesn't exist"}"
+// @Failure     200 {string} json "{"status":202,"success":false,"msg":"password doesn't match"}"
 // @Router      /login [POST]
 func Login(c *gin.Context) {
 	username := c.Query("username")
@@ -116,11 +110,11 @@ func Login(c *gin.Context) {
 // @Summary     ccf
 // @Description 查看用户个人信息
 // @Tags        用户
-// @Param       user_id query string true "user_id"
+// @Param       user_id      query string true "user_id"
 // @Accept      json
 // @Produce     json
-// @Success		200 {string} json   "{"status":200,"success":true,"msg":"get UserInfo","data":{object}}"
-// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"userID not exist"}"
+// @Success     200 {string} json "{"status":200,"success":true,"msg":"get UserInfo","data":{object}}"
+// @Failure     200 {string} json "{"status":200,"success":false,"msg":"userID not exist"}"
 // @Router      user/info [POST]
 func UserInfo(c *gin.Context) {
 	userID := c.Query("user_id")
@@ -146,14 +140,14 @@ func UserInfo(c *gin.Context) {
 // @Description 编辑用户信息
 // @Tags        用户
 // @Param       user_id query string true "user_id"
-// @Param       user_info query string true "个性签名"
+// @Param       user_info    query string true "个性签名"
 // @Param       phone_number query string true "电话号码"
-// @Param       email query string true "Email"
+// @Param       email        query string true "Email"
 // @Accept      json
 // @Produce     json
-// @Success		200 {string} json   "{"status":200,"success":true,"msg":"修改成功","data":{object}}"
-// @Failure		200 {string} json   "{"status":200,"success":false,"msg":"用户ID不存在"}"
-// @Failure		200 {string} json   "{"status":200,"success":false,"msg":err.Error()}"
+// @Success     200 {string} json "{"status":200,"success":true,"msg":"修改成功","data":{object}}"
+// @Failure     200 {string} json "{"status":200,"success":false,"msg":"用户ID不存在"}"
+// @Failure     200 {string} json "{"status":200,"success":false,"msg":err.Error()}"
 // @Router      user/mod [POST]
 func ModifyUser(c *gin.Context) {
 	userId := c.Query("user_id")
