@@ -327,12 +327,7 @@ func UploadHeadshot(c *gin.Context) {
 		}
 		return
 	}
-	defer func(out *os.File) {
-		err := out.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(out)
+	defer out.Close()
 	_, err := io.Copy(out, file)
 	if err != nil {
 		fmt.Println(err)
