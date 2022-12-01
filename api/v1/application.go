@@ -6,10 +6,11 @@ import (
 	"IShare/service"
 	"database/sql"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func CreateApplication(c *gin.Context) {
@@ -60,7 +61,6 @@ func CreateApplication(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "申请提交成功", "status": 200}) //, "papers": service.GetAuthorSomePapers(author_id, 100)})
-	return
 }
 
 func HandleApplication(c *gin.Context) {
@@ -87,7 +87,7 @@ func HandleApplication(c *gin.Context) {
 	if notFound {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "申请不存在", "status": 404})
 	}
-	fmt.Println("check user application", user.ID)
+	fmt.Println("check user application", user.UserID)
 	if application.Status != 0 {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "已审核过该申请", "status": 406})
 		return
@@ -110,5 +110,4 @@ func HandleApplication(c *gin.Context) {
 		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "申请审批成功", "status": 200})
-	return
 }

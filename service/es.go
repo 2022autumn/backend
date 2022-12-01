@@ -6,25 +6,35 @@ import (
 	"github.com/olivere/elastic"
 )
 
-var LIMITCOUNT = 100
+var LIMITCOUNT = 10000000
 
+func GetWork(boolQuery *elastic.BoolQuery) (res *elastic.SearchResult, err error) {
+	return global.ES.Search().Index("works").Query(boolQuery).Do(context.Background())
+}
 func GetObject(index string, id string) (res *elastic.SearchResult, err error) {
 	termQuery := elastic.NewMatchQuery("id", id)
 	return global.ES.Search().Index(index).Query(termQuery).Do(context.Background())
 }
-func CommonWorkSearch(page int, size int,
-	boolQuery *elastic.BoolQuery, sortType int, ascending bool) (
+func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
+	sortType int, ascending bool, aggs map[string]bool) (
 	*elastic.SearchResult, error) {
-	typesAgg := elastic.NewTermsAggregation().Field("type.keyword")
-	institutionsAgg := elastic.NewTermsAggregation().Field("authorships.institutions.keyword")
-	publishersAgg := elastic.NewTermsAggregation().Field("host_venue.publisher.keyword")
-	authorsAgg := elastic.NewTermsAggregation().Field("authorships.author.display_name.keyword")
-	// minDateAgg, maxYearAgg := elastic.NewMinAggregation().Field("publication_date"), elastic.NewMaxAggregation().Field("publication_date")
-	service := global.ES.Search().Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).
-		Aggregation("type", typesAgg).
-		Aggregation("institution", institutionsAgg).
-		Aggregation("publishers", publishersAgg).
-		Aggregation("authors", authorsAgg)
+	//typesAgg := elastic.NewTermsAggregation().Field("type.keyword")
+	//institutionsAgg := elastic.NewTermsAggregation().Field("authorships.institutions.display_name.keyword")
+	//publishersAgg := elastic.NewTermsAggregation().Field("host_venue.publisher.keyword")
+	//venuesAgg := elastic.NewTermsAggregation().Field("host_venue.display_name.keyword")
+	//authorsAgg := elastic.NewTermsAggregation().Field("authorships.author.display_name.keyword").Size(30)
+	//minDateAgg, maxYearAgg := elastic.NewMinAggregation().Field("publication_year"), elastic.NewMaxAggregation().Field("publication_year")
+	//publicationYearAgg := elastic.NewTermsAggregation().Field("publication_year")
+	service := global.ES.Search().Index("works").Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout("2s")
+	addAggToSearch(service, aggs)
+	//Aggregation("types", typesAgg).
+	//Aggregation("institutions", institutionsAgg).
+	//Aggregation("venues", venuesAgg).
+	//Aggregation("publishers", publishersAgg).
+	//Aggregation("authors", authorsAgg).
+	//Aggregation("publication_years", publicationYearAgg)
+	//Aggregation("min_year", minDateAgg).
+	//Aggregation("max_year", maxYearAgg)
 	var res *elastic.SearchResult
 	var err error
 	if sortType == 0 {
@@ -35,4 +45,32 @@ func CommonWorkSearch(page int, size int,
 		res, err = service.Sort("publication_date", ascending).From((page - 1) * size).Do(context.Background())
 	}
 	return res, err
+}
+func addAggToSearch(service *elastic.SearchService, aggNames map[string]bool) *elastic.SearchService {
+	if aggNames["types"] {
+		service = service.Aggregation("types",
+			elastic.NewTermsAggregation().Field("type.keyword"))
+	}
+	if aggNames["institutions"] {
+		service = service.Aggregation("institutions",
+			elastic.NewTermsAggregation().Field("authorships.institutions.display_name.keyword"))
+	}
+	if aggNames["venues"] {
+		service = service.Aggregation("venues",
+			elastic.NewTermsAggregation().Field("host_venue.display_name.keyword"))
+	}
+	if aggNames["publishers"] {
+		service = service.Aggregation("publishers",
+			elastic.NewTermsAggregation().Field("host_venue.publisher.keyword"))
+	}
+	if aggNames["authors"] {
+		service = service.Aggregation("authors",
+			elastic.NewTermsAggregation().Field("authorships.author.display_name.keyword").
+				Size(30))
+	}
+	if aggNames["publication_years"] {
+		service = service.Aggregation("publication_years",
+			elastic.NewTermsAggregation().Field("publication_year"))
+	}
+	return service
 }

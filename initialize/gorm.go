@@ -1,6 +1,8 @@
 package initialize
 
 import (
+	"IShare/model/database"
+	"IShare/model/response"
 	"fmt"
 
 	"github.com/jinzhu/gorm"
@@ -23,12 +25,31 @@ func InitMySQL() {
 	global.DB, err = gorm.Open("mysql", dsn)
 	if err != nil {
 		panic(fmt.Errorf("数据库出问题啦: %s \n", err))
-		return
 	}
 	// 迁移
 	global.DB.AutoMigrate(
-	//base
-	// &database.User{},
+		//base
+		// &database.User{},
+		&database.Author{},
+		&database.Institution{},
+		&database.Venue{},
+		&database.AuthorConnection{},
+		&database.Application{},
+		&database.Comment{},
+		&database.Like{},
+		&database.TagPaper{},
+		&database.TagPaper{},
+		&database.User{},
+
+		&response.AuthResponse{},
+		&response.CommonA{},
+		&response.LoginQ{},
+		&response.RegisterQ{},
+		&response.BaseSearchA{},
+		&response.BaseSearchQ{},
+		&response.AdvancedSearchQ{},
+		&response.DoiSearchQ{},
+		&response.GetObjectA{},
 	)
 	// 检查数据库连接是否存在, 好像没啥用
 	err = global.DB.DB().Ping()

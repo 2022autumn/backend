@@ -1,27 +1,137 @@
+definitions:
+  response.AdvancedSearchQ:
+    properties:
+      asc:
+        type: boolean
+      conds:
+        additionalProperties:
+          type: string
+        type: object
+      page:
+        type: integer
+      query:
+        items:
+          additionalProperties:
+            type: string
+          type: object
+        type: array
+      size:
+        type: integer
+      sort:
+        type: integer
+    type: object
+  response.BaseSearchQ:
+    properties:
+      asc:
+        type: boolean
+      conds:
+        additionalProperties:
+          type: string
+        type: object
+      kind:
+        type: string
+      page:
+        type: integer
+      queryWord:
+        type: string
+      size:
+        type: integer
+      sort:
+        type: integer
+    type: object
 info:
   contact: {}
 paths:
-  /es/basequery:
-    post:
-      description: 基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找
-      parameters:
-      - description: 搜索词
-        in: query
-        name: query
-        required: true
-        type: string
-      responses: {}
-  /es/get/{id}:
+  /es/get/:
     get:
+      description: 根据id获取对象，可以是author，work，institution,venue,concept
       parameters:
       - description: id
-        in: path
+        in: query
         name: id
         required: true
         type: string
       responses:
         "200":
-          description: OK
+          description: '{"status":200,"res":{obeject}}'
+          schema:
+            type: string
+        "201":
+          description: '{"status":201,"msg":"es get err"}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400,"msg":"id type error"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - esSearch
+  /es/search/advanced:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        高级搜索，query是一个map列表， 每个map包含"content" "field" "logic"
+        logic 仅包含["and", "or", "not"]
+        field 仅包含["title", "abstract", "venue", "publisher", "author", "institution", "concept"]
+        对于年份的筛选，在query里面 field是"publication_date" logic默认为and， 该map下有"begin" "end"分别是开始和结束
+        sort=0为默认排序（降序） =1为按引用数降序 =2按发表日期由近到远
+        asc=0为降序 =1为升序
+        { "asc": false,"conds": {"venue":"International Journal for Research in Applied Science and Engineering Technology","author": "Zenith Nandy"},"page": 1,"query": [{"field": "title","content": "python","logic": "and"},{"field": "publication_date","begin": "2021-12-01","end":"2022-06-01","logic": "and"}],"size": 8,"sort": 0}
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.AdvancedSearchQ'
+      produces:
+      - application/json
+      responses: {}
+      summary: txc
+      tags:
+      - esSearch
+  /es/search/base:
+    post:
+      consumes:
+      - application/json
+      description: 基本搜索，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher",
+        "venue", "publication_year"]
+      parameters:
+      - description: 搜索条件
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.BaseSearchQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status":200,"res":{obeject}}'
+          schema:
+            type: string
+        "201":
+          description: '{"status":201,"err":"es search err"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - esSearch
+  /es/search/doi:
+    post:
+      description: 使用doi查找work，未测试，请勿使用
+      parameters:
+      - description: doi
+        in: query
+        name: doi
+        required: true
+        type: string
+      responses: {}
+      summary: txc
+      tags:
+      - esSearch
   /es/test_es:
     post:
       parameters:
@@ -31,4 +141,48 @@ paths:
         required: true
         type: string
       responses: {}
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: 登录
+      produces:
+      - application/json
+      responses: {}
+      summary: ccf
+      tags:
+      - 用户
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: 注册
+      produces:
+      - application/json
+      responses: {}
+      summary: ccf
+      tags:
+      - 用户
+  /userinfo:
+    post:
+      consumes:
+      - application/json
+      description: 查看用户个人信息
+      produces:
+      - application/json
+      responses: {}
+      summary: ccf
+      tags:
+      - 用户
+  /usermod:
+    post:
+      consumes:
+      - application/json
+      description: 编辑用户信息
+      produces:
+      - application/json
+      responses: {}
+      summary: ccf
+      tags:
+      - 用户
 swagger: "2.0"

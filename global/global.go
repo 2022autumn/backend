@@ -2,7 +2,7 @@ package global
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/olivere/elastic/v7"
+	"github.com/olivere/elastic"
 	"github.com/spf13/viper"
 )
 

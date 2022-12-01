@@ -4,37 +4,128 @@
         "contact": {}
     },
     "paths": {
-        "/es/basequery": {
-            "post": {
-                "description": "基本搜索，根据query字段去查找title和abstract里面含有搜索词的work，词是精确查找",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "搜索词",
-                        "name": "query",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/es/get/{id}": {
+        "/es/get/": {
             "get": {
+                "description": "根据id获取对象，可以是author，work，institution,venue,concept",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "id",
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "{\"status\":200,\"res\":{obeject}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "201": {
+                        "description": "{\"status\":201,\"msg\":\"es get err\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"id type error\"}",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
+            }
+        },
+        "/es/search/advanced": {
+            "post": {
+                "description": "高级搜索，query是一个map列表， 每个map包含\"content\" \"field\" \"logic\"\nlogic 仅包含[\"and\", \"or\", \"not\"]\nfield 仅包含[\"title\", \"abstract\", \"venue\", \"publisher\", \"author\", \"institution\", \"concept\"]\n对于年份的筛选，在query里面 field是\"publication_date\" logic默认为and， 该map下有\"begin\" \"end\"分别是开始和结束\nsort=0为默认排序（降序） =1为按引用数降序 =2按发表日期由近到远\nasc=0为降序 =1为升序\n{ \"asc\": false,\"conds\": {\"venue\":\"International Journal for Research in Applied Science and Engineering Technology\",\"author\": \"Zenith Nandy\"},\"page\": 1,\"query\": [{\"field\": \"title\",\"content\": \"python\",\"logic\": \"and\"},{\"field\": \"publication_date\",\"begin\": \"2021-12-01\",\"end\":\"2022-06-01\",\"logic\": \"and\"}],\"size\": 8,\"sort\": 0}",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.AdvancedSearchQ"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/es/search/base": {
+            "post": {
+                "description": "基本搜索，Cond里面填筛选条件，key仅包含[\"type\", \"author\", \"institution\", \"publisher\", \"venue\", \"publication_year\"]",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "搜索条件",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseSearchQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"res\":{obeject}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "201": {
+                        "description": "{\"status\":201,\"err\":\"es search err\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/es/search/doi": {
+            "post": {
+                "description": "使用doi查找work，未测试，请勿使用",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "doi",
+                        "name": "doi",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
             }
         },
         "/es/test_es": {
@@ -49,6 +140,133 @@
                     }
                 ],
                 "responses": {}
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "登录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "responses": {}
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "注册",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "responses": {}
+            }
+        },
+        "/userinfo": {
+            "post": {
+                "description": "查看用户个人信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "responses": {}
+            }
+        },
+        "/usermod": {
+            "post": {
+                "description": "编辑用户信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "response.AdvancedSearchQ": {
+            "type": "object",
+            "properties": {
+                "asc": {
+                    "type": "boolean"
+                },
+                "conds": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.BaseSearchQ": {
+            "type": "object",
+            "properties": {
+                "asc": {
+                    "type": "boolean"
+                },
+                "conds": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "queryWord": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                }
             }
         }
     }
