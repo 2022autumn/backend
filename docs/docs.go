@@ -34,7 +34,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":201,\"msg\":\"id type error\"}",
+                        "description": "{\"status\":200,\"res\":{obeject}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "201": {
+                        "description": "{\"status\":201,\"msg\":\"es get err\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"id type error\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -95,6 +107,12 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
+                        "description": "{\"status\":200,\"res\":{obeject}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "201": {
                         "description": "{\"status\":201,\"err\":\"es search err\"}",
                         "schema": {
                             "type": "string"
