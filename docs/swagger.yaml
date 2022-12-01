@@ -16,6 +16,16 @@ definitions:
       sort:
         type: integer
     type: object
+  response.LoginQ:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
   response.RegisterQ:
     properties:
       password:
@@ -104,21 +114,26 @@ paths:
       - application/json
       description: 登录
       parameters:
-      - description: username
-        in: query
-        name: username
+      - description: data
+        in: body
+        name: data
         required: true
-        type: string
-      - description: password
-        in: query
-        name: password
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/response.LoginQ'
       produces:
       - application/json
       responses:
         "200":
-          description: '{"status":202,"success":false,"msg":"password doesn''t match"}'
+          description: '{"status":200,"success":true,"msg":"login success","token":
+            666}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400,"success":false,"msg":"username doesn''t exist"}'
+          schema:
+            type: string
+        "401":
+          description: '{"status":401,"success":false,"msg":"password doesn''t match"}'
           schema:
             type: string
       summary: ccf
@@ -140,13 +155,32 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"status":201,"msg":"username exists"}'
+          description: '{"status":200,"msg":"register success"}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400,"msg":"username exists"}'
           schema:
             type: string
       summary: ccf
       tags:
       - 用户
-  /userinfo:
+  /user/headshot:
+    post:
+      consumes:
+      - application/json
+      description: 上传用户头像
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status":204,"success":false,"msg":"保存文件路径到数据库中失败"}'
+          schema:
+            type: string
+      summary: ccf
+      tags:
+      - 用户
+  /user/info:
     post:
       consumes:
       - application/json
@@ -161,13 +195,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"status":200,"success":false,"msg":"userID not exist"}'
+          description: '{"status":201,"success":false,"msg":"userID not exist"}'
           schema:
             type: string
       summary: ccf
       tags:
       - 用户
-  /usermod:
+  /user/mod:
     post:
       consumes:
       - application/json
@@ -197,7 +231,51 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"status":200,"success":false,"msg":err.Error()}'
+          description: '{"status":201,"success":false,"msg":"用户ID不存在"}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":202,"success":false,"msg":err.Error()}'
+          schema:
+            type: string
+      summary: ccf
+      tags:
+      - 用户
+  /user/pwd:
+    post:
+      consumes:
+      - application/json
+      description: 编辑用户信息
+      parameters:
+      - description: user_id
+        in: query
+        name: user_id
+        required: true
+        type: string
+      - description: 旧密码
+        in: query
+        name: password_old
+        required: true
+        type: string
+      - description: 新密码1
+        in: query
+        name: password_new1
+        required: true
+        type: string
+      - description: 新密码2
+        in: query
+        name: password_new2
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status":203,"success":false,"msg":"原密码输入错误"}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":204,"success":false,"msg":err1.Error()}'
           schema:
             type: string
       summary: ccf

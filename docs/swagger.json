@@ -118,23 +118,30 @@
                 "summary": "ccf",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "username",
-                        "name": "username",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "password",
-                        "name": "password",
-                        "in": "query",
-                        "required": true
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.LoginQ"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":202,\"success\":false,\"msg\":\"password doesn't match\"}",
+                        "description": "{\"status\":200,\"success\":true,\"msg\":\"login success\",\"token\": 666}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"success\":false,\"msg\":\"username doesn't exist\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\":401,\"success\":false,\"msg\":\"password doesn't match\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -168,7 +175,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":201,\"msg\":\"username exists\"}",
+                        "description": "{\"status\":200,\"msg\":\"register success\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"username exists\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -176,7 +189,30 @@
                 }
             }
         },
-        "/userinfo": {
+        "/user/headshot": {
+            "post": {
+                "description": "上传用户头像",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":204,\"success\":false,\"msg\":\"保存文件路径到数据库中失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/info": {
             "post": {
                 "description": "查看用户个人信息",
                 "consumes": [
@@ -200,7 +236,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"success\":false,\"msg\":\"userID not exist\"}",
+                        "description": "{\"status\":201,\"success\":false,\"msg\":\"userID not exist\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -208,7 +244,7 @@
                 }
             }
         },
-        "/usermod": {
+        "/user/mod": {
             "post": {
                 "description": "编辑用户信息",
                 "consumes": [
@@ -253,7 +289,72 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"success\":false,\"msg\":err.Error()}",
+                        "description": "{\"status\":201,\"success\":false,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":202,\"success\":false,\"msg\":err.Error()}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/pwd": {
+            "post": {
+                "description": "编辑用户信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "旧密码",
+                        "name": "password_old",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "新密码1",
+                        "name": "password_new1",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "新密码2",
+                        "name": "password_new2",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":203,\"success\":false,\"msg\":\"原密码输入错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":204,\"success\":false,\"msg\":err1.Error()}",
                         "schema": {
                             "type": "string"
                         }
@@ -286,6 +387,21 @@
                 },
                 "sort": {
                     "type": "integer"
+                }
+            }
+        },
+        "response.LoginQ": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
