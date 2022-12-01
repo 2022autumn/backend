@@ -31,7 +31,7 @@ func GetUserByID(ID uint64) (user database.User, notFound bool) {
 
 // GetUserByUsername 根据用户名查询某个用户
 func GetUserByUsername(username string) (user database.User, notFound bool) {
-	err := global.DB.Where("name = ?", username).First(&user).Error
+	err := global.DB.Where("username = ?", username).First(&user).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		return user, true
 	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
