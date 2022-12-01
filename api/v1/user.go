@@ -271,7 +271,7 @@ func ModifyPassword(c *gin.Context) {
 	})
 }
 
-// UploadHeadshot 编辑用户信息
+// UploadHeadshot 上传用户头像
 // @Summary     ccf
 // @Description 上传用户头像
 // @Tags        用户
