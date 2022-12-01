@@ -129,23 +129,3 @@ func NormalizationSearchResult(res *elastic.SearchResult) (hits int64, result []
 	}
 	return hits, result, aggs, TookInMillis
 }
-
-// 计算学者关系网络
-func ComputeAuthorRelationNet(authot_id string) {
-	ty, err := TransObjPrefix(authot_id)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	if ty != "authors" {
-		log.Println("authot_id is not an author id")
-		return
-	}
-	// res, err := service.GetObject(ty, authot_id)
-	// if err != nil {
-	// 	log.Println("GetObject err: ", err)
-	// 	return
-	// }
-	// // 1. 获取学者的所有作品
-
-}

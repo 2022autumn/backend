@@ -6,6 +6,7 @@ import (
 	"IShare/service"
 	"IShare/utils"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -41,19 +42,24 @@ func TestEsSearch(c *gin.Context) {
 }
 
 // GetObject
-// @Summary     txc
-// @Description 根据id获取对象，可以是author，work，institution,venue,concept
+// @Summary     根据ID获取学术数据对象 txc
+// @Description 根据实体的id获取对象，支持五种实体的获取
+// @Description 获取作者authors id = A4220294553
+// @Description 获取机构institutions id = I4210132425
+// @Description 获取论文works id = W2914747780
+// @Description 获取刊物venues id = V4210195501
+// @Description 获取领域概念concepts id = C112012222
 // @Tags        esSearch
 // @Param       id  query    string true "id"
-// @Success     200 {string} json   "{"status":200,"res":{obeject}}"
-// @Failure     200 {string} json   "{"status":201,"msg":"es get err"}"
-// @Failure     200 {string} json   "{"status":201,"msg":"id type error"}"
+// @Success     200 {string} json   "{"status":200,"res":{response.GetObjectRes}}"
+// @Failure     201 {string} json   "{"status":201,"msg":"es get err"}"
+// @Failure     202 {string} json   "{"status":202,"msg":"id type error"}"
 // @Router      /es/get/ [GET]
 func GetObject(c *gin.Context) {
 	id := c.Query("id")
 	idx, err := utils.TransObjPrefix(id)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(202, gin.H{
 			"status": 202,
 			"msg":    "id type error",
 		})
@@ -61,15 +67,23 @@ func GetObject(c *gin.Context) {
 	}
 	res, err := service.GetObject(idx, id)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(201, gin.H{
 			"msg":    "es get err",
 			"status": 201,
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"res":    res,
+	var data = response.GetObjectRes{}
+	var Objects []json.RawMessage
+	data.Hits, Objects, _, _ = utils.NormalizationSearchResult(res)
+	if len(Objects) == 0 {
+		data.Object = nil
+	} else {
+		data.Object = Objects[0]
+	}
+	c.JSON(200, gin.H{
 		"status": 200,
+		"res":    data,
 	})
 }
 
@@ -243,5 +257,27 @@ func DoiSearch(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status": 200,
 		"res":    res,
+	})
+}
+
+// @Tags relation-net
+// @Summary get author relation net
+// @Produce  json
+// @Param id query string true "author id"
+func ComputeAuthorRelationNet(c *gin.Context) {
+	id := c.Query("id")
+	Vertex_set, Edge_set, err := service.ComputeAuthorRelationNet(id)
+	if err != nil {
+		c.JSON(201, gin.H{
+			"status": 201,
+			"msg":    "compute author relation net err",
+			"err":    err,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":       200,
+		"Vertex_set": Vertex_set,
+		"Edge_set":   Edge_set,
 	})
 }

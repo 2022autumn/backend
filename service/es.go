@@ -2,7 +2,15 @@ package service
 
 import (
 	"IShare/global"
+	"IShare/utils"
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"strconv"
 
 	"github.com/olivere/elastic/v7"
 )
@@ -74,4 +82,125 @@ func addAggToSearch(service *elastic.SearchService, aggNames map[string]bool) *e
 			elastic.NewTermsAggregation().Field("publication_year"))
 	}
 	return service
+}
+
+// 计算学者关系网络
+func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interface{}, Edge_set []map[string]interface{}, err error) {
+	// 1. 判断author_id类型
+	ty, err := utils.TransObjPrefix(author_id)
+	if err != nil {
+		log.Println(err)
+		return nil, nil, err
+	}
+	if ty != "authors" {
+		log.Println("author_id is not an author id")
+		return nil, nil, errors.New("author_id is not an author id")
+	}
+	// 2. 获取author_id对应的author
+	res, err := GetObject(ty, author_id)
+	if err != nil {
+		log.Println("GetObject err: ", err)
+		return nil, nil, err
+	}
+	// 2.1 判断author_id对应的author是否存在
+	hits, authors, _, _ := utils.NormalizationSearchResult(res)
+	if hits == 0 {
+		log.Println("falut author id mapping to nil")
+		return nil, nil, errors.New("falut author id mapping to nil")
+	}
+	author := authors[0]
+	// 3. 反序列化author实体，获取实体中的display_name\ works_api_url
+	var author_map map[string]interface{}
+	_ = json.Unmarshal(author, &author_map)
+	display_name := author_map["display_name"].(string)
+	works_api_url := author_map["works_api_url"].(string)
+
+	// 4. 获取author_id对应的author的所有作品
+	works := make([]map[string]interface{}, 0)
+	GetWorksByUrl(works_api_url, 1, &works)
+
+	Vertex_set = make([]map[string]interface{}, 0)
+	Edge_set = make([]map[string]interface{}, 0)
+	Vertex_set = append(Vertex_set, map[string]interface{}{
+		"id":    author_id,
+		"label": display_name,
+	})
+	// for _, work := range works {
+	// 	// work_id := work["id"].(string)
+	// 	// work_display_name := work["display_name"].(string)
+	// 	work_authorships := work["authorships"].([]interface{})
+	// 	for _, work_authorship := range work_authorships {
+	// 		work_authorship_map := work_authorship.(map[string]interface{})
+	// 		work_author_id := work_authorship_map["author"].(map[string]interface{})["id"].(string)
+	// 		exist := false
+	// 		for _, Vertex := range Vertex_set {
+	// 			if Vertex["id"] == work_author_id {
+	// 				exist = true
+	// 				break
+	// 			}
+	// 		}
+	// 		if !exist {
+	// 			work_author_display_name := work_authorship_map["author"].(map[string]interface{})["display_name"].(string)
+	// 			Vertex_set = append(Vertex_set, map[string]interface{}{
+	// 				"id":    work_author_id,
+	// 				"label": work_author_display_name,
+	// 			})
+	// 		}
+	// 		if work_author_id != author_id {
+	// 			exist := false
+	// 			for _, Edge := range Edge_set {
+	// 				if Edge["source"] == author_id && Edge["target"] == work_author_id {
+	// 					exist = true
+	// 					Edge["weight"] = Edge["weight"].(int) + 1
+	// 					break
+	// 				}
+	// 			}
+	// 			if !exist {
+	// 				Edge_set = append(Edge_set, map[string]interface{}{
+	// 					"source": author_id,
+	// 					"target": work_author_id,
+	// 					"weight": 1,
+	// 				})
+	// 			}
+	// 		}
+	// 	}
+	// }
+	// // 打印
+	// for _, v := range Vertex_set {
+	// 	fmt.Println()
+	// 	fmt.Println("Vertex: ")
+	// 	fmt.Println(v)
+	// 	fmt.Println()
+	// }
+	// for _, e := range Edge_set {
+	// 	fmt.Println()
+	// 	fmt.Println("Edge: ")
+	// 	fmt.Println(e)
+	// 	fmt.Println()
+	// }
+	return
+}
+
+func GetWorksByUrl(works_api_url string, page int, works *[]map[string]interface{}) (total_pages int, err error) {
+	request_url := works_api_url + "&page=" + strconv.Itoa(page)
+	resp, err := http.Get(request_url)
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		log.Println("get works_api_url fail: ", string(body))
+		return 0, errors.New("get works_api_url fail: " + string(body))
+	}
+	res := make(map[string]interface{})
+	_ = json.Unmarshal(body, &res)
+	total_pages = int(res["meta"].(map[string]interface{})["count"].(float64))
+	fmt.Println(res["meta"])
+	return
+}
+
+func getAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (err error) {
+	return
 }

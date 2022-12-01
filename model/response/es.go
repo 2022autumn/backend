@@ -28,3 +28,8 @@ type AdvancedSearchQ struct {
 type DoiSearchQ struct {
 	Doi string
 }
+
+type GetObjectRes struct {
+	Object json.RawMessage
+	Hits   int64
+}
