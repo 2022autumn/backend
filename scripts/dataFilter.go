@@ -171,6 +171,9 @@ func initAuthorsfilter() map[string]interface{} {
 	authorsfilter["ids"].(map[string]interface{})["mag"] = false
 	authorsfilter["last_known_institution"] = make(map[string]interface{})
 	authorsfilter["last_known_institution"].(map[string]interface{})["id"] = true
+	authorsfilter["last_known_institution"].(map[string]interface{})["ror"] = false
+	authorsfilter["last_known_institution"].(map[string]interface{})["country_code"] = false
+	authorsfilter["last_known_institution"].(map[string]interface{})["type"] = false
 	authorsfilter["x_concepts"] = make([]map[string]interface{}, 0)
 	x_concept := make(map[string]interface{})
 	x_concept["id"] = true
@@ -187,9 +190,15 @@ func initConceptsfilter() map[string]interface{} {
 	conceptsfilter["ids"] = make(map[string]interface{})
 	conceptsfilter["ids"].(map[string]interface{})["openalex"] = false
 	conceptsfilter["ids"].(map[string]interface{})["mag"] = false
-	conceptsfilter["image_url"] = false
-	conceptsfilter["image_thumbnail_url"] = false
 	conceptsfilter["international"] = false
+	conceptsfilter["ancestors"] = make([]map[string]interface{}, 0)
+	ancestor := make(map[string]interface{})
+	ancestor["id"] = true
+	conceptsfilter["ancestors"] = append(conceptsfilter["ancestors"].([]map[string]interface{}), ancestor)
+	conceptsfilter["related_concepts"] = make([]map[string]interface{}, 0)
+	related_concept := make(map[string]interface{})
+	related_concept["id"] = true
+	conceptsfilter["related_concepts"] = append(conceptsfilter["related_concepts"].([]map[string]interface{}), related_concept)
 	conceptsfilter["updated_date"] = false
 	conceptsfilter["created_date"] = false
 	return conceptsfilter
@@ -202,14 +211,20 @@ func initInstitutionsfilter() map[string]interface{} {
 	institutionsfilter["country_code"] = false
 	institutionsfilter["ids"] = make(map[string]interface{})
 	institutionsfilter["ids"].(map[string]interface{})["openalex"] = false
+	institutionsfilter["ids"].(map[string]interface{})["ror"] = false
 	institutionsfilter["ids"].(map[string]interface{})["mag"] = false
-	institutionsfilter["geo"] = false
+	institutionsfilter["geo"] = make(map[string]interface{})
+	institutionsfilter["geo"].(map[string]interface{})["geonames_city_id"] = false
+	institutionsfilter["geo"].(map[string]interface{})["country_code"] = false
+	institutionsfilter["geo"].(map[string]interface{})["latitude"] = false
+	institutionsfilter["geo"].(map[string]interface{})["longitude"] = false
 	institutionsfilter["international"] = false
 	institutionsfilter["associated_institutions"] = make([]map[string]interface{}, 0)
 	associated_institution := make(map[string]interface{})
 	associated_institution["id"] = true
 	associated_institution["ror"] = false
 	associated_institution["country_code"] = false
+	associated_institution["type"] = false
 	institutionsfilter["associated_institutions"] = append(institutionsfilter["associated_institutions"].([]map[string]interface{}), associated_institution)
 	institutionsfilter["x_concepts"] = make([]map[string]interface{}, 0)
 	x_concept := make(map[string]interface{})
@@ -228,9 +243,12 @@ func initWorksfilter() map[string]interface{} {
 
 	worksfilter["display_name"] = false
 
-	worksfilter["publication_year"] = false
+	// worksfilter["publication_year"] = false
 
-	worksfilter["ids"] = false
+	worksfilter["ids"] = make(map[string]interface{})
+	worksfilter["ids"].(map[string]interface{})["openalex"] = false
+	worksfilter["ids"].(map[string]interface{})["mag"] = false
+	worksfilter["ids"].(map[string]interface{})["doi"] = false
 
 	worksfilter["host_venue"] = make(map[string]interface{}) // host_venue 需要修改
 	worksfilter["host_venue"].(map[string]interface{})["id"] = true
@@ -245,11 +263,13 @@ func initWorksfilter() map[string]interface{} {
 	authorship := make(map[string]interface{})
 	authorship["author"] = make(map[string]interface{})
 	authorship["author"].(map[string]interface{})["id"] = true // authorships.author.id 需要修改 "https://openalex.org/A1969205032" -> "A1969205032"
+	authorship["author"].(map[string]interface{})["orcid"] = false
 
 	authorship["institutions"] = make([]map[string]interface{}, 0) // authorships.institutions 需要修改
 	// 建立authorships.institutions数组中的元素map
 	institution := make(map[string]interface{})
 	institution["id"] = true // authorships.institutions.id 需要修改 "https://openalex.org/I1969205032" -> "I1969205032"
+	institution["ror"] = false
 	institution["country_code"] = false
 	institution["type"] = false
 	// 向authorships.institutions数组中添加元素map
@@ -266,11 +286,13 @@ func initWorksfilter() map[string]interface{} {
 	concept["id"] = true // concepts.id 需要修改 "https://openalex.org/C1969205032" -> "C1969205032"
 	worksfilter["concepts"] = append(worksfilter["concepts"].([]map[string]interface{}), concept)
 
+	worksfilter["mesh"] = false
 	worksfilter["alternate_host_venues"] = false
+
 	worksfilter["referenced_works"] = true
 	worksfilter["related_works"] = true
 
-	worksfilter["mesh"] = false
+	worksfilter["ngrams_url"] = false
 	worksfilter["updated_date"] = false
 	worksfilter["created_date"] = false
 	return worksfilter
@@ -281,7 +303,6 @@ func initVenuesfilter() map[string]interface{} {
 	venuesfilter := make(map[string]interface{})
 	venuesfilter["id"] = true
 	venuesfilter["issn"] = false
-	venuesfilter["is_oa"] = false
 	venuesfilter["is_in_doaj"] = false
 	venuesfilter["ids"] = false
 	venuesfilter["x_concepts"] = make([]map[string]interface{}, 0)

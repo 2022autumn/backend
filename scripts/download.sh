@@ -1,7 +1,7 @@
 #!/bin/bash
 # Download the data through the urls
 # require: ./urls/*_url.txt preprocessed
-# Usage: bash download.sh <target_dir>  e.g. bash ./download.sh ../data 1
+# Usage: bash download.sh <target_dir>  e.g. bash ./download.sh /data/openalex 1 > download.log &
 # continue from the last downloaded file(if continue is 1)
 # restart from the first file(if continue is 0)
 if [ $# -lt 2 ]; then
@@ -61,7 +61,7 @@ for e in ${entity[@]}; do
                 continue
             fi
             # if the file filterred, continue
-            if [ -f $target_dir/$e/filterred_${e}_data_${number}.json]; then
+            if [ -f $target_dir/$e/filterred_${e}_data_${number}.json ]; then
                 echo "-----$target_dir/$e/filterred_${e}_data_${number}.json filterred, continue..."
                 number=$((number + 1))
                 continue
