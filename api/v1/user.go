@@ -21,8 +21,8 @@ import (
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.RegisterQ true "data"
-// @Success     200  {string} json               "{"status":200,"msg":"register success"}"
-// @Failure     400  {string} json               "{"status":400,"msg":"username exists"}"
+// @Success     200  {string} json "{"status":200,"msg":"register success"}"
+// @Failure     400  {string} json "{"status":400,"msg":"username exists"}"
 // @Router      /register [POST]
 func Register(c *gin.Context) {
 	// 获取请求数据
@@ -74,11 +74,6 @@ func Login(c *gin.Context) {
 	if err := c.ShouldBind(&d); err != nil {
 		panic(err)
 	}
-	//password := c.PostForm("password")	//不用data在hash比较时候会出错？？？
-	//password := c.Request.FormValue("password")
-	//data := utils.BindJsonAndValid(c, &response.LoginQ{}).(*response.LoginQ)
-	//password := data.Password
-	//fmt.Print(data)
 	// 用户不存在
 	user, notFound := service.GetUserByUsername(d.Username)
 	if notFound {
@@ -89,10 +84,6 @@ func Login(c *gin.Context) {
 		return
 	}
 	// 密码错误的情况
-	//fmt.Print(user.Password)
-	//hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	//fmt.Print(hashedPassword)
-	//fmt.Print(password)
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(d.Password)); err != nil {
 		c.JSON(401, gin.H{
 			"status": 401,
@@ -115,27 +106,24 @@ func Login(c *gin.Context) {
 // @Param       user_id      query string true "user_id"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"status":200,"success":true,"msg":"get UserInfo","data":{object}}"
-// @Failure     200 {string} json "{"status":201,"success":false,"msg":"userID not exist"}"
-// @Router      /user/info [POST]
+// @Success     200 {string} json "{"status":200,"msg":"get info of user","data":{object}}"
+// @Failure     400 {string} json "{"status":400,"msg":"userID not exist"}"
+// @Router      /user/info [GET]
 func UserInfo(c *gin.Context) {
 	userID := c.Query("user_id")
-	//userID := c.PostForm("userID")
 	id, _ := strconv.ParseInt(userID, 0, 64)
 	user, notFoundUserByID := service.QueryAUserByID(uint64(id))
 	if notFoundUserByID {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"status":  201,
-			"msg":     "userID not exist",
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": 400,
+			"msg":    "userID not exist",
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"status":  200,
-		"msg":     "get UserInfo",
-		"data":    user,
+		"status": 200,
+		"msg":    "get info of user",
+		"data":   user,
 	})
 }
 
@@ -144,34 +132,45 @@ func UserInfo(c *gin.Context) {
 // @Description 编辑用户信息
 // @Tags        用户
 // @Param       user_id query string true "user_id"
+// @Param       data body     response.ModifyQ true "data"
 // @Param       user_info    query string true "个性签名"
 // @Param       phone_number query string true "电话号码"
 // @Param       email        query string true "Email"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"status":200,"success":true,"msg":"修改成功","data":{object}}"
-// @Failure     200 {string} json "{"status":201,"success":false,"msg":"用户ID不存在"}"
-// @Failure     400 {string} json "{"status":202,"success":false,"msg":err.Error()}"
+// @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"
+// @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
+// @Failure     401 {string} json "{"status":401,"msg":err.Error()}"
 // @Router      /user/mod [POST]
 func ModifyUser(c *gin.Context) {
 	userId := c.Query("user_id")
+	//获取修改信息
+	var d response.ModifyQ
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	userInfo := d.UserInfo
+	name := d.Name
+	phoneNum := d.Phone
+	email := d.Email
+	fields := d.Fields
+	interestTag := d.InterestTag
+	// 用户不存在
 	userID, _ := strconv.ParseUint(userId, 0, 64)
-	//userID, _ := strconv.ParseUint(c.Request.FormValue("user_id"), 0, 64)
-	userInfo := c.Query("user_info")
-	phoneNum := c.Query("phone_number")
-	email := c.Query("email")
-
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"status":  201,
-			"msg":     "用户ID不存在",
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": 400,
+			"msg":    "用户ID不存在",
 		})
 		return
 	}
+	// 修改用户信息
 	if len(userInfo) != 0 {
 		user.UserInfo = userInfo
+	}
+	if len(name) != 0 {
+		user.Name = name
 	}
 	if len(phoneNum) != 0 {
 		user.Phone = phoneNum
@@ -179,74 +178,71 @@ func ModifyUser(c *gin.Context) {
 	if len(email) != 0 {
 		user.Email = email
 	}
+	if len(fields) != 0 {
+		user.Fields = fields
+	}
+	if len(interestTag) != 0 {
+		user.InterestTag = interestTag
+	}
+	//成功修改数据库
 	err := global.DB.Save(user).Error
 	if err != nil {
-		c.JSON(400, gin.H{
-			"success": false,
-			"status":  202,
-			"msg":     err.Error(),
+		c.JSON(401, gin.H{
+			"status": 401,
+			"msg":    err.Error(),
 		})
 		return
 	}
 	//修改成功
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"status":  200,
-		"msg":     "修改成功",
-		"data":    user,
+		"status": 200,
+		"msg":    "修改成功",
+		"data":   user,
 	})
 }
 
-// ModifyPassword 编辑用户信息
+// ModifyPassword 编辑用户密码
 // @Summary     ccf
 // @Description 编辑用户信息
 // @Tags        用户
 // @Param       user_id query string true "user_id"
-// @Param       password_old    query string true "旧密码"
-// @Param       password_new1 query string true "新密码1"
-// @Param       password_new2 query string true "新密码2"
+// @Param       Password_Old formData string true "旧密码"
+// @Param       Password_New formData string true "新密码"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"status":200,"success":true,"msg":"修改成功","data":{object}}"
-// @Failure     200 {string} json "{"status":201,"success":false,"msg":"用户ID不存在"}"
-// @Failure     200 {string} json "{"status":202,"success":false,"msg":"两次输入密码不一致"}"
-// @Failure     200 {string} json "{"status":203,"success":false,"msg":"原密码输入错误"}"
-// @Failure     400 {string} json "{"status":204,"success":false,"msg":err1.Error()}"
+// @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"
+// @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
+// @Failure     401 {string} json "{"status":401,"msg":"原密码输入错误"}"
+// @Failure     402 {string} json "{"status":402,"msg":err1.Error()}"
 // @Router      /user/pwd [POST]
 func ModifyPassword(c *gin.Context) {
 	userId := c.Query("user_id")
 	//userID, _ := strconv.ParseUint(c.Request.FormValue("user_id"), 0, 64)
-	passwordOld := c.Query("password_old")
-	passwordNew1 := c.Query("password_new1")
-	passwordNew2 := c.Query("password_new2")
+	//passwordOld := c.Query("password_old")
+	//passwordNew1 := c.Query("password_new")
+	//passwordNew2 := c.Query("password_new2")
 	userID, _ := strconv.ParseUint(userId, 0, 64)
+
+	passwordOld := c.Request.FormValue("Password_Old")
+	passwordNew := c.Request.FormValue("Password_New")
 
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"status":  201,
-			"msg":     "用户ID不存在",
-		})
-		return
-	}
-	if passwordNew1 != passwordNew2 {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"status":  202,
-			"msg":     "两次输入密码不一致",
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": 400,
+			"msg":    "用户ID不存在",
 		})
 		return
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(passwordOld)); err != nil {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(401, gin.H{
 			"success": false,
-			"status":  203,
+			"status":  401,
 			"msg":     "原密码输入错误",
 		})
 		return
 	}
-	var password = passwordNew1
+	var password = passwordNew
 	// 将密码进行哈希处理
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -255,19 +251,17 @@ func ModifyPassword(c *gin.Context) {
 	user.Password = string(hashedPassword)
 	err1 := global.DB.Save(user).Error
 	if err1 != nil {
-		c.JSON(400, gin.H{
-			"success": false,
-			"status":  204,
-			"msg":     err1.Error(),
+		c.JSON(402, gin.H{
+			"status": 402,
+			"msg":    err1.Error(),
 		})
 		return
 	}
 	//修改成功
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"msg":     "修改成功",
-		"status":  200,
-		"data":    user,
+		"status": 200,
+		"msg":    "修改成功",
+		"data":   user,
 	})
 }
 
@@ -275,33 +269,32 @@ func ModifyPassword(c *gin.Context) {
 // @Summary     ccf
 // @Description 上传用户头像
 // @Tags        用户
+// @Param       Headshot formData file true "新头像"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"status":200,"success":true,"msg":"修改成功","data":{object}}"
-// @Failure     200 {string} json "{"status":201,"success":false,"msg":"用户ID不存在"}"
-// @Failure     200 {string} json "{"status":202,"success":false,"msg":"头像文件上传失败"}"
-// @Failure     200 {string} json "{"status":203,"success":false,"msg":"文件保存失败"}"
-// @Failure     200 {string} json "{"status":204,"success":false,"msg":"保存文件路径到数据库中失败"}"
+// @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"
+// @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
+// @Failure     401 {string} json "{"status":401,"msg":"头像文件上传失败"}"
+// @Failure     402 {string} json "{"status":402,"msg":"文件保存失败"}"
+// @Failure     403 {string} json "{"status":403,"msg":"保存文件路径到数据库中失败"}"
 // @Router      /user/headshot [POST]
 func UploadHeadshot(c *gin.Context) {
 	userId := c.Query("user_id")
 	userID, _ := strconv.ParseUint(userId, 0, 64)
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"status":  201,
-			"msg":     "用户ID不存在",
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": 400,
+			"msg":    "用户ID不存在",
 		})
 		return
 	}
 	//1、获取上传的文件
-	file, header, fileErr := c.Request.FormFile("headshot")
+	file, header, fileErr := c.Request.FormFile("Headshot")
 	if fileErr != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"status":  202,
-			"msg":     "头像文件上传失败",
+		c.JSON(401, gin.H{
+			"status": 401,
+			"msg":    "头像文件上传失败",
 		})
 		return
 	}
@@ -314,15 +307,20 @@ func UploadHeadshot(c *gin.Context) {
 		out, e = os.Create(filePath)
 		if e != nil {
 			fmt.Println(e)
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"status":  203,
-				"msg":     "文件保存失败",
+			c.JSON(402, gin.H{
+				"status": 402,
+				"msg":    "文件保存失败",
 			})
 		}
 		return
 	}
-	defer out.Close()
+	//defer out.Close()
+	defer func(out *os.File) {
+		err := out.Close()
+		if err != nil {
+
+		}
+	}(out)
 	_, err := io.Copy(out, file)
 	if err != nil {
 		fmt.Println(err)
@@ -332,18 +330,16 @@ func UploadHeadshot(c *gin.Context) {
 	user.HeadShot = filePath
 	err = global.DB.Save(user).Error
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"status":  204,
-			"msg":     "保存文件路径到数据库中失败",
+		c.JSON(403, gin.H{
+			"status": 403,
+			"msg":    "保存文件路径到数据库中失败",
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"msg":     "头像上传成功",
-		"status":  200,
-		"data":    user,
+		"status": 200,
+		"msg":    "头像上传成功",
+		"data":   user,
 	})
 	return
 }
