@@ -3,7 +3,7 @@ package service
 import (
 	"IShare/global"
 	"context"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 )
 
 var LIMITCOUNT = 10000000
