@@ -19,4 +19,4 @@ type ModifyQ struct {
 	InterestTag string `gorm:"size:256;" json:"interest_tag"` //兴趣词
 }
 
-//binding:"required就是gin自带的数据验证，表示数据不为空，为空则返回错误
+//binding:"required就是gin自带的数据验证，表示数据不为空，为空则返回错误;
