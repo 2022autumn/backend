@@ -153,6 +153,10 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 					if Edge["source"] == author_id && Edge["target"] == work_author_id {
 						exist = true
 						Edge["weight"] = Edge["weight"].(int) + 1
+						dispaly_work := make(map[string]interface{})
+						dispaly_work["id"] = work["id"].(string)
+						dispaly_work["title"] = work["title"].(string)
+						Edge["works"] = append(Edge["works"].([]interface{}), dispaly_work)
 						break
 					}
 				}
@@ -161,7 +165,12 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 						"source": author_id,
 						"target": work_author_id,
 						"weight": 1,
+						"works":  []interface{}{},
 					})
+					dispaly_work := make(map[string]interface{})
+					dispaly_work["id"] = work["id"].(string)
+					dispaly_work["title"] = work["title"].(string)
+					Edge_set[len(Edge_set)-1]["works"] = append(Edge_set[len(Edge_set)-1]["works"].([]interface{}), dispaly_work)
 				}
 			}
 		}

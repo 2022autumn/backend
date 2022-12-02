@@ -48,6 +48,7 @@ func SetupRouter(r *gin.Engine) {
 		esGroup.POST("/search/doi", v1.DoiSearch)
 		esGroup.POST("/search/advanced", v1.AdvancedSearch)
 		esGroup.GET("/getAuthorRelationNet", v1.GetAuthorRelationNet)
+		esGroup.GET("/getWorksOfAuthorByUrl", v1.GetWorksOfAuthorByUrl)
 	}
 	// userGroup := baseGroup.Group("/user", middleware.AuthRequired())
 	// {

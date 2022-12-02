@@ -201,3 +201,7 @@ func FilterData(data *map[string]interface{}, filter *map[string]interface{}) {
 		}
 	}
 }
+
+func RemovePrefix(s string) string {
+	return strings.Replace(s, "https://openalex.org/", "", -1)
+}

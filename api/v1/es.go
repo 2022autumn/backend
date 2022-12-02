@@ -286,3 +286,13 @@ func GetAuthorRelationNet(c *gin.Context) {
 		"data": data,
 	})
 }
+
+func GetWorksOfAuthorByUrl(c *gin.Context) {
+	var d response.BaseSearchQ
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	c.JSON(200, gin.H{
+		"status": 200,
+	})
+}
