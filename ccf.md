@@ -1,3 +1,5 @@
+11/30 pull from dev
+
 model/database--数据库表
 
 ​	---user.go：用户表User
@@ -23,3 +25,7 @@ redis和token未实现
 3、个人中心
 
 4、修改个人信息（部分）
+
+
+
+$2a$10$O6tgVt0eNIzTqRrbl/RMI.qW3X7fwQz6p.3Ko7nohujquikb1Hb5O
