@@ -58,18 +58,17 @@ func GetObject(c *gin.Context) {
 		})
 		return
 	}
-	if idx == "works" && res.Hits.TotalHits.Value == 1 {
+	if idx == "works" && res.Found == true {
 		var tmp = make(map[string]interface{})
-		by, _ := res.Hits.Hits[0].Source.MarshalJSON()
-		_ = json.Unmarshal(by, &tmp)
+		_ = json.Unmarshal(res.Source, &tmp)
 		referenced_works := tmp["referenced_works"].([]interface{})
 		var newReferencedWorks []map[string]string
 		for _, v := range referenced_works {
 			res, _ := service.GetObject("works", v.(string))
-			if res.Hits.TotalHits.Value == 1 {
+			if res.Found == true {
 				newReferencedWorks = append(newReferencedWorks, map[string]string{
 					"id":    v.(string),
-					"cited": GetWorkCited(res.Hits.Hits[0].Source),
+					"cited": GetWorkCited(res.Source),
 				})
 			}
 		}
@@ -78,10 +77,10 @@ func GetObject(c *gin.Context) {
 		var newRelatedWorks []map[string]string
 		for _, v := range related_works {
 			res, _ := service.GetObject("works", v.(string))
-			if res.Hits.TotalHits.Value == 1 {
+			if res.Found == true {
 				newRelatedWorks = append(newRelatedWorks, map[string]string{
 					"id":    v.(string),
-					"cited": GetWorkCited(res.Hits.Hits[0].Source),
+					"cited": GetWorkCited(res.Source),
 				})
 			}
 		}
@@ -93,7 +92,7 @@ func GetObject(c *gin.Context) {
 		return
 	}
 	var data = response.GetObjectA{
-		RawMessage: res.Hits.Hits[0].Source,
+		RawMessage: res.Source,
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"data":   data,
