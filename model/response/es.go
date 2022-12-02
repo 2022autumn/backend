@@ -33,17 +33,6 @@ type GetObjectA struct {
 }
 
 type AuthorRelationNet struct {
-	Vertex_set []struct {
-		id    string
-		label string
-	}
-	Edge_set []struct {
-		source string
-		target string
-		weight int
-		works  []struct {
-			id    string
-			title string
-		}
-	}
+	Vertex_set []map[string]interface{}
+	Edge_set   []map[string]interface{}
 }
