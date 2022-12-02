@@ -82,7 +82,7 @@ var cond2field = map[string]string{
 	"institution":      "authorships.institutions.display_name.keyword",
 	"publisher":        "host_venue.publisher.keyword",
 	"venue":            "host_venue.display_name.keyword",
-	"publication_year": "publication_years",
+	"publication_year": "publication_year",
 }
 var query2field = map[string]string{
 	"title":       "title",
