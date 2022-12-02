@@ -9,6 +9,7 @@ import (
 	"os"
 	"reflect"
 	"sort"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic/v7"
@@ -128,4 +129,75 @@ func NormalizationSearchResult(res *elastic.SearchResult) (hits int64, result []
 		}
 	}
 	return hits, result, aggs, TookInMillis
+}
+
+// create works filter map
+func InitWorksfilter() map[string]interface{} {
+	worksfilter := make(map[string]interface{})
+
+	worksfilter["id"] = true // id 需要修改 "https://openalex.org/W2741809807" -> "W2741809807"
+
+	// 建立authorships数组
+	worksfilter["authorships"] = make([]map[string]interface{}, 0) // authorships 需要修改
+	// 建立authorships数组中的元素map
+	authorship := make(map[string]interface{})
+	authorship["author"] = make(map[string]interface{})
+	authorship["author"].(map[string]interface{})["id"] = true // authorships.author.id 需要修改 "https://openalex.org/A1969205032" -> "A1969205032"
+	authorship["author"].(map[string]interface{})["orcid"] = false
+	authorship["raw_affiliation_string"] = false
+	authorship["institutions"] = make([]map[string]interface{}, 0) // authorships.institutions 需要修改
+	// 建立authorships.institutions数组中的元素map
+	institution := make(map[string]interface{})
+	institution["id"] = true // authorships.institutions.id 需要修改 "https://openalex.org/I1969205032" -> "I1969205032"
+	institution["ror"] = false
+	institution["country_code"] = false
+	institution["type"] = false
+	// 向authorships.institutions数组中添加元素map
+	authorship["institutions"] = append(authorship["institutions"].([]map[string]interface{}), institution)
+	// 向worksfilter.authorships中添加元素map
+	worksfilter["authorships"] = append(worksfilter["authorships"].([]map[string]interface{}), authorship)
+
+	return worksfilter
+}
+
+// 保证filter中的key在data中存在
+func FilterData(data *map[string]interface{}, filter *map[string]interface{}) {
+	for k, v := range *filter {
+		// 如果v为bool类型，若为true则修改，若为false则删除
+		if reflect.TypeOf(v).Kind() == reflect.Bool {
+			if v.(bool) {
+				// 修改规则类似："https://openalex.org/W2741809807" -> "W2741809807"
+				if (*data)[k] != nil {
+					// data[k] 为string类型，需要修改
+					if reflect.TypeOf((*data)[k]).Kind() == reflect.String {
+						(*data)[k] = strings.Replace((*data)[k].(string), "https://openalex.org/", "", -1)
+					}
+					// data[k] 为数组类型 每个元素都是string类型，都需要修改
+					if reflect.TypeOf((*data)[k]).Kind() == reflect.Slice {
+						for i, v := range (*data)[k].([]interface{}) {
+							(*data)[k].([]interface{})[i] = strings.Replace(v.(string), "https://openalex.org/", "", -1)
+						}
+					}
+				}
+			} else {
+				delete(*data, k)
+			}
+		} else if reflect.TypeOf(v).Kind() == reflect.Map {
+			// 如果v为map类型，则递归
+			if (*data)[k] != nil {
+				inner_data := (*data)[k].(map[string]interface{})
+				inner_filter := v.(map[string]interface{})
+				FilterData(&inner_data, &inner_filter)
+			}
+		} else if reflect.TypeOf(v).Kind() == reflect.Slice {
+			// 如果v为map的数组类型，则遍历data数组，递归
+			if (*data)[k] != nil {
+				inner_filter := v.([]map[string]interface{})[0]
+				for _, value := range (*data)[k].([]interface{}) {
+					inner_data := value.(map[string]interface{})
+					FilterData(&inner_data, &inner_filter)
+				}
+			}
+		}
+	}
 }

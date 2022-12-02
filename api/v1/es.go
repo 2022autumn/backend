@@ -257,3 +257,32 @@ func DoiSearch(c *gin.Context) {
 		"res":    res,
 	})
 }
+
+// GetObject
+// @Summary     hr
+// @Description 根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我
+// @Description
+// @Description 目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低
+// @Description
+// @Description 接口使用示例 1. author_id=A2764814280  2. author_id=A2900471938
+// @Tags        esSearch
+// @Param       author_id  query    string true "author_id"
+// @Success     200 {string} json   "{"data":{response.AuthorRelationNet}}"
+// @Failure     201 {string} json   "{"msg":"Get Author Relation Net Error"}"
+// @Router      /es/getAuthorRelationNet [GET]
+func GetAuthorRelationNet(c *gin.Context) {
+	author_id := c.Query("author_id")
+	var err error
+	data := response.AuthorRelationNet{}
+	data.Vertex_set, data.Edge_set, err = service.GetAuthorRelationNet(author_id)
+	if err != nil {
+		c.JSON(201, gin.H{
+			"msg": "Get Author Relation Net Error",
+			"err": err,
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"data": data,
+	})
+}

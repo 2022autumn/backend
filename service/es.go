@@ -6,10 +6,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
+	"sort"
 	"strconv"
 
 	"github.com/olivere/elastic/v7"
@@ -117,7 +118,7 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 
 	// 4. 获取author_id对应的author的所有作品
 	works := make([]map[string]interface{}, 0)
-	GetWorksByUrl(works_api_url, 1, &works)
+	getAllWorksByUrl(works_api_url, &works)
 
 	Vertex_set = make([]map[string]interface{}, 0)
 	Edge_set = make([]map[string]interface{}, 0)
@@ -125,60 +126,80 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 		"id":    author_id,
 		"label": display_name,
 	})
-	// for _, work := range works {
-	// 	// work_id := work["id"].(string)
-	// 	// work_display_name := work["display_name"].(string)
-	// 	work_authorships := work["authorships"].([]interface{})
-	// 	for _, work_authorship := range work_authorships {
-	// 		work_authorship_map := work_authorship.(map[string]interface{})
-	// 		work_author_id := work_authorship_map["author"].(map[string]interface{})["id"].(string)
-	// 		exist := false
-	// 		for _, Vertex := range Vertex_set {
-	// 			if Vertex["id"] == work_author_id {
-	// 				exist = true
-	// 				break
-	// 			}
-	// 		}
-	// 		if !exist {
-	// 			work_author_display_name := work_authorship_map["author"].(map[string]interface{})["display_name"].(string)
-	// 			Vertex_set = append(Vertex_set, map[string]interface{}{
-	// 				"id":    work_author_id,
-	// 				"label": work_author_display_name,
-	// 			})
-	// 		}
-	// 		if work_author_id != author_id {
-	// 			exist := false
-	// 			for _, Edge := range Edge_set {
-	// 				if Edge["source"] == author_id && Edge["target"] == work_author_id {
-	// 					exist = true
-	// 					Edge["weight"] = Edge["weight"].(int) + 1
-	// 					break
-	// 				}
-	// 			}
-	// 			if !exist {
-	// 				Edge_set = append(Edge_set, map[string]interface{}{
-	// 					"source": author_id,
-	// 					"target": work_author_id,
-	// 					"weight": 1,
-	// 				})
-	// 			}
-	// 		}
-	// 	}
-	// }
-	// // 打印
-	// for _, v := range Vertex_set {
-	// 	fmt.Println()
-	// 	fmt.Println("Vertex: ")
-	// 	fmt.Println(v)
-	// 	fmt.Println()
-	// }
-	// for _, e := range Edge_set {
-	// 	fmt.Println()
-	// 	fmt.Println("Edge: ")
-	// 	fmt.Println(e)
-	// 	fmt.Println()
-	// }
-	return
+	for _, work := range works {
+		// work_id := work["id"].(string)
+		// work_display_name := work["display_name"].(string)
+		work_authorships := work["authorships"].([]interface{})
+		for _, work_authorship := range work_authorships {
+			work_authorship_map := work_authorship.(map[string]interface{})
+			work_author_id := work_authorship_map["author"].(map[string]interface{})["id"].(string)
+			exist := false
+			for _, Vertex := range Vertex_set {
+				if Vertex["id"] == work_author_id {
+					exist = true
+					break
+				}
+			}
+			if !exist {
+				work_author_display_name := work_authorship_map["author"].(map[string]interface{})["display_name"].(string)
+				Vertex_set = append(Vertex_set, map[string]interface{}{
+					"id":    work_author_id,
+					"label": work_author_display_name,
+				})
+			}
+			if work_author_id != author_id {
+				exist := false
+				for _, Edge := range Edge_set {
+					if Edge["source"] == author_id && Edge["target"] == work_author_id {
+						exist = true
+						Edge["weight"] = Edge["weight"].(int) + 1
+						break
+					}
+				}
+				if !exist {
+					Edge_set = append(Edge_set, map[string]interface{}{
+						"source": author_id,
+						"target": work_author_id,
+						"weight": 1,
+					})
+				}
+			}
+		}
+	}
+	TopVertex_set := make([]map[string]interface{}, 0)
+	TopEdge_set := make([]map[string]interface{}, 0)
+	GetTopN(&Vertex_set, &Edge_set, &TopVertex_set, &TopEdge_set, 10)
+	return TopVertex_set, TopEdge_set, nil
+}
+
+func GetTopN(Vertex_set *[]map[string]interface{}, Edge_set *[]map[string]interface{}, TopVertex_set *[]map[string]interface{}, TopEdge_set *[]map[string]interface{}, n int) {
+	// 1. 获取Top N 的Edge
+	sort.Slice(*Edge_set, func(i, j int) bool {
+		return (*Edge_set)[i]["weight"].(int) > (*Edge_set)[j]["weight"].(int)
+	})
+	for i := 0; i < n && i < len(*Edge_set); i++ {
+		*TopEdge_set = append(*TopEdge_set, (*Edge_set)[i])
+	}
+	for _, Edge := range *TopEdge_set {
+		source := Edge["source"].(string)
+		for _, Vertex := range *Vertex_set {
+			if Vertex["id"] == source {
+				*TopVertex_set = append(*TopVertex_set, Vertex)
+				goto exit
+			}
+		}
+	}
+exit:
+	// 2. 获取Top N Edge target 对应的Vertex
+	for _, Edge := range *TopEdge_set {
+		target := Edge["target"].(string)
+		for _, Vertex := range *Vertex_set {
+			if Vertex["id"] == target {
+				*TopVertex_set = append(*TopVertex_set, Vertex)
+				break
+			}
+		}
+	}
 }
 
 func GetWorksByUrl(works_api_url string, page int, works *[]map[string]interface{}) (total_pages int, err error) {
@@ -196,11 +217,40 @@ func GetWorksByUrl(works_api_url string, page int, works *[]map[string]interface
 	}
 	res := make(map[string]interface{})
 	_ = json.Unmarshal(body, &res)
-	total_pages = int(res["meta"].(map[string]interface{})["count"].(float64))
-	fmt.Println(res["meta"])
+	count := int(res["meta"].(map[string]interface{})["count"].(float64))
+	total_pages = int(math.Ceil(float64(count) / 25))
+	works_list := res["results"].([]interface{})
+	for _, work := range works_list {
+		work_min := make(map[string]interface{})
+		work_min["id"] = work.(map[string]interface{})["id"]
+		work_min["title"] = work.(map[string]interface{})["title"]
+		work_min["authorships"] = work.(map[string]interface{})["authorships"]
+		*works = append(*works, work_min)
+	}
 	return
 }
 
 func getAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (err error) {
-	return
+	total_pages, err := GetWorksByUrl(works_api_url, 1, works)
+	if err != nil {
+		log.Println("GetWorksByUrl err: ", err)
+		return err
+	}
+	for i := 2; i <= total_pages; i++ {
+		_, err := GetWorksByUrl(works_api_url, i, works)
+		if err != nil {
+			log.Println("GetWorksByUrl err: ", err)
+			return err
+		}
+	}
+	filter := utils.InitWorksfilter()
+	for _, work := range *works {
+		utils.FilterData(&work, &filter)
+	}
+	return nil
+}
+
+func GetAuthorRelationNet(authorid string) (Vertex_set []map[string]interface{}, Edge_set []map[string]interface{}, err error) {
+	Vertex_set, Edge_set, err = ComputeAuthorRelationNet(authorid)
+	return Vertex_set, Edge_set, err
 }
