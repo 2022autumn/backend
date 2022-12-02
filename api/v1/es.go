@@ -1,53 +1,40 @@
 package v1
 
 import (
-	"IShare/global"
 	"IShare/model/response"
 	"IShare/service"
 	"IShare/utils"
-	"context"
-	"fmt"
+	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic/v7"
 )
 
-// TestEsSearch
-// @Param  queryWord formData string true "queryWord"
-// @Router /es/test_es [POST]
-func TestEsSearch(c *gin.Context) {
-	queryWord := c.Request.FormValue("queryWord")
-	queryWord = strings.ToLower(queryWord)
-	boolQuery := elastic.NewBoolQuery()
-	// nameQuery := elastic.NewTermQuery("name", queryWord)
-	infoQuery := elastic.NewMatchPhraseQuery("authors.name", queryWord)
-	boolQuery.Should(infoQuery)
-	age_agg := elastic.NewTermsAggregation().Field("info.keyword")
-	searchRes, err := global.ES.Search().
-		Index("students").
-		Aggregation("nameless", age_agg).
-		Query(boolQuery).
-		Do(context.Background())
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"success": false, "message": "参数错误", "status": 401})
-		panic(fmt.Errorf("es search err"))
+func GetWorkCited(w json.RawMessage) string {
+	var work = make(map[string]interface{})
+	_ = json.Unmarshal(w, &work)
+	var cited string
+	for _, v := range work["authorships"].([]interface{}) {
+		authorship := v.(map[string]interface{})
+		if authorship["author_position"] == "first" {
+			author := authorship["author"].(map[string]interface{})
+			cited += author["display_name"].(string) + ", "
+		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"res":    searchRes,
-		"status": 200,
-	})
+	cited += "\"" + work["title"].(string) + "\""
+	if work["host_venue"] != nil {
+		if work["host_venue"].(map[string]interface{})["display_name"] != nil {
+			cited += "," + work["host_venue"].(map[string]interface{})["display_name"].(string)
+		}
+	}
+	cited += "."
+	return cited
 }
 
 // GetObject
-// @Summary     根据ID获取学术数据对象 txc
-// @Description 根据实体的id获取对象，支持五种实体的获取
-// @Description 获取作者authors id = A4220294553
-// @Description 获取机构institutions id = I4210132425
-// @Description 获取论文works id = W2914747780
-// @Description 获取刊物venues id = V4210195501
-// @Description 获取领域概念concepts id = C112012222
+// @Summary     txc
+// @Description 根据id获取对象，可以是author，work，institution,venue,concept
 // @Tags        esSearch
 // @Param       id  query    string true "id"
 // @Success     200 {string} json   "{"status":200,"res":{obeject}}"
@@ -72,23 +59,47 @@ func GetObject(c *gin.Context) {
 		})
 		return
 	}
-
-	if res.Hits.TotalHits.Value == 0 {
-		c.JSON(200, gin.H{
+	if idx == "works" && res.Hits.TotalHits.Value == 1 {
+		var tmp = make(map[string]interface{})
+		by, _ := res.Hits.Hits[0].Source.MarshalJSON()
+		_ = json.Unmarshal(by, &tmp)
+		referenced_works := tmp["referenced_works"].([]interface{})
+		var newReferencedWorks []map[string]string
+		for _, v := range referenced_works {
+			res, _ := service.GetObject("works", v.(string))
+			if res.Hits.TotalHits.Value == 1 {
+				newReferencedWorks = append(newReferencedWorks, map[string]string{
+					"id":    v.(string),
+					"cited": GetWorkCited(res.Hits.Hits[0].Source),
+				})
+			}
+		}
+		tmp["referenced_works"] = newReferencedWorks
+		related_works := tmp["related_works"].([]interface{})
+		var newRelatedWorks []map[string]string
+		for _, v := range related_works {
+			res, _ := service.GetObject("works", v.(string))
+			if res.Hits.TotalHits.Value == 1 {
+				newRelatedWorks = append(newRelatedWorks, map[string]string{
+					"id":    v.(string),
+					"cited": GetWorkCited(res.Hits.Hits[0].Source),
+				})
+			}
+		}
+		tmp["related_works"] = newRelatedWorks
+		c.JSON(http.StatusOK, gin.H{
+			"data":   tmp,
 			"status": 200,
-			"res":    nil,
 		})
 		return
-	} else {
-		var data = response.GetObjectA{
-			RawMessage: res.Hits.Hits[0].Source,
-		}
-		c.JSON(http.StatusOK, gin.H{
-			"data":   data,
-			"status": 200,
-			"res":    data,
-		})
 	}
+	var data = response.GetObjectA{
+		RawMessage: res.Hits.Hits[0].Source,
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data":   data,
+		"status": 200,
+	})
 }
 
 var cond2field = map[string]string{
@@ -97,7 +108,7 @@ var cond2field = map[string]string{
 	"institution":      "authorships.institutions.display_name.keyword",
 	"publisher":        "host_venue.publisher.keyword",
 	"venue":            "host_venue.display_name.keyword",
-	"publication_year": "publication_years",
+	"publication_year": "publication_year",
 }
 var query2field = map[string]string{
 	"title":       "title",
@@ -244,27 +255,5 @@ func DoiSearch(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status": 200,
 		"res":    res,
-	})
-}
-
-// @Tags relation-net
-// @Summary get author relation net
-// @Produce  json
-// @Param id query string true "author id"
-func ComputeAuthorRelationNet(c *gin.Context) {
-	id := c.Query("id")
-	Vertex_set, Edge_set, err := service.ComputeAuthorRelationNet(id)
-	if err != nil {
-		c.JSON(201, gin.H{
-			"status": 201,
-			"msg":    "compute author relation net err",
-			"err":    err,
-		})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"code":       200,
-		"Vertex_set": Vertex_set,
-		"Edge_set":   Edge_set,
 	})
 }

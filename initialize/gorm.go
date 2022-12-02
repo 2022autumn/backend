@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"IShare/model/database"
 	"fmt"
 
 	"github.com/jinzhu/gorm"
@@ -26,8 +27,8 @@ func InitMySQL() {
 	}
 	// 迁移
 	global.DB.AutoMigrate(
-	//base
-	// &database.User{},
+		//base
+		&database.User{},
 	)
 	// 检查数据库连接是否存在, 好像没啥用
 	err = global.DB.DB().Ping()

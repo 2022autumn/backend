@@ -27,10 +27,12 @@ func SetupRouter(r *gin.Engine) {
 	baseGroup := r.Group("/api")
 	{
 		//用户模块
-		baseGroup.POST("/register", v1.Register)  //注册
-		baseGroup.POST("/login", v1.Login)        //登录
-		baseGroup.POST("/userinfo", v1.UserInfo)  //个人中心
-		baseGroup.POST("/usermod", v1.ModifyUser) //编辑个人信息
+		baseGroup.POST("/register", v1.Register)           //注册
+		baseGroup.POST("/login", v1.Login)                 //登录
+		baseGroup.GET("user/info", v1.UserInfo)            //个人中心
+		baseGroup.POST("user/mod", v1.ModifyUser)          //编辑个人信息
+		baseGroup.POST("user/pwd", v1.ModifyPassword)      //重置用户密码
+		baseGroup.POST("user/headshot", v1.UploadHeadshot) //上传用户头像
 	}
 	ApplicationRouter := baseGroup.Group("/application")
 	{
@@ -41,7 +43,6 @@ func SetupRouter(r *gin.Engine) {
 	// }
 	esGroup := baseGroup.Group("/es")
 	{
-		esGroup.POST("/test_es", v1.TestEsSearch)
 		esGroup.GET("/get/", v1.GetObject)
 		esGroup.POST("/search/base", v1.BaseSearch)
 		esGroup.POST("/search/doi", v1.DoiSearch)

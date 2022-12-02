@@ -140,20 +140,6 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/es/test_es": {
-            "post": {
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "queryWord",
-                        "name": "queryWord",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
         "/login": {
             "post": {
                 "description": "登录",
@@ -167,12 +153,42 @@ const docTemplate = `{
                     "用户"
                 ],
                 "summary": "ccf",
-                "responses": {}
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.LoginQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"success\":true,\"msg\":\"login success\",\"token\": 666}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"success\":false,\"msg\":\"username doesn't exist\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\":401,\"success\":false,\"msg\":\"password doesn't match\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/register": {
             "post": {
-                "description": "注册",
+                "description": "填入用户名和密码注册",
                 "consumes": [
                     "application/json"
                 ],
@@ -183,11 +199,91 @@ const docTemplate = `{
                     "用户"
                 ],
                 "summary": "ccf",
-                "responses": {}
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.RegisterQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"msg\":\"register success\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"username exists\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
-        "/userinfo": {
+        "/user/headshot": {
             "post": {
+                "description": "上传用户头像",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "新头像",
+                        "name": "Headshot",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"msg\":\"修改成功\",\"data\":{object}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\":401,\"msg\":\"头像文件上传失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"status\":402,\"msg\":\"文件保存失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"status\":403,\"msg\":\"保存文件路径到数据库中失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/info": {
+            "get": {
                 "description": "查看用户个人信息",
                 "consumes": [
                     "application/json"
@@ -199,10 +295,32 @@ const docTemplate = `{
                     "用户"
                 ],
                 "summary": "ccf",
-                "responses": {}
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"msg\":\"get info of user\",\"data\":{object}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"userID not exist\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
-        "/usermod": {
+        "/user/mod": {
             "post": {
                 "description": "编辑用户信息",
                 "consumes": [
@@ -215,7 +333,129 @@ const docTemplate = `{
                     "用户"
                 ],
                 "summary": "ccf",
-                "responses": {}
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.ModifyQ"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "个性签名",
+                        "name": "user_info",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "电话号码",
+                        "name": "phone_number",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"msg\":\"修改成功\",\"data\":{object}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\":401,\"msg\":err.Error()}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/pwd": {
+            "post": {
+                "description": "编辑用户信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "ccf",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user_id",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "旧密码",
+                        "name": "Password_Old",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "新密码",
+                        "name": "Password_New",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"msg\":\"修改成功\",\"data\":{object}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\":401,\"msg\":\"原密码输入错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"status\":402,\"msg\":err1.Error()}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         }
     },
@@ -278,6 +518,68 @@ const docTemplate = `{
                 },
                 "sort": {
                     "type": "integer"
+                }
+            }
+        },
+        "response.LoginQ": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ModifyQ": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "邮箱",
+                    "type": "string"
+                },
+                "fields": {
+                    "description": "研究领域",
+                    "type": "string"
+                },
+                "interest_tag": {
+                    "description": "兴趣词",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "真实姓名",
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "电话号码",
+                    "type": "string"
+                },
+                "user_info": {
+                    "description": "个性签名",
+                    "type": "string"
+                }
+            }
+        },
+        "response.RegisterQ": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
                 }
             }
         }
