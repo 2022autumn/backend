@@ -1,43 +1,34 @@
 package v1
 
 import (
-	"IShare/global"
 	"IShare/model/response"
 	"IShare/service"
 	"IShare/utils"
-	"context"
-	"fmt"
-	"net/http"
-	"strings"
-
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic/v7"
+	"net/http"
 )
 
-// TestEsSearch
-// @Param  queryWord formData string true "queryWord"
-// @Router /es/test_es [POST]
-func TestEsSearch(c *gin.Context) {
-	queryWord := c.Request.FormValue("queryWord")
-	queryWord = strings.ToLower(queryWord)
-	boolQuery := elastic.NewBoolQuery()
-	// nameQuery := elastic.NewTermQuery("name", queryWord)
-	infoQuery := elastic.NewMatchPhraseQuery("authors.name", queryWord)
-	boolQuery.Should(infoQuery)
-	age_agg := elastic.NewTermsAggregation().Field("info.keyword")
-	searchRes, err := global.ES.Search().
-		Index("students").
-		Aggregation("nameless", age_agg).
-		Query(boolQuery).
-		Do(context.Background())
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"success": false, "message": "参数错误", "status": 401})
-		panic(fmt.Errorf("es search err"))
+func GetWorkCited(w json.RawMessage) string {
+	var work = make(map[string]interface{})
+	_ = json.Unmarshal(w, &work)
+	var cited string
+	for _, v := range work["authorships"].([]interface{}) {
+		authorship := v.(map[string]interface{})
+		if authorship["author_position"] == "first" {
+			author := authorship["author"].(map[string]interface{})
+			cited += author["display_name"].(string) + ", "
+		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"res":    searchRes,
-		"status": 200,
-	})
+	cited += "\"" + work["title"].(string) + "\""
+	if work["host_venue"] != nil {
+		if work["host_venue"].(map[string]interface{})["display_name"] != nil {
+			cited += "," + work["host_venue"].(map[string]interface{})["display_name"].(string)
+		}
+	}
+	cited += "."
+	return cited
 }
 
 // GetObject
@@ -64,6 +55,40 @@ func GetObject(c *gin.Context) {
 		c.JSON(201, gin.H{
 			"msg":    "es get err",
 			"status": 201,
+		})
+		return
+	}
+	if idx == "works" && res.Hits.TotalHits.Value == 1 {
+		var tmp = make(map[string]interface{})
+		by, _ := res.Hits.Hits[0].Source.MarshalJSON()
+		_ = json.Unmarshal(by, &tmp)
+		referenced_works := tmp["referenced_works"].([]interface{})
+		var newReferencedWorks []map[string]string
+		for _, v := range referenced_works {
+			res, _ := service.GetObject("works", v.(string))
+			if res.Hits.TotalHits.Value == 1 {
+				newReferencedWorks = append(newReferencedWorks, map[string]string{
+					"id":    v.(string),
+					"cited": GetWorkCited(res.Hits.Hits[0].Source),
+				})
+			}
+		}
+		tmp["referenced_works"] = newReferencedWorks
+		related_works := tmp["related_works"].([]interface{})
+		var newRelatedWorks []map[string]string
+		for _, v := range related_works {
+			res, _ := service.GetObject("works", v.(string))
+			if res.Hits.TotalHits.Value == 1 {
+				newRelatedWorks = append(newRelatedWorks, map[string]string{
+					"id":    v.(string),
+					"cited": GetWorkCited(res.Hits.Hits[0].Source),
+				})
+			}
+		}
+		tmp["related_works"] = newRelatedWorks
+		c.JSON(http.StatusOK, gin.H{
+			"data":   tmp,
+			"status": 200,
 		})
 		return
 	}
