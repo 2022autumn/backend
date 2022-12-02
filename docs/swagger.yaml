@@ -111,6 +111,32 @@ paths:
       summary: txc
       tags:
       - esSearch
+  /es/getAuthorRelationNet:
+    get:
+      description: |-
+        根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我
+
+        目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低
+
+        接口使用示例 1. author_id=A2764814280  2. author_id=A2900471938
+      parameters:
+      - description: author_id
+        in: query
+        name: author_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"data":{response.AuthorRelationNet}}'
+          schema:
+            type: string
+        "201":
+          description: '{"msg":"Get Author Relation Net Error"}'
+          schema:
+            type: string
+      summary: hr
+      tags:
+      - esSearch
   /es/search/advanced:
     post:
       consumes:

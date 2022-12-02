@@ -54,6 +54,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/es/getAuthorRelationNet": {
+            "get": {
+                "description": "根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我\n\n目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低\n\n接口使用示例 1. author_id=A2764814280  2. author_id=A2900471938",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "hr",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "author_id",
+                        "name": "author_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"data\":{response.AuthorRelationNet}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "201": {
+                        "description": "{\"msg\":\"Get Author Relation Net Error\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/es/search/advanced": {
             "post": {
                 "description": "高级搜索，query是一个map列表， 每个map包含\"content\" \"field\" \"logic\"\nlogic 仅包含[\"and\", \"or\", \"not\"]\nfield 仅包含[\"title\", \"abstract\", \"venue\", \"publisher\", \"author\", \"institution\", \"concept\"]\n对于年份的筛选，在query里面 field是\"publication_date\" logic默认为and， 该map下有\"begin\" \"end\"分别是开始和结束\nsort=0为默认排序（降序） =1为按引用数降序 =2按发表日期由近到远\nasc=0为降序 =1为升序\n{ \"asc\": false,\"conds\": {\"venue\":\"International Journal for Research in Applied Science and Engineering Technology\",\"author\": \"Zenith Nandy\"},\"page\": 1,\"query\": [{\"field\": \"title\",\"content\": \"python\",\"logic\": \"and\"},{\"field\": \"publication_date\",\"begin\": \"2021-12-01\",\"end\":\"2022-06-01\",\"logic\": \"and\"}],\"size\": 8,\"sort\": 0}",
