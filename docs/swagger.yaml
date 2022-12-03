@@ -1,6 +1,29 @@
 definitions:
+  response.AdvancedSearchQ:
+    properties:
+      asc:
+        type: boolean
+      conds:
+        additionalProperties:
+          type: string
+        type: object
+      page:
+        type: integer
+      query:
+        items:
+          additionalProperties:
+            type: string
+          type: object
+        type: array
+      size:
+        type: integer
+      sort:
+        type: integer
+    type: object
   response.BaseSearchQ:
     properties:
+      asc:
+        type: boolean
       conds:
         additionalProperties:
           type: string
@@ -53,7 +76,15 @@ paths:
         type: string
       responses:
         "200":
-          description: '{"status":201,"msg":"id type error"}'
+          description: '{"status":200,"res":{obeject}}'
+          schema:
+            type: string
+        "201":
+          description: '{"status":201,"msg":"es get err"}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400,"msg":"id type error"}'
           schema:
             type: string
       summary: txc
@@ -61,13 +92,34 @@ paths:
       - esSearch
   /es/search/advanced:
     post:
-      description: 高级搜索，搜索条件通过body传入，未完成
+      consumes:
+      - application/json
+      description: |-
+        高级搜索，query是一个map列表， 每个map包含"content" "field" "logic"
+        logic 仅包含["and", "or", "not"]
+        field 仅包含["title", "abstract", "venue", "publisher", "author", "institution", "concept"]
+        对于年份的筛选，在query里面 field是"publication_date" logic默认为and， 该map下有"begin" "end"分别是开始和结束
+        sort=0为默认排序（降序） =1为按引用数降序 =2按发表日期由近到远
+        asc=0为降序 =1为升序
+        { "asc": false,"conds": {"venue":"International Journal for Research in Applied Science and Engineering Technology","author": "Zenith Nandy"},"page": 1,"query": [{"field": "title","content": "python","logic": "and"},{"field": "publication_date","begin": "2021-12-01","end":"2022-06-01","logic": "and"}],"size": 8,"sort": 0}
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.AdvancedSearchQ'
+      produces:
+      - application/json
       responses: {}
-  /es/search/base2:
+      summary: txc
+      tags:
+      - esSearch
+  /es/search/base:
     post:
       consumes:
       - application/json
-      description: 基本搜索2，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher",
+      description: 基本搜索，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher",
         "venue", "publication_year"]
       parameters:
       - description: 搜索条件
@@ -80,6 +132,10 @@ paths:
       - application/json
       responses:
         "200":
+          description: '{"status":200,"res":{obeject}}'
+          schema:
+            type: string
+        "201":
           description: '{"status":201,"err":"es search err"}'
           schema:
             type: string

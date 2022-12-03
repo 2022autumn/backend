@@ -34,7 +34,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":201,\"msg\":\"id type error\"}",
+                        "description": "{\"status\":200,\"res\":{obeject}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "201": {
+                        "description": "{\"status\":201,\"msg\":\"es get err\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"id type error\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -44,13 +56,34 @@ const docTemplate = `{
         },
         "/es/search/advanced": {
             "post": {
-                "description": "高级搜索，搜索条件通过body传入，未完成",
+                "description": "高级搜索，query是一个map列表， 每个map包含\"content\" \"field\" \"logic\"\nlogic 仅包含[\"and\", \"or\", \"not\"]\nfield 仅包含[\"title\", \"abstract\", \"venue\", \"publisher\", \"author\", \"institution\", \"concept\"]\n对于年份的筛选，在query里面 field是\"publication_date\" logic默认为and， 该map下有\"begin\" \"end\"分别是开始和结束\nsort=0为默认排序（降序） =1为按引用数降序 =2按发表日期由近到远\nasc=0为降序 =1为升序\n{ \"asc\": false,\"conds\": {\"venue\":\"International Journal for Research in Applied Science and Engineering Technology\",\"author\": \"Zenith Nandy\"},\"page\": 1,\"query\": [{\"field\": \"title\",\"content\": \"python\",\"logic\": \"and\"},{\"field\": \"publication_date\",\"begin\": \"2021-12-01\",\"end\":\"2022-06-01\",\"logic\": \"and\"}],\"size\": 8,\"sort\": 0}",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.AdvancedSearchQ"
+                        }
+                    }
+                ],
                 "responses": {}
             }
         },
-        "/es/search/base2": {
+        "/es/search/base": {
             "post": {
-                "description": "基本搜索2，Cond里面填筛选条件，key仅包含[\"type\", \"author\", \"institution\", \"publisher\", \"venue\", \"publication_year\"]",
+                "description": "基本搜索，Cond里面填筛选条件，key仅包含[\"type\", \"author\", \"institution\", \"publisher\", \"venue\", \"publication_year\"]",
                 "consumes": [
                     "application/json"
                 ],
@@ -74,6 +107,12 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
+                        "description": "{\"status\":200,\"res\":{obeject}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "201": {
                         "description": "{\"status\":201,\"err\":\"es search err\"}",
                         "schema": {
                             "type": "string"
@@ -376,9 +415,44 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "response.AdvancedSearchQ": {
+            "type": "object",
+            "properties": {
+                "asc": {
+                    "type": "boolean"
+                },
+                "conds": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.BaseSearchQ": {
             "type": "object",
             "properties": {
+                "asc": {
+                    "type": "boolean"
+                },
                 "conds": {
                     "type": "object",
                     "additionalProperties": {

@@ -8,6 +8,7 @@ type BaseSearchQ struct {
 	Size      int
 	Kind      string
 	Sort      int
+	Asc       bool
 	QueryWord string
 }
 type BaseSearchA struct {
@@ -16,10 +17,17 @@ type BaseSearchA struct {
 	Hits  int64
 }
 type AdvancedSearchQ struct {
-	Conds []map[string]string
+	Query []map[string]string
+	Conds map[string]string
 	Page  int
 	Size  int
+	Sort  int
+	Asc   bool
 }
+
 type DoiSearchQ struct {
 	Doi string
+}
+type GetObjectA struct {
+	json.RawMessage
 }
