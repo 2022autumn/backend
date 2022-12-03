@@ -2,7 +2,6 @@ package initialize
 
 import (
 	"IShare/model/database"
-	"IShare/model/response"
 	"fmt"
 
 	"github.com/jinzhu/gorm"
@@ -41,15 +40,15 @@ func InitMySQL() {
 		&database.TagPaper{},
 		&database.User{},
 
-		&response.AuthResponse{},
-		&response.CommonA{},
-		&response.LoginQ{},
-		&response.RegisterQ{},
-		&response.BaseSearchA{},
-		&response.BaseSearchQ{},
-		&response.AdvancedSearchQ{},
-		&response.DoiSearchQ{},
-		&response.GetObjectA{},
+		//&response.AuthResponse{},
+		//&response.CommonA{},
+		//&response.LoginQ{},
+		//&response.RegisterQ{},
+		//&response.BaseSearchA{},
+		//&response.BaseSearchQ{},
+		//&response.AdvancedSearchQ{},
+		//&response.DoiSearchQ{},
+		//&response.GetObjectA{},
 		//&database.User{},
 	)
 	// 检查数据库连接是否存在, 好像没啥用

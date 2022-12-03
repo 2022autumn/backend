@@ -6,7 +6,7 @@ import (
 )
 
 type Author struct {
-	AuthorId            string `gorm:"type:varchar(150);primary_key;not null;" json:"author_id"`
+	AuthorId            string `gorm:"primary_key;type:varchar(150);not null;" json:"author_id"`
 	AuthorName          string `gorm:"not null;size :64;type:varchar(100)" json:"author_name"`
 	AuthorRank          string `gorm:"size:32;" json:"author_rank"`
 	PaperNum            int    `gorm:"type:int;" json:"paper_num"`
@@ -15,7 +15,7 @@ type Author struct {
 }
 
 type Institution struct {
-	InstitutionID   string `gorm:"type:varchar(150);primary_key;not null;" json:"institution_id"`
+	InstitutionID   string `gorm:"primary_key;type:varchar(150);not null;" json:"institution_id"`
 	InstitutionName string `gorm:"type:varchar(150);not null;" json:"institution_name"`
 	HomePageURL     string `gorm:"type:varchar(150);" json:"homepage_url"`
 	CountryCode     string `gorm:"type:varchar(150);" json:"country_code"`
@@ -23,7 +23,7 @@ type Institution struct {
 	CitedByCount    int    `gorm:"type:int;" json:"cited_by_count"`
 }
 type Venue struct {
-	VenueID      string    `gorm:"type:varchar(150);not null;primary_key;" json:"venue_id"`
+	VenueID      string    `gorm:"primary_key;type:varchar(150);not null;" json:"venue_id"`
 	ISSN         string    `gorm:"type:varchar(50);unique;" json:"issn"`
 	DisplayName  string    `gorm:"type:varchar(150);not null" json:"Venue_display_name"`
 	WorksCount   int       `gorm:"type:int;not null" json:"works_count"`
@@ -41,7 +41,7 @@ type AuthorConnection struct {
 }
 
 type Application struct {
-	ApplicationID   uint64       `gorm:"primary_key;not null;autoIncrement;" json:"application_id"`
+	ApplicationID   uint64       `gorm:"primary_key;not null;" json:"application_id"`
 	UserID          uint64       `gorm:"not null;" json:"user_id"` //申请者的用户id
 	AuthorName      string       `gorm:"not null;type:varchar(100);" json:"author_name"`
 	AuthorID        string       `gorm:"type:varchar(150);not null;" json:"author_id"`
