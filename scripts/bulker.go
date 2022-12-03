@@ -185,7 +185,7 @@ func initWorksfilter() map[string]interface{} {
 	authorship["author"] = make(map[string]interface{})
 	authorship["author"].(map[string]interface{})["id"] = true // authorships.author.id 需要修改 "https://openalex.org/A1969205032" -> "A1969205032"
 	authorship["author"].(map[string]interface{})["orcid"] = false
-
+	authorship["author"].(map[string]interface{})["raw_affiliation_string"] = false
 	authorship["institutions"] = make([]map[string]interface{}, 0) // authorships.institutions 需要修改
 	// 建立authorships.institutions数组中的元素map
 	institution := make(map[string]interface{})

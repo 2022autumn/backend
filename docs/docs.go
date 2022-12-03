@@ -39,14 +39,46 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
-                    "201": {
-                        "description": "{\"status\":201,\"msg\":\"es get err\"}",
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"id type error\"}",
                         "schema": {
                             "type": "string"
                         }
                     },
-                    "400": {
-                        "description": "{\"status\":400,\"msg\":\"id type error\"}",
+                    "404": {
+                        "description": "{\"status\":201,\"msg\":\"es get err or not found\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/es/getAuthorRelationNet": {
+            "get": {
+                "description": "根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我\n\n目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低\n\n接口使用示例 1. author_id=A2764814280  2. author_id=A2900471938",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "hr",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "author_id",
+                        "name": "author_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"data\":{response.AuthorRelationNet}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "201": {
+                        "description": "{\"msg\":\"Get Author Relation Net Error\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -134,20 +166,6 @@ const docTemplate = `{
                         "description": "doi",
                         "name": "doi",
                         "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/es/test_es": {
-            "post": {
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "queryWord",
-                        "name": "queryWord",
-                        "in": "formData",
                         "required": true
                     }
                 ],
@@ -253,9 +271,42 @@ const docTemplate = `{
                     "用户"
                 ],
                 "summary": "ccf",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "新头像",
+                        "name": "Headshot",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":204,\"success\":false,\"msg\":\"保存文件路径到数据库中失败\"}",
+                        "description": "{\"status\":200,\"msg\":\"修改成功\",\"data\":{object}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\":401,\"msg\":\"头像文件上传失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"status\":402,\"msg\":\"文件保存失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"status\":403,\"msg\":\"保存文件路径到数据库中失败\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -264,7 +315,7 @@ const docTemplate = `{
             }
         },
         "/user/info": {
-            "post": {
+            "get": {
                 "description": "查看用户个人信息",
                 "consumes": [
                     "application/json"
@@ -287,7 +338,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":201,\"success\":false,\"msg\":\"userID not exist\"}",
+                        "description": "{\"status\":200,\"msg\":\"get info of user\",\"data\":{object}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"userID not exist\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -317,6 +374,15 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.ModifyQ"
+                        }
+                    },
+                    {
                         "type": "string",
                         "description": "个性签名",
                         "name": "user_info",
@@ -340,13 +406,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":201,\"success\":false,\"msg\":\"用户ID不存在\"}",
+                        "description": "{\"status\":200,\"msg\":\"修改成功\",\"data\":{object}}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "{\"status\":202,\"success\":false,\"msg\":err.Error()}",
+                        "description": "{\"status\":400,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\":401,\"msg\":err.Error()}",
                         "schema": {
                             "type": "string"
                         }
@@ -378,34 +450,39 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "旧密码",
-                        "name": "password_old",
-                        "in": "query",
+                        "name": "Password_Old",
+                        "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "新密码1",
-                        "name": "password_new1",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "新密码2",
-                        "name": "password_new2",
-                        "in": "query",
+                        "description": "新密码",
+                        "name": "Password_New",
+                        "in": "formData",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":203,\"success\":false,\"msg\":\"原密码输入错误\"}",
+                        "description": "{\"status\":200,\"msg\":\"修改成功\",\"data\":{object}}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "{\"status\":204,\"success\":false,\"msg\":err1.Error()}",
+                        "description": "{\"status\":400,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\":401,\"msg\":\"原密码输入错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"status\":402,\"msg\":err1.Error()}",
                         "schema": {
                             "type": "string"
                         }
@@ -487,6 +564,35 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ModifyQ": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "邮箱",
+                    "type": "string"
+                },
+                "fields": {
+                    "description": "研究领域",
+                    "type": "string"
+                },
+                "interest_tag": {
+                    "description": "兴趣词",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "真实姓名",
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "电话号码",
+                    "type": "string"
+                },
+                "user_info": {
+                    "description": "个性签名",
                     "type": "string"
                 }
             }

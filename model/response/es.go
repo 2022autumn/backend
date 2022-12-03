@@ -31,3 +31,8 @@ type DoiSearchQ struct {
 type GetObjectA struct {
 	json.RawMessage
 }
+
+type AuthorRelationNet struct {
+	Vertex_set []map[string]interface{}
+	Edge_set   []map[string]interface{}
+}
