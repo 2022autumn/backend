@@ -16,6 +16,7 @@ import (
 
 // Register 注册
 // @Summary     ccf
+// @Description 注册
 // @Description 填入用户名和密码注册
 // @Tags        用户
 // @Accept      json
@@ -61,11 +62,12 @@ func Register(c *gin.Context) {
 // Login 登录
 // @Summary     ccf
 // @Description 登录
+// @Description 填入用户名和密码
 // @Tags        用户
 // @Accept      json
 // @Produce     json
-// @Param       data body     response.LoginQ true "data"
-// @Success     200 {string} json "{"status":200,"msg":"登录成功","token": 666}"
+// @Param       data body     response.LoginQ true "data" Enums({"username":"test2","password":"test222"},{"username":"test3","password":"test333"})
+// @Success     200 {string} json "{"status":200,"msg":"登录成功","token": user.id}"
 // @Failure     400 {string} json "{"status":400,"msg":"用户名不存在"}"
 // @Failure     401 {string} json "{"status":401,"msg":"密码错误"}"
 // @Router      /login [POST]
@@ -103,11 +105,11 @@ func Login(c *gin.Context) {
 // @Summary     ccf
 // @Description 查看用户个人信息
 // @Tags        用户
-// @Param       user_id      query string true "user_id"
+// @Param       user_id query string true "user_id" Enums(2,3,4)
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"status":200,"msg":"get info of user","data":{object}}"
-// @Failure     400 {string} json "{"status":400,"msg":"userID not exist"}"
+// @Success     200 {string} json "{"status":200,"msg":"获取用户信息成功","data":{object}}"
+// @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
 // @Router      /user/info [GET]
 func UserInfo(c *gin.Context) {
 	userID := c.Query("user_id")
@@ -116,13 +118,13 @@ func UserInfo(c *gin.Context) {
 	if notFoundUserByID {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": 400,
-			"msg":    "userID not exist",
+			"msg":    "用户ID不存在",
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "get info of user",
+		"msg":    "获取用户信息成功",
 		"data":   user,
 	})
 }
@@ -131,7 +133,7 @@ func UserInfo(c *gin.Context) {
 // @Summary     ccf
 // @Description 编辑用户信息
 // @Tags        用户
-// @Param       user_id query string true "user_id"
+// @Param       user_id query string true "user_id" Enums(2,3,4)
 // @Param       data body     response.ModifyQ true "data"
 // @Accept      json
 // @Produce     json
@@ -202,8 +204,8 @@ func ModifyUser(c *gin.Context) {
 // @Summary     ccf
 // @Description 编辑用户信息
 // @Tags        用户
-// @Param       user_id query string true "user_id"
-// @Param       Password_Old formData string true "旧密码"
+// @Param       user_id query string true "user_id" Enums(2,3,4)
+// @Param       Password_Old formData string true "旧密码" Enums(test222,test333,test444)
 // @Param       Password_New formData string true "新密码"
 // @Accept      json
 // @Produce     json
@@ -261,7 +263,7 @@ func ModifyPassword(c *gin.Context) {
 // @Summary     ccf
 // @Description 上传用户头像
 // @Tags        用户
-// @Param       user_id query string true "user_id"
+// @Param       user_id query string true "user_id" Enums(2,3,4)
 // @Param       Headshot formData file true "新头像"
 // @Accept      json
 // @Produce     json
