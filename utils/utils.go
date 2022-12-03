@@ -131,35 +131,6 @@ func NormalizationSearchResult(res *elastic.SearchResult) (hits int64, result []
 	return hits, result, aggs, TookInMillis
 }
 
-// 规范化es的返回结果
-// hits 为es查询结果的总数
-// result 为es查询结果的具体内容
-// aggs 为es查询结果的聚合结果
-// TookInMillis 为es查询耗时
-func NormalizationGetResult(res *elastic.SearchResult) (hits int64, result []json.RawMessage, aggs map[string]interface{}, TookInMillis int64) {
-	if res == nil {
-		return 0, nil, nil, 0
-	}
-	TookInMillis = res.TookInMillis
-	hits = res.Hits.TotalHits.Value
-	result = make([]json.RawMessage, 0)
-	if res.Hits.Hits != nil {
-		for _, hit := range res.Hits.Hits {
-			result = append(result, hit.Source)
-		}
-	}
-	aggs = make(map[string]interface{})
-	if res.Aggregations != nil {
-		for k, v := range res.Aggregations {
-			by, _ := v.MarshalJSON()
-			var tmp = make(map[string]interface{})
-			_ = json.Unmarshal(by, &tmp)
-			aggs[k] = tmp["buckets"].([]interface{})
-		}
-	}
-	return hits, result, aggs, TookInMillis
-}
-
 // create works filter map
 func InitWorksfilter() map[string]interface{} {
 	worksfilter := make(map[string]interface{})
