@@ -21,8 +21,8 @@ import (
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.RegisterQ true "data"
-// @Success     200  {string} json "{"status":200,"msg":"register success"}"
-// @Failure     400  {string} json "{"status":400,"msg":"username exists"}"
+// @Success     200  {string} json               "{"status":200,"msg":"register success"}"
+// @Failure     400  {string} json               "{"status":400,"msg":"username exists"}"
 // @Router      /register [POST]
 func Register(c *gin.Context) {
 	// 获取请求数据
@@ -65,9 +65,9 @@ func Register(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.LoginQ true "data"
-// @Success     200 {string} json "{"status":200,"success":true,"msg":"login success","token": 666}"
-// @Failure     400 {string} json "{"status":400,"success":false,"msg":"username doesn't exist"}"
-// @Failure     401 {string} json "{"status":401,"success":false,"msg":"password doesn't match"}"
+// @Success     200  {string} json            "{"status":200,"success":true,"msg":"login success","token": 666}"
+// @Failure     400  {string} json            "{"status":400,"success":false,"msg":"username doesn't exist"}"
+// @Failure     401  {string} json            "{"status":401,"success":false,"msg":"password doesn't match"}"
 // @Router      /login [POST]
 func Login(c *gin.Context) {
 	var d response.LoginQ
@@ -103,7 +103,7 @@ func Login(c *gin.Context) {
 // @Summary     ccf
 // @Description 查看用户个人信息
 // @Tags        用户
-// @Param       user_id      query string true "user_id"
+// @Param       user_id      query string           true "user_id"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status":200,"msg":"get info of user","data":{object}}"
@@ -131,11 +131,11 @@ func UserInfo(c *gin.Context) {
 // @Summary     ccf
 // @Description 编辑用户信息
 // @Tags        用户
-// @Param       user_id query string true "user_id"
-// @Param       data body     response.ModifyQ true "data"
-// @Param       user_info    query string true "个性签名"
-// @Param       phone_number query string true "电话号码"
-// @Param       email        query string true "Email"
+// @Param       user_id      query    string true "user_id"
+// @Param       data         body  response.ModifyQ true "data"
+// @Param       user_info    query string           true "个性签名"
+// @Param       phone_number query string           true "电话号码"
+// @Param       email        query string           true "Email"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"

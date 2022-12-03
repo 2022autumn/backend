@@ -32,13 +32,33 @@ func GetWorkCited(w json.RawMessage) string {
 	return cited
 }
 
+func TransRefs2Cited(refs []interface{}) []map[string]string {
+	var newReferencedWorks []map[string]string
+	var ids []string
+	for _, v := range refs {
+		ids = append(ids, v.(string))
+	}
+	works, _ := service.GetObjects("works", ids)
+	for i, v := range works.Docs {
+		if v.Found == true {
+			newReferencedWorks = append(newReferencedWorks, map[string]string{
+				"id":    ids[i],
+				"cited": GetWorkCited(v.Source),
+			})
+		} else {
+			println(ids[i] + " not found")
+		}
+	}
+	return newReferencedWorks
+}
+
 // GetObject
 // @Summary     txc
 // @Description 根据id获取对象，可以是author，work，institution,venue,concept
 // @Tags        esSearch
 // @Param       id  query    string true "id"
 // @Success     200 {string} json   "{"status":200,"res":{obeject}}"
-// @Failure     201 {string} json   "{"status":201,"msg":"es get err"}"
+// @Failure     404 {string} json   "{"status":201,"msg":"es get err or not found"}"
 // @Failure     400 {string} json   "{"status":400,"msg":"id type error"}"
 // @Router      /es/get/ [GET]
 func GetObject(c *gin.Context) {
@@ -53,40 +73,19 @@ func GetObject(c *gin.Context) {
 	}
 	res, err := service.GetObject(idx, id)
 	if err != nil {
-		c.JSON(201, gin.H{
-			"msg":    "es get err",
-			"status": 201,
+		c.JSON(404, gin.H{
+			"msg":    "es get err or not found",
+			"status": 404,
 		})
 		return
 	}
-	if idx == "works" && res.Hits.TotalHits.Value == 1 {
+	if idx == "works" && res.Found == true {
 		var tmp = make(map[string]interface{})
-		by, _ := res.Hits.Hits[0].Source.MarshalJSON()
-		_ = json.Unmarshal(by, &tmp)
+		_ = json.Unmarshal(res.Source, &tmp)
 		referenced_works := tmp["referenced_works"].([]interface{})
-		var newReferencedWorks []map[string]string
-		for _, v := range referenced_works {
-			res, _ := service.GetObject("works", v.(string))
-			if res.Hits.TotalHits.Value == 1 {
-				newReferencedWorks = append(newReferencedWorks, map[string]string{
-					"id":    v.(string),
-					"cited": GetWorkCited(res.Hits.Hits[0].Source),
-				})
-			}
-		}
-		tmp["referenced_works"] = newReferencedWorks
+		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := tmp["related_works"].([]interface{})
-		var newRelatedWorks []map[string]string
-		for _, v := range related_works {
-			res, _ := service.GetObject("works", v.(string))
-			if res.Hits.TotalHits.Value == 1 {
-				newRelatedWorks = append(newRelatedWorks, map[string]string{
-					"id":    v.(string),
-					"cited": GetWorkCited(res.Hits.Hits[0].Source),
-				})
-			}
-		}
-		tmp["related_works"] = newRelatedWorks
+		tmp["related_works"] = TransRefs2Cited(related_works)
 		c.JSON(http.StatusOK, gin.H{
 			"data":   tmp,
 			"status": 200,
@@ -94,7 +93,7 @@ func GetObject(c *gin.Context) {
 		return
 	}
 	var data = response.GetObjectA{
-		RawMessage: res.Hits.Hits[0].Source,
+		RawMessage: res.Source,
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"data":   data,
