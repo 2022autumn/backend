@@ -113,12 +113,12 @@ paths:
           description: '{"status":200,"res":{obeject}}'
           schema:
             type: string
-        "201":
-          description: '{"status":201,"msg":"es get err"}'
-          schema:
-            type: string
         "400":
           description: '{"status":400,"msg":"id type error"}'
+          schema:
+            type: string
+        "404":
+          description: '{"status":201,"msg":"es get err or not found"}'
           schema:
             type: string
       summary: txc

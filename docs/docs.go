@@ -39,14 +39,14 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
-                    "201": {
-                        "description": "{\"status\":201,\"msg\":\"es get err\"}",
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"id type error\"}",
                         "schema": {
                             "type": "string"
                         }
                     },
-                    "400": {
-                        "description": "{\"status\":400,\"msg\":\"id type error\"}",
+                    "404": {
+                        "description": "{\"status\":201,\"msg\":\"es get err or not found\"}",
                         "schema": {
                             "type": "string"
                         }
