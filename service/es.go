@@ -12,6 +12,13 @@ var LIMITCOUNT = 10000000
 func GetWork(boolQuery *elastic.BoolQuery) (res *elastic.SearchResult, err error) {
 	return global.ES.Search().Index("works").Query(boolQuery).Do(context.Background())
 }
+func GetObjects(index string, ids []string) (res *elastic.MgetResponse, err error) {
+	mgetService := global.ES.MultiGet()
+	for _, id := range ids {
+		mgetService.Add(elastic.NewMultiGetItem().Index(index).Id(id))
+	}
+	return mgetService.Do(context.Background())
+}
 func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 	//termQuery := elastic.NewMatchQuery("id", id)
 	//return global.ES.Search().Index(index).Query(termQuery).Do(context.Background())
