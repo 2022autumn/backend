@@ -111,13 +111,7 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 		log.Println("GetObject err: ", err)
 		return nil, nil, err
 	}
-	// 2.1 判断author_id对应的author是否存在
-	hits, authors, _, _ := utils.NormalizationSearchResult(res)
-	if hits == 0 {
-		log.Println("falut author id mapping to nil")
-		return nil, nil, errors.New("falut author id mapping to nil")
-	}
-	author := authors[0]
+	author := res.Source
 	// 3. 反序列化author实体，获取实体中的display_name\ works_api_url
 	var author_map map[string]interface{}
 	_ = json.Unmarshal(author, &author_map)

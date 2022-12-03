@@ -44,13 +44,18 @@
         },
         "/es/getAuthorRelationNet": {
             "get": {
-                "description": "根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我\n\n目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低\n\n接口使用示例 1. author_id=A2764814280  2. author_id=A2900471938",
+                "description": "根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我\n\n目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低\n",
                 "tags": [
                     "esSearch"
                 ],
                 "summary": "hr",
                 "parameters": [
                     {
+                        "enum": [
+                            "A2764814280",
+                            "A2900471938",
+                            "A2227665069"
+                        ],
                         "type": "string",
                         "description": "author_id",
                         "name": "author_id",
@@ -60,9 +65,9 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"data\":{response.AuthorRelationNet}}",
+                        "description": "{\"data\":{ \"Vertex_set\":[], \"Edge_set\":[]}}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.AuthorRelationNet"
                         }
                     },
                     "201": {
@@ -606,6 +611,25 @@
                 },
                 "sort": {
                     "type": "integer"
+                }
+            }
+        },
+        "response.AuthorRelationNet": {
+            "type": "object",
+            "properties": {
+                "edge_set": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "vertex_set": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
                 }
             }
         },
