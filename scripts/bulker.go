@@ -37,6 +37,9 @@ func main() {
 	initialize.InitViper()
 	initialize.InitElasticSearch()
 	filter := initFilter()
+	if DEBUG {
+		return
+	}
 	data_dir_path := []string{"/data/openalex/authors/", "/data/openalex/concepts/", "/data/openalex/institutions/", "/data/openalex/works/", "/data/openalex/venues/"}
 	if DEBUG {
 		data_dir_path = []string{"/data/openalex/testdata/authors/", "/data/openalex/testdata/concepts/", "/data/openalex/testdata/institutions/", "/data/openalex/testdata/works/", "/data/openalex/testdata/venues/"}
