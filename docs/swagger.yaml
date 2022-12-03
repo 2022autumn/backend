@@ -20,6 +20,19 @@ definitions:
       sort:
         type: integer
     type: object
+  response.AuthorRelationNet:
+    properties:
+      edge_set:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+      vertex_set:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+    type: object
   response.BaseSearchQ:
     properties:
       asc:
@@ -113,23 +126,25 @@ paths:
       - esSearch
   /es/getAuthorRelationNet:
     get:
-      description: |-
+      description: |
         根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我
 
         目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低
-
-        接口使用示例 1. author_id=A2764814280  2. author_id=A2900471938
       parameters:
       - description: author_id
+        enum:
+        - A2764814280
+        - A2900471938
+        - A2227665069
         in: query
         name: author_id
         required: true
         type: string
       responses:
         "200":
-          description: '{"data":{response.AuthorRelationNet}}'
+          description: '{"data":{ "Vertex_set":[], "Edge_set":[]}}'
           schema:
-            type: string
+            $ref: '#/definitions/response.AuthorRelationNet'
         "201":
           description: '{"msg":"Get Author Relation Net Error"}'
           schema:
