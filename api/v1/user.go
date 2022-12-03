@@ -21,8 +21,8 @@ import (
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.RegisterQ true "data"
-// @Success     200  {string} json "{"status":200,"msg":"register success"}"
-// @Failure     400  {string} json "{"status":400,"msg":"username exists"}"
+// @Success     200  {string} json "{"status":200,"msg":"注册成功"}"
+// @Failure     400  {string} json "{"status":400,"msg":"用户名已存在"}"
 // @Router      /register [POST]
 func Register(c *gin.Context) {
 	// 获取请求数据
@@ -34,7 +34,7 @@ func Register(c *gin.Context) {
 	if _, notFound := service.GetUserByUsername(d.Username); !notFound {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": 400,
-			"msg":    "username exists",
+			"msg":    "用户名已存在",
 		})
 		return
 	}
@@ -54,7 +54,7 @@ func Register(c *gin.Context) {
 	// 返回响应
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "register success",
+		"msg":    "注册成功",
 	})
 }
 
@@ -65,9 +65,9 @@ func Register(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.LoginQ true "data"
-// @Success     200 {string} json "{"status":200,"success":true,"msg":"login success","token": 666}"
-// @Failure     400 {string} json "{"status":400,"success":false,"msg":"username doesn't exist"}"
-// @Failure     401 {string} json "{"status":401,"success":false,"msg":"password doesn't match"}"
+// @Success     200 {string} json "{"status":200,"msg":"登录成功","token": 666}"
+// @Failure     400 {string} json "{"status":400,"msg":"用户名不存在"}"
+// @Failure     401 {string} json "{"status":401,"msg":"密码错误"}"
 // @Router      /login [POST]
 func Login(c *gin.Context) {
 	var d response.LoginQ
@@ -79,7 +79,7 @@ func Login(c *gin.Context) {
 	if notFound {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": 400,
-			"msg":    "username doesn't exist",
+			"msg":    "用户名不存在",
 		})
 		return
 	}
@@ -87,15 +87,15 @@ func Login(c *gin.Context) {
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(d.Password)); err != nil {
 		c.JSON(401, gin.H{
 			"status": 401,
-			"msg":    "password doesn't match",
+			"msg":    "密码错误",
 		})
 		return
 	}
 	// 成功返回响应
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "login success",
-		"token":  666,
+		"msg":    "登录成功",
+		"token":  user.UserID,
 	})
 }
 
@@ -133,12 +133,9 @@ func UserInfo(c *gin.Context) {
 // @Tags        用户
 // @Param       user_id query string true "user_id"
 // @Param       data body     response.ModifyQ true "data"
-// @Param       user_info    query string true "个性签名"
-// @Param       phone_number query string true "电话号码"
-// @Param       email        query string true "Email"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"
+// @Success     200 {string} json "{"status":200,"msg":"修改个人信息成功","data":{object}}"
 // @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
 // @Failure     401 {string} json "{"status":401,"msg":err.Error()}"
 // @Router      /user/mod [POST]
@@ -196,7 +193,7 @@ func ModifyUser(c *gin.Context) {
 	//修改成功
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "修改成功",
+		"msg":    "修改个人信息成功",
 		"data":   user,
 	})
 }
@@ -210,22 +207,18 @@ func ModifyUser(c *gin.Context) {
 // @Param       Password_New formData string true "新密码"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"
+// @Success     200 {string} json "{"status":200,"msg":"修改密码成功","data":{object}}"
 // @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
 // @Failure     401 {string} json "{"status":401,"msg":"原密码输入错误"}"
 // @Failure     402 {string} json "{"status":402,"msg":err1.Error()}"
 // @Router      /user/pwd [POST]
 func ModifyPassword(c *gin.Context) {
 	userId := c.Query("user_id")
-	//userID, _ := strconv.ParseUint(c.Request.FormValue("user_id"), 0, 64)
-	//passwordOld := c.Query("password_old")
-	//passwordNew1 := c.Query("password_new")
-	//passwordNew2 := c.Query("password_new2")
 	userID, _ := strconv.ParseUint(userId, 0, 64)
 
 	passwordOld := c.Request.FormValue("Password_Old")
 	passwordNew := c.Request.FormValue("Password_New")
-
+	//用户ID不存在
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -236,9 +229,8 @@ func ModifyPassword(c *gin.Context) {
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(passwordOld)); err != nil {
 		c.JSON(401, gin.H{
-			"success": false,
-			"status":  401,
-			"msg":     "原密码输入错误",
+			"status": 401,
+			"msg":    "原密码输入错误",
 		})
 		return
 	}
@@ -260,7 +252,7 @@ func ModifyPassword(c *gin.Context) {
 	//修改成功
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "修改成功",
+		"msg":    "修改密码成功",
 		"data":   user,
 	})
 }
@@ -269,6 +261,7 @@ func ModifyPassword(c *gin.Context) {
 // @Summary     ccf
 // @Description 上传用户头像
 // @Tags        用户
+// @Param       user_id query string true "user_id"
 // @Param       Headshot formData file true "新头像"
 // @Accept      json
 // @Produce     json
@@ -338,7 +331,7 @@ func UploadHeadshot(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "头像上传成功",
+		"msg":    "修改用户头像成功",
 		"data":   user,
 	})
 	return
