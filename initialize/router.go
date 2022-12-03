@@ -46,7 +46,7 @@ func SetupRouter(r *gin.Engine) {
 	{
 		SocialRouter.POST("/comment/create", v1.CreateComment)
 		SocialRouter.POST("/comment/like", v1.LikeComment)
-		SocialRouter.POST("/comment/unlike")
+		SocialRouter.POST("/comment/unlike", v1.UnLikeComment)
 	}
 	esGroup := baseGroup.Group("/es")
 	{

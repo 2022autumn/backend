@@ -14,6 +14,7 @@ import (
 
 func InitElasticSearch() {
 	host := global.VP.GetString("es.host")
+	//fmt.Println(host)
 	eslog, err := os.OpenFile(global.VP.GetString("es.logpath"),
 		os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
