@@ -39,14 +39,16 @@ func TransRefs2Cited(refs []interface{}) []map[string]string {
 		ids = append(ids, v.(string))
 	}
 	works, _ := service.GetObjects("works", ids)
-	for i, v := range works.Docs {
-		if v.Found == true {
-			newReferencedWorks = append(newReferencedWorks, map[string]string{
-				"id":    ids[i],
-				"cited": GetWorkCited(v.Source),
-			})
-		} else {
-			println(ids[i] + " not found")
+	if works != nil {
+		for i, v := range works.Docs {
+			if v.Found == true {
+				newReferencedWorks = append(newReferencedWorks, map[string]string{
+					"id":    ids[i],
+					"cited": GetWorkCited(v.Source),
+				})
+			} else {
+				println(ids[i] + " not found")
+			}
 		}
 	}
 	return newReferencedWorks
