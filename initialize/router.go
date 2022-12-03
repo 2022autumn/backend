@@ -27,20 +27,27 @@ func SetupRouter(r *gin.Engine) {
 	baseGroup := r.Group("/api")
 	{
 		//用户模块
-		baseGroup.POST("/register", v1.Register)           //注册
-		baseGroup.POST("/login", v1.Login)                 //登录
-		baseGroup.GET("user/info", v1.UserInfo)            //个人中心
-		baseGroup.POST("user/mod", v1.ModifyUser)          //编辑个人信息
-		baseGroup.POST("user/pwd", v1.ModifyPassword)      //重置用户密码
-		baseGroup.POST("user/headshot", v1.UploadHeadshot) //上传用户头像
+		baseGroup.POST("/register", v1.Register)            //注册
+		baseGroup.POST("/login", v1.Login)                  //登录
+		baseGroup.GET("/user/info", v1.UserInfo)            //个人中心
+		baseGroup.POST("/user/mod", v1.ModifyUser)          //编辑个人信息
+		baseGroup.POST("/user/pwd", v1.ModifyPassword)      //重置用户密码
+		baseGroup.POST("/user/headshot", v1.UploadHeadshot) //上传用户头像
 	}
 	ApplicationRouter := baseGroup.Group("/application")
 	{
 		ApplicationRouter.POST("/create", v1.CreateApplication)
+		ApplicationRouter.POST("/Handle", v1.HandleApplication)
 	}
 	// {
 	// 	baseGroup.Static("/media", "./media")
 	// }
+	SocialRouter := baseGroup.Group("/social")
+	{
+		SocialRouter.POST("/comment/create", v1.CreateComment)
+		SocialRouter.POST("/comment/like", v1.LikeComment)
+		SocialRouter.POST("/comment/unlike")
+	}
 	esGroup := baseGroup.Group("/es")
 	{
 		esGroup.GET("/get/", v1.GetObject)
