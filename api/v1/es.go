@@ -65,6 +65,13 @@ func TransRefs2Cited(refs []interface{}) []map[string]string {
 // @Router      /es/get/ [GET]
 func GetObject(c *gin.Context) {
 	id := c.Query("id")
+	if id == "" {
+		c.JSON(400, gin.H{
+			"status": 400,
+			"msg":    "id type error",
+		})
+		return
+	}
 	idx, err := utils.TransObjPrefix(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
