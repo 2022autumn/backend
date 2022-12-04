@@ -16,22 +16,26 @@ manifests_path = os.path.join('.', 'manifests')
 entries = []
 urls = []
 # 将所有json文件中的entries合并到一个list中
-for directory, subdir_list, file_list in os.walk(manifests_path):
-    for file in file_list:
-        with open(os.path.join(manifests_path, file), 'r') as f:
-            data = json.load(f)
-            entries.extend(data['entries'])
+# for directory, subdir_list, file_list in os.walk(manifests_path):
+#     for file in file_list:
+with open(os.path.join(manifests_path, "com.json"), 'r') as f:
+    data = json.load(f)
+    entries.extend(data['entries'])
 # 将entries按照url中updated_date=xxxx-xx-xx后的时间进行排序
 date_pattern = r'\d{4}-\d{2}-\d{2}'
 entries.sort(key=lambda x: re.search(date_pattern, x['url']).group())
 # 计算最多能下载的文件url
 max_storage = download_size  
 current_size = 0
+cuurent_num = 0
 for entry in entries:
     current_size += entry['meta']['content_length']
+    cuurent_num += entry['meta']['record_count']
     if current_size > max_storage:
         break
     urls.append(entry['url'])
+print('totol num', cuurent_num)
+exit(0)
 # 将url分类
 works_url = []
 authors_url = []

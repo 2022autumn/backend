@@ -22,12 +22,13 @@ import (
 )
 
 var DEBUG = false
-var BULK_SIZE = 10000
-var BATCH_SIZE = 10
+
+// 一般建议是1000-5000个文档，如果你的文档很大，可以适当减少队列，大小建议是5-15MB，默认不能超过100M，
+var BULK_SIZE = 5000 // 一个文档约为1K，5000个文档约为5M
 
 const (
-	Limit  = 50 // 同时运行的goroutine上限
-	Weight = 1  // 信号量的权重
+	Limit  = 8 // 同时运行的goroutine上限
+	Weight = 1 // 信号量的权重
 )
 
 var sem = semaphore.NewWeighted(Limit)
@@ -285,6 +286,8 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 		bulkRequest = bulkRequest.Add(req)
 		// 每BULK_SIZE条数据提交一次
 		if bulkRequest.NumberOfActions() >= BULK_SIZE {
+			// 插入时，遇到相同id的数据，会更新原数据
+
 			_, err := bulkRequest.Do(context.Background())
 			if err != nil {
 				log.Println("bulk error: ", err, " error file: ", file)
