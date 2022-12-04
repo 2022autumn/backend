@@ -5,6 +5,7 @@ import (
 	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
+	"IShare/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -67,7 +68,7 @@ func Register(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.LoginQ true "data" Enums({"username":"test2","password":"test222"},{"username":"test3","password":"test333"})
-// @Success     200 {string} json "{"status":200,"msg":"登录成功","token": user.id}"
+// @Success     200 {string} json "{"status":200,"msg":"登录成功","token": token,"ID": user.UserID}"
 // @Failure     400 {string} json "{"status":400,"msg":"用户名不存在"}"
 // @Failure     401 {string} json "{"status":401,"msg":"密码错误"}"
 // @Router      /login [POST]
@@ -94,10 +95,13 @@ func Login(c *gin.Context) {
 		return
 	}
 	// 成功返回响应
+	//token := 666
+	token := utils.GenerateToken(user.UserID)
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
 		"msg":    "登录成功",
-		"token":  user.UserID,
+		"token":  token,
+		"ID":     user.UserID,
 	})
 }
 
