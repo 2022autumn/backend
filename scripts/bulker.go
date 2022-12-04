@@ -22,12 +22,13 @@ import (
 )
 
 var DEBUG = false
-var BULK_SIZE = 10000
-var BATCH_SIZE = 10
+
+// 一般建议是1000-5000个文档，如果你的文档很大，可以适当减少队列，大小建议是5-15MB，默认不能超过100M，
+var BULK_SIZE = 5000 // 一个文档约为1K，5000个文档约为5M
 
 const (
-	Limit  = 50 // 同时运行的goroutine上限
-	Weight = 1  // 信号量的权重
+	Limit  = 8 // 同时运行的goroutine上限
+	Weight = 1 // 信号量的权重
 )
 
 var sem = semaphore.NewWeighted(Limit)
@@ -37,6 +38,9 @@ func main() {
 	initialize.InitViper()
 	initialize.InitElasticSearch()
 	filter := initFilter()
+	if DEBUG {
+		return
+	}
 	data_dir_path := []string{"/data/openalex/authors/", "/data/openalex/concepts/", "/data/openalex/institutions/", "/data/openalex/works/", "/data/openalex/venues/"}
 	if DEBUG {
 		data_dir_path = []string{"/data/openalex/testdata/authors/", "/data/openalex/testdata/concepts/", "/data/openalex/testdata/institutions/", "/data/openalex/testdata/works/", "/data/openalex/testdata/venues/"}
@@ -185,7 +189,7 @@ func initWorksfilter() map[string]interface{} {
 	authorship["author"] = make(map[string]interface{})
 	authorship["author"].(map[string]interface{})["id"] = true // authorships.author.id 需要修改 "https://openalex.org/A1969205032" -> "A1969205032"
 	authorship["author"].(map[string]interface{})["orcid"] = false
-	authorship["author"].(map[string]interface{})["raw_affiliation_string"] = false
+	authorship["raw_affiliation_string"] = false
 	authorship["institutions"] = make([]map[string]interface{}, 0) // authorships.institutions 需要修改
 	// 建立authorships.institutions数组中的元素map
 	institution := make(map[string]interface{})
@@ -282,6 +286,8 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 		bulkRequest = bulkRequest.Add(req)
 		// 每BULK_SIZE条数据提交一次
 		if bulkRequest.NumberOfActions() >= BULK_SIZE {
+			// 插入时，遇到相同id的数据，会更新原数据
+
 			_, err := bulkRequest.Do(context.Background())
 			if err != nil {
 				log.Println("bulk error: ", err, " error file: ", file)
