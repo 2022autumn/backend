@@ -5,9 +5,10 @@ import (
 	"IShare/model/response"
 	"IShare/service"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateComment 创建评论
@@ -44,6 +45,7 @@ func CreateComment(c *gin.Context) {
 
 	comment := database.Comment{UserID: user.UserID, PaperID: paper_id,
 		CommentTime: time.Now(), Content: content}
+	// new a comment auto generate comment_id
 	err := service.CreateComment(&comment)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"success": false, "status": 403, "msg": "评论创建失败"})
