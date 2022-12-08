@@ -13,7 +13,7 @@ func CreateComment(comment *database.Comment) (err error) {
 	}
 	return nil
 }
-func GetCommentByID(comment_id string) (comment *database.Comment, notFound bool) {
+func GetCommentByID(comment_id uint64) (comment *database.Comment, notFound bool) {
 	err := global.DB.First(&comment, comment_id).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		return comment, true
@@ -22,7 +22,7 @@ func GetCommentByID(comment_id string) (comment *database.Comment, notFound bool
 	}
 }
 
-func GetLike_Rel(comment_id string, user_id uint64) (isLike bool) {
+func GetLike_Rel(comment_id uint64, user_id uint64) (isLike bool) {
 	like := database.Like{}
 	err := global.DB.Where("user_id = ? AND comment_id = ?", user_id, comment_id).First(&like).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {

@@ -3,7 +3,7 @@ package database
 import "time"
 
 type Comment struct {
-	CommentID   string    `gorm:"primary_key;not null;unique;type:varchar(150)" json:"comment_id"`
+	CommentID   uint64    `gorm:"primary_key;autoIncrement;default:0" json:"comment_id"`
 	Content     string    `gorm:"size:255;" json:"content"`
 	UserID      uint64    `gorm:"not null;" json:"user_id"` //评论者的用户id
 	CommentTime time.Time `gorm:"column:comment_time;type:datetime" json:"comment_time"`
@@ -13,7 +13,7 @@ type Comment struct {
 }
 
 type Like struct {
-	CommentID string `gorm:"primary_key;" json:"comment_id"`
+	CommentID uint64 `gorm:"primary_key;" json:"comment_id"`
 	UserID    uint64 `gorm:"not null;" json:"user_id"` //评论者的用户id
 }
 

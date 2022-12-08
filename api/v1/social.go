@@ -15,8 +15,6 @@ import (
 // @Summary     Vera
 // @Description 用户可以在某一篇文献的评论区中发表自己的评论
 // @Tags        社交
-// @Param       user_id query string true "user_id"
-// @Param       paper_id query string true "user_id"
 // @Param       data body     response.CommentCreation true "data"
 // @Accept      json
 // @Produce     json
@@ -25,14 +23,16 @@ import (
 // @Failure     403 {string} json "{"success":false,"status":403,"msg":"评论创建失败"}"
 // @Router      /social/comment/create [POST]
 func CreateComment(c *gin.Context) {
-	user_id := c.Query("user_id")
-	paper_id := c.Query("paper_id")
+	//user_id := c.Query("user_id")
+	//paper_id := c.Query("paper_id")
 	var d response.CommentCreation
 	if err := c.ShouldBind(&d); err != nil {
 		panic(err)
 	}
 	content := d.Content
-	userID, _ := strconv.ParseUint(user_id, 0, 64)
+	userID := d.UserID
+	paper_id := d.PaperID
+	//userID, _ := strconv.ParseUint(user_id, 0, 64)
 	//验证用户是否存在
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
@@ -73,6 +73,7 @@ func LikeComment(c *gin.Context) {
 	comment_id := c.Query("comment_id")
 
 	userID, _ := strconv.ParseUint(user_id, 0, 64)
+	commentID, _ := strconv.ParseUint(comment_id, 10, 64)
 	//验证用户是否存在
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
@@ -83,7 +84,7 @@ func LikeComment(c *gin.Context) {
 		return
 	}
 	//commentID, _ := strconv.ParseUint(comment_id, 0, 64)
-	comment, notFound := service.GetCommentByID(comment_id)
+	comment, notFound := service.GetCommentByID(commentID)
 	if notFound {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -92,7 +93,7 @@ func LikeComment(c *gin.Context) {
 		})
 		return
 	}
-	isLike := service.GetLike_Rel(comment_id, userID)
+	isLike := service.GetLike_Rel(commentID, userID)
 	if isLike {
 		c.JSON(http.StatusOK, gin.H{
 			"status": 402,
@@ -123,6 +124,7 @@ func UnLikeComment(c *gin.Context) {
 	comment_id := c.Query("comment_id")
 
 	userID, _ := strconv.ParseUint(user_id, 0, 64)
+	commentID, _ := strconv.ParseUint(comment_id, 10, 64)
 	//验证用户是否存在
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
@@ -132,7 +134,7 @@ func UnLikeComment(c *gin.Context) {
 		})
 		return
 	}
-	comment, notFound := service.GetCommentByID(comment_id)
+	comment, notFound := service.GetCommentByID(commentID)
 	if notFound {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,

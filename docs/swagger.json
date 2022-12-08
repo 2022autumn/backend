@@ -191,19 +191,19 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"msg\":\"登录成功\",\"token\": 666}",
+                        "description": "{\"status\":200,\"success\":true,\"msg\":\"login success\",\"token\": 666}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "{\"status\":400,\"msg\":\"用户名不存在\"}",
+                        "description": "{\"status\":400,\"success\":false,\"msg\":\"username doesn't exist\"}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "401": {
-                        "description": "{\"status\":401,\"msg\":\"密码错误\"}",
+                        "description": "{\"status\":401,\"success\":false,\"msg\":\"password doesn't match\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -237,13 +237,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"msg\":\"注册成功\"}",
+                        "description": "{\"status\":200,\"msg\":\"register success\"}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "{\"status\":400,\"msg\":\"用户名已存在\"}",
+                        "description": "{\"status\":400,\"msg\":\"username exists\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -265,20 +265,6 @@
                 ],
                 "summary": "Vera",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "user_id",
-                        "name": "paper_id",
-                        "in": "query",
-                        "required": true
-                    },
                     {
                         "description": "data",
                         "name": "data",
@@ -376,13 +362,6 @@
                 ],
                 "summary": "ccf",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "query",
-                        "required": true
-                    },
                     {
                         "type": "file",
                         "description": "新头像",
@@ -492,11 +471,32 @@
                         "schema": {
                             "$ref": "#/definitions/response.ModifyQ"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "个性签名",
+                        "name": "user_info",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "电话号码",
+                        "name": "phone_number",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"msg\":\"修改个人信息成功\",\"data\":{object}}",
+                        "description": "{\"status\":200,\"msg\":\"修改成功\",\"data\":{object}}",
                         "schema": {
                             "type": "string"
                         }
@@ -554,7 +554,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"msg\":\"修改密码成功\",\"data\":{object}}",
+                        "description": "{\"status\":200,\"msg\":\"修改成功\",\"data\":{object}}",
                         "schema": {
                             "type": "string"
                         }
@@ -665,11 +665,19 @@
         "response.CommentCreation": {
             "type": "object",
             "required": [
-                "content"
+                "content",
+                "paper_id",
+                "user_id"
             ],
             "properties": {
                 "content": {
                     "type": "string"
+                },
+                "paper_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },
