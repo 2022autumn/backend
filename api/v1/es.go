@@ -1,43 +1,57 @@
 package v1
 
 import (
-	"IShare/global"
 	"IShare/model/response"
 	"IShare/service"
 	"IShare/utils"
-	"context"
-	"fmt"
+	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic/v7"
 )
 
-// TestEsSearch
-// @Param  queryWord formData string true "queryWord"
-// @Router /es/test_es [POST]
-func TestEsSearch(c *gin.Context) {
-	queryWord := c.Request.FormValue("queryWord")
-	queryWord = strings.ToLower(queryWord)
-	boolQuery := elastic.NewBoolQuery()
-	// nameQuery := elastic.NewTermQuery("name", queryWord)
-	infoQuery := elastic.NewMatchPhraseQuery("authors.name", queryWord)
-	boolQuery.Should(infoQuery)
-	age_agg := elastic.NewTermsAggregation().Field("info.keyword")
-	searchRes, err := global.ES.Search().
-		Index("students").
-		Aggregation("nameless", age_agg).
-		Query(boolQuery).
-		Do(context.Background())
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"success": false, "message": "参数错误", "status": 401})
-		panic(fmt.Errorf("es search err"))
+func GetWorkCited(w json.RawMessage) string {
+	var work = make(map[string]interface{})
+	_ = json.Unmarshal(w, &work)
+	var cited string
+	for _, v := range work["authorships"].([]interface{}) {
+		authorship := v.(map[string]interface{})
+		if authorship["author_position"] == "first" {
+			author := authorship["author"].(map[string]interface{})
+			cited += author["display_name"].(string) + ", "
+		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"res":    searchRes,
-		"status": 200,
-	})
+	cited += "\"" + work["title"].(string) + "\""
+	if work["host_venue"] != nil {
+		if work["host_venue"].(map[string]interface{})["display_name"] != nil {
+			cited += "," + work["host_venue"].(map[string]interface{})["display_name"].(string)
+		}
+	}
+	cited += "."
+	return cited
+}
+
+func TransRefs2Cited(refs []interface{}) []map[string]string {
+	var newReferencedWorks []map[string]string
+	var ids []string
+	for _, v := range refs {
+		ids = append(ids, v.(string))
+	}
+	works, _ := service.GetObjects("works", ids)
+	if works != nil {
+		for i, v := range works.Docs {
+			if v.Found == true {
+				newReferencedWorks = append(newReferencedWorks, map[string]string{
+					"id":    ids[i],
+					"cited": GetWorkCited(v.Source),
+				})
+			} else {
+				println(ids[i] + " not found")
+			}
+		}
+	}
+	return newReferencedWorks
 }
 
 // GetObject
@@ -46,11 +60,18 @@ func TestEsSearch(c *gin.Context) {
 // @Tags        esSearch
 // @Param       id  query    string true "id"
 // @Success     200 {string} json   "{"status":200,"res":{obeject}}"
-// @Failure     201 {string} json   "{"status":201,"msg":"es get err"}"
+// @Failure     404 {string} json   "{"status":201,"msg":"es get err or not found"}"
 // @Failure     400 {string} json   "{"status":400,"msg":"id type error"}"
 // @Router      /es/get/ [GET]
 func GetObject(c *gin.Context) {
 	id := c.Query("id")
+	if id == "" {
+		c.JSON(400, gin.H{
+			"status": 400,
+			"msg":    "id type error",
+		})
+		return
+	}
 	idx, err := utils.TransObjPrefix(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -61,14 +82,27 @@ func GetObject(c *gin.Context) {
 	}
 	res, err := service.GetObject(idx, id)
 	if err != nil {
-		c.JSON(201, gin.H{
-			"msg":    "es get err",
-			"status": 201,
+		c.JSON(404, gin.H{
+			"msg":    "es get err or not found",
+			"status": 404,
+		})
+		return
+	}
+	if idx == "works" && res.Found == true {
+		var tmp = make(map[string]interface{})
+		_ = json.Unmarshal(res.Source, &tmp)
+		referenced_works := tmp["referenced_works"].([]interface{})
+		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
+		related_works := tmp["related_works"].([]interface{})
+		tmp["related_works"] = TransRefs2Cited(related_works)
+		c.JSON(http.StatusOK, gin.H{
+			"data":   tmp,
+			"status": 200,
 		})
 		return
 	}
 	var data = response.GetObjectA{
-		RawMessage: res.Hits.Hits[0].Source,
+		RawMessage: res.Source,
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"data":   data,
@@ -82,7 +116,7 @@ var cond2field = map[string]string{
 	"institution":      "authorships.institutions.display_name.keyword",
 	"publisher":        "host_venue.publisher.keyword",
 	"venue":            "host_venue.display_name.keyword",
-	"publication_year": "publication_years",
+	"publication_year": "publication_year",
 }
 var query2field = map[string]string{
 	"title":       "title",
@@ -229,5 +263,43 @@ func DoiSearch(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status": 200,
 		"res":    res,
+	})
+}
+
+// GetAuthorRelationNet
+// @Summary     hr
+// @Description 根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我
+// @Description
+// @Description 目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低
+// @Description
+// @Tags        esSearch
+// @Param       author_id  query    string true "author_id" Enums(A2764814280, A2900471938, A2227665069)
+// @Success     200 {object} response.AuthorRelationNet "{"data":{ "Vertex_set":[], "Edge_set":[]}}"
+// @Failure     201 {string} json   "{"msg":"Get Author Relation Net Error"}"
+// @Router      /es/getAuthorRelationNet [GET]
+func GetAuthorRelationNet(c *gin.Context) {
+	author_id := c.Query("author_id")
+	var err error
+	data := response.AuthorRelationNet{}
+	data.Vertex_set, data.Edge_set, err = service.GetAuthorRelationNet(author_id)
+	if err != nil {
+		c.JSON(201, gin.H{
+			"msg": "Get Author Relation Net Error",
+			"err": err,
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"data": data,
+	})
+}
+
+func GetWorksOfAuthorByUrl(c *gin.Context) {
+	var d response.BaseSearchQ
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	c.JSON(200, gin.H{
+		"status": 200,
 	})
 }

@@ -20,6 +20,19 @@ definitions:
       sort:
         type: integer
     type: object
+  response.AuthorRelationNet:
+    properties:
+      edge_set:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+      vertex_set:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+    type: object
   response.BaseSearchQ:
     properties:
       asc:
@@ -48,6 +61,27 @@ definitions:
     required:
     - password
     - username
+    type: object
+  response.ModifyQ:
+    properties:
+      email:
+        description: 邮箱
+        type: string
+      fields:
+        description: 研究领域
+        type: string
+      interest_tag:
+        description: 兴趣词
+        type: string
+      name:
+        description: 真实姓名
+        type: string
+      phone:
+        description: 电话号码
+        type: string
+      user_info:
+        description: 个性签名
+        type: string
     type: object
   response.RegisterQ:
     properties:
@@ -79,15 +113,43 @@ paths:
           description: '{"status":200,"res":{obeject}}'
           schema:
             type: string
-        "201":
-          description: '{"status":201,"msg":"es get err"}'
-          schema:
-            type: string
         "400":
           description: '{"status":400,"msg":"id type error"}'
           schema:
             type: string
+        "404":
+          description: '{"status":201,"msg":"es get err or not found"}'
+          schema:
+            type: string
       summary: txc
+      tags:
+      - esSearch
+  /es/getAuthorRelationNet:
+    get:
+      description: |
+        根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我
+
+        目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低
+      parameters:
+      - description: author_id
+        enum:
+        - A2764814280
+        - A2900471938
+        - A2227665069
+        in: query
+        name: author_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"data":{ "Vertex_set":[], "Edge_set":[]}}'
+          schema:
+            $ref: '#/definitions/response.AuthorRelationNet'
+        "201":
+          description: '{"msg":"Get Author Relation Net Error"}'
+          schema:
+            type: string
+      summary: hr
       tags:
       - esSearch
   /es/search/advanced:
@@ -155,15 +217,6 @@ paths:
       summary: txc
       tags:
       - esSearch
-  /es/test_es:
-    post:
-      parameters:
-      - description: queryWord
-        in: formData
-        name: queryWord
-        required: true
-        type: string
-      responses: {}
   /login:
     post:
       consumes:
@@ -226,18 +279,40 @@ paths:
       consumes:
       - application/json
       description: 上传用户头像
+      parameters:
+      - description: 新头像
+        in: formData
+        name: Headshot
+        required: true
+        type: file
       produces:
       - application/json
       responses:
         "200":
-          description: '{"status":204,"success":false,"msg":"保存文件路径到数据库中失败"}'
+          description: '{"status":200,"msg":"修改成功","data":{object}}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400,"msg":"用户ID不存在"}'
+          schema:
+            type: string
+        "401":
+          description: '{"status":401,"msg":"头像文件上传失败"}'
+          schema:
+            type: string
+        "402":
+          description: '{"status":402,"msg":"文件保存失败"}'
+          schema:
+            type: string
+        "403":
+          description: '{"status":403,"msg":"保存文件路径到数据库中失败"}'
           schema:
             type: string
       summary: ccf
       tags:
       - 用户
   /user/info:
-    post:
+    get:
       consumes:
       - application/json
       description: 查看用户个人信息
@@ -251,7 +326,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"status":201,"success":false,"msg":"userID not exist"}'
+          description: '{"status":200,"msg":"get info of user","data":{object}}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400,"msg":"userID not exist"}'
           schema:
             type: string
       summary: ccf
@@ -268,6 +347,12 @@ paths:
         name: user_id
         required: true
         type: string
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.ModifyQ'
       - description: 个性签名
         in: query
         name: user_info
@@ -287,11 +372,15 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"status":201,"success":false,"msg":"用户ID不存在"}'
+          description: '{"status":200,"msg":"修改成功","data":{object}}'
           schema:
             type: string
         "400":
-          description: '{"status":202,"success":false,"msg":err.Error()}'
+          description: '{"status":400,"msg":"用户ID不存在"}'
+          schema:
+            type: string
+        "401":
+          description: '{"status":401,"msg":err.Error()}'
           schema:
             type: string
       summary: ccf
@@ -309,29 +398,32 @@ paths:
         required: true
         type: string
       - description: 旧密码
-        in: query
-        name: password_old
+        in: formData
+        name: Password_Old
         required: true
         type: string
-      - description: 新密码1
-        in: query
-        name: password_new1
-        required: true
-        type: string
-      - description: 新密码2
-        in: query
-        name: password_new2
+      - description: 新密码
+        in: formData
+        name: Password_New
         required: true
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: '{"status":203,"success":false,"msg":"原密码输入错误"}'
+          description: '{"status":200,"msg":"修改成功","data":{object}}'
           schema:
             type: string
         "400":
-          description: '{"status":204,"success":false,"msg":err1.Error()}'
+          description: '{"status":400,"msg":"用户ID不存在"}'
+          schema:
+            type: string
+        "401":
+          description: '{"status":401,"msg":"原密码输入错误"}'
+          schema:
+            type: string
+        "402":
+          description: '{"status":402,"msg":err1.Error()}'
           schema:
             type: string
       summary: ccf
