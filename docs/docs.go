@@ -310,7 +310,7 @@ const docTemplate = `{
             }
         },
         "/social/comment/like": {
-            "get": {
+            "post": {
                 "description": "用户可以对某一评论进行点赞",
                 "tags": [
                     "社交"
@@ -318,18 +318,13 @@ const docTemplate = `{
                 "summary": "Vera",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "comment_id",
-                        "name": "comment_id",
-                        "in": "query",
-                        "required": true
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.CommentUser"
+                        }
                     }
                 ],
                 "responses": {
@@ -687,6 +682,21 @@ const docTemplate = `{
                 },
                 "paper_id": {
                     "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.CommentUser": {
+            "type": "object",
+            "required": [
+                "comment_id",
+                "user_id"
+            ],
+            "properties": {
+                "comment_id": {
+                    "type": "integer"
                 },
                 "user_id": {
                     "type": "integer"

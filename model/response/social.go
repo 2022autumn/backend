@@ -5,3 +5,11 @@ type CommentCreation struct {
 	UserID  uint64 `json:"user_id" binding:"required"`
 	PaperID string `json:"paper_id" binding:"required"`
 }
+type CommentListQuery struct {
+	UserID  uint64 `json:"user_id" binding:"required"`
+	PaperID string `json:"paper_id" binding:"required"`
+}
+type CommentUser struct {
+	CommentID uint64 `json:"comment_id" binding:"required"`
+	UserID    uint64 `json:"user_id" binding:"required"`
+}

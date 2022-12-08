@@ -64,6 +64,6 @@ func CancelLike(comment *database.Comment, user database.User) (notFound bool) {
 // 根据文献id获取文献所有评论
 func GetCommentsByPaperId(paperId string) (comments []database.Comment) {
 	comments = make([]database.Comment, 0)
-	global.DB.Where(map[string]interface{}{"paper_id": paperId, "relate_id": 0}).Order("comment_time desc").Find(&comments)
+	global.DB.Where(map[string]interface{}{"paper_id": paperId}).Order("comment_time desc").Find(&comments)
 	return comments
 }

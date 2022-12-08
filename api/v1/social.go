@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -61,19 +60,24 @@ func CreateComment(c *gin.Context) {
 // @Summary     Vera
 // @Description 用户可以对某一评论进行点赞
 // @Tags 社交
-// @Param       user_id query string true "user_id"
-// @Param       comment_id query string true "comment_id"
+// @Param       data body     response.CommentUser true "data"
 // @Success		200 {string} json "{"success": true,"status":200,"msg": "操作成功"}"
 // @Failure     400 {string} json "{"success": false,"status":400,"msg":"用户ID不存在"}"
 // @Failure 	402 {string} json "{"success": false,"status":402, "msg": "用户已赞过该评论"}"
 // @Failure 	403 {string} json "{"success": false,"status":403, "msg": "评论不存在"}"
-// @Router 		/social/comment/like [GET]
+// @Router 		/social/comment/like [POST]
 func LikeComment(c *gin.Context) {
-	user_id := c.Query("user_id")
-	comment_id := c.Query("comment_id")
-
-	userID, _ := strconv.ParseUint(user_id, 0, 64)
-	commentID, _ := strconv.ParseUint(comment_id, 10, 64)
+	//user_id := c.Query("user_id")
+	//comment_id := c.Query("comment_id")
+	//fmt.Printf("debug 0")
+	var d response.CommentUser
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	userID := d.UserID
+	commentID := d.CommentID
+	//userID, _ := strconv.ParseUint(user_id, 0, 64)
+	//commentID, _ := strconv.ParseUint(comment_id, 0, 64)
 	//验证用户是否存在
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
@@ -83,6 +87,7 @@ func LikeComment(c *gin.Context) {
 		})
 		return
 	}
+	fmt.Printf("debug 1")
 	//commentID, _ := strconv.ParseUint(comment_id, 0, 64)
 	comment, notFound := service.GetCommentByID(commentID)
 	if notFound {
@@ -93,6 +98,8 @@ func LikeComment(c *gin.Context) {
 		})
 		return
 	}
+	fmt.Printf("debug 2")
+
 	isLike := service.GetLike_Rel(commentID, userID)
 	if isLike {
 		c.JSON(http.StatusOK, gin.H{
@@ -101,6 +108,8 @@ func LikeComment(c *gin.Context) {
 		})
 		return
 	}
+	fmt.Printf("debug 3")
+
 	service.UpdateCommentLike(comment, user)
 	c.JSON(http.StatusOK, gin.H{"success": true,
 		"status": 200,
@@ -111,20 +120,25 @@ func LikeComment(c *gin.Context) {
 // @Summary     Vera
 // @Description 取消点赞
 // @Tags 社交
-// @Param       user_id query string true "user_id"
-// @Param       comment_id query string true "comment_id"
+// @Param       data body     response.CommentUser true "data"
 // @Success		200 {string} json "{"success": true,"status":200,"msg": "已取消点赞"}"
 // @Failure     400 {string} json "{"success": false,"status":400,"msg":"用户ID不存在"}"
 // @Failure 	402 {string} json "{"success": false,"status":402, "msg": "用户未点赞"}"
 // @Failure 	403 {string} json "{"success": false,"status":403, "msg": "评论不存在"}"
-// @Router 		/social/comment/unlike [GET]
+// @Router 		/social/comment/unlike [POST]
 
 func UnLikeComment(c *gin.Context) {
-	user_id := c.Query("user_id")
-	comment_id := c.Query("comment_id")
-
-	userID, _ := strconv.ParseUint(user_id, 0, 64)
-	commentID, _ := strconv.ParseUint(comment_id, 10, 64)
+	//user_id := c.Query("user_id")
+	//comment_id := c.Query("comment_id")
+	//
+	//userID, _ := strconv.ParseUint(user_id, 0, 64)
+	//commentID, _ := strconv.ParseUint(comment_id, 10, 64)
+	var d response.CommentUser
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	userID := d.UserID
+	commentID := d.CommentID
 	//验证用户是否存在
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
@@ -169,11 +183,28 @@ func UnLikeComment(c *gin.Context) {
 	}
 }
 
-func ShowPaperCommentList(c *gin.Context) {
-	user_id := c.Query("user_id")
-	paper_id := c.Query("paper_id")
+// ShowPaperCommentList doc
+// @description 显示文献评论列表，时间倒序
+// @Tags 社交
+// @Param       data body     response.CommentListQuery true "data"
+// @Accept      json
+// @Produce     json
+// @Success 200 {string} string "{"data":{"comments":[],"paper_id":"string"},"message":"查找成功","status": 200, "success": true}"
+// @Failure 403 {string} string "{"success": false, "status":  403,"message": "评论不存在"}"
+// @Failure 400 {string} string "{"status": 400, "msg": "用户ID不存在"}"
+// @Router /social/comment/list [POST]
 
-	userID, _ := strconv.ParseUint(user_id, 0, 64)
+func ShowPaperCommentList(c *gin.Context) {
+	//user_id := c.Query("user_id")
+	//paper_id := c.Query("paper_id")
+	var d response.CommentListQuery
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	userID := d.UserID
+	paper_id := d.PaperID
+
+	//userID, _ := strconv.ParseUint(user_id, 0, 64)
 	//验证用户是否存在
 	_, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
@@ -200,7 +231,7 @@ func ShowPaperCommentList(c *gin.Context) {
 		var com = make(map[string]interface{})
 		com["id"] = comment.CommentID
 		com["like"] = comment.LikeNum
-		com["is_animating"] = false
+		//com["is_animating"] = false
 		com["is_like"] = false
 		if !err && service.GetLike_Rel(comment.CommentID, userID) {
 			com["is_like"] = true

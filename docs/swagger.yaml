@@ -65,6 +65,16 @@ definitions:
     - paper_id
     - user_id
     type: object
+  response.CommentUser:
+    properties:
+      comment_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - comment_id
+    - user_id
+    type: object
   response.LoginQ:
     properties:
       password:
@@ -318,19 +328,15 @@ paths:
       tags:
       - 社交
   /social/comment/like:
-    get:
+    post:
       description: 用户可以对某一评论进行点赞
       parameters:
-      - description: user_id
-        in: query
-        name: user_id
+      - description: data
+        in: body
+        name: data
         required: true
-        type: string
-      - description: comment_id
-        in: query
-        name: comment_id
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/response.CommentUser'
       responses:
         "200":
           description: '{"success": true,"status":200,"msg": "操作成功"}'
