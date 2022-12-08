@@ -43,7 +43,8 @@ func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
 	//authorsAgg := elastic.NewTermsAggregation().Field("authorships.author.display_name.keyword").Size(30)
 	//minDateAgg, maxYearAgg := elastic.NewMinAggregation().Field("publication_year"), elastic.NewMaxAggregation().Field("publication_year")
 	//publicationYearAgg := elastic.NewTermsAggregation().Field("publication_year")
-	service := global.ES.Search().Index("works").Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout("2s")
+	timeout := global.VP.GetString("es.timeout")
+	service := global.ES.Search().Index("works").Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
 	addAggToSearch(service, aggs)
 	//Aggregation("types", typesAgg).
 	//Aggregation("institutions", institutionsAgg).

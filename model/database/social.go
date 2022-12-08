@@ -8,8 +8,8 @@ type Comment struct {
 	UserID      uint64    `gorm:"not null;" json:"user_id"` //评论者的用户id
 	CommentTime time.Time `gorm:"column:comment_time;type:datetime" json:"comment_time"`
 	PaperID     string    `gorm:"size:64;" json:"paper_id"`
-	PaperTitle  string    `gorm:"type:varchar(256);" json:"paper_title"`
-	LikeNum     uint64    `gorm:"default:0" json:"like_num"` //	点赞数量
+	//PaperTitle  string    `gorm:"type:varchar(256);" json:"paper_title"`
+	LikeNum uint64 `gorm:"default:0" json:"like_num"` //	点赞数量
 }
 
 type Like struct {

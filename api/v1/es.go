@@ -39,14 +39,16 @@ func TransRefs2Cited(refs []interface{}) []map[string]string {
 		ids = append(ids, v.(string))
 	}
 	works, _ := service.GetObjects("works", ids)
-	for i, v := range works.Docs {
-		if v.Found == true {
-			newReferencedWorks = append(newReferencedWorks, map[string]string{
-				"id":    ids[i],
-				"cited": GetWorkCited(v.Source),
-			})
-		} else {
-			println(ids[i] + " not found")
+	if works != nil {
+		for i, v := range works.Docs {
+			if v.Found == true {
+				newReferencedWorks = append(newReferencedWorks, map[string]string{
+					"id":    ids[i],
+					"cited": GetWorkCited(v.Source),
+				})
+			} else {
+				println(ids[i] + " not found")
+			}
 		}
 	}
 	return newReferencedWorks
@@ -63,6 +65,13 @@ func TransRefs2Cited(refs []interface{}) []map[string]string {
 // @Router      /es/get/ [GET]
 func GetObject(c *gin.Context) {
 	id := c.Query("id")
+	if id == "" {
+		c.JSON(400, gin.H{
+			"status": 400,
+			"msg":    "id type error",
+		})
+		return
+	}
 	idx, err := utils.TransObjPrefix(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

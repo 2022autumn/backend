@@ -1,0 +1,4 @@
+https://openalex.s3.amazonaws.com/data/venues/updated_date=2022-11-11/part_000.gz
+https://openalex.s3.amazonaws.com/data/venues/updated_date=2022-11-12/part_000.gz
+https://openalex.s3.amazonaws.com/data/venues/updated_date=2022-11-13/part_000.gz
+https://openalex.s3.amazonaws.com/data/venues/updated_date=2022-11-14/part_000.gz
