@@ -5,6 +5,7 @@ import (
 	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
+	"IShare/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -92,10 +93,12 @@ func Login(c *gin.Context) {
 		return
 	}
 	// 成功返回响应
+	token := utils.GenerateToken(user.UserID)
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
 		"msg":    "login success",
-		"token":  666,
+		"token":  token,
+		"ID":     user.UserID,
 	})
 }
 
