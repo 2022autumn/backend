@@ -4,6 +4,7 @@ import (
 	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -164,4 +165,65 @@ func UnLikeComment(c *gin.Context) {
 		})
 		return
 	}
+}
+
+func ShowPaperCommentList(c *gin.Context) {
+	user_id := c.Query("user_id")
+	paper_id := c.Query("paper_id")
+
+	userID, _ := strconv.ParseUint(user_id, 0, 64)
+	//验证用户是否存在
+	_, notFoundUserByID := service.QueryAUserByID(userID)
+	if notFoundUserByID {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": 400,
+			"msg":    "用户ID不存在",
+		})
+		return
+	}
+
+	comments := service.GetCommentsByPaperId(paper_id)
+	fmt.Println(comments)
+	if len(comments) == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"status":  403,
+			"message": "评论不存在",
+		})
+		return
+	}
+	err := false
+	var dataList []map[string]interface{}
+	for _, comment := range comments {
+		var com = make(map[string]interface{})
+		com["id"] = comment.CommentID
+		com["like"] = comment.LikeNum
+		com["is_animating"] = false
+		com["is_like"] = false
+		if !err && service.GetLike_Rel(comment.CommentID, userID) {
+			com["is_like"] = true
+		}
+		com["user_id"] = comment.UserID
+		//com["username"] = comment.Username
+		com["content"] = comment.Content
+		com["time"] = comment.CommentTime
+		//com["reply_count"] = comment.ReplyCount
+		// fmt.Println(com)
+		dataList = append(dataList, com)
+	}
+	// fmt.Println(dataList)
+
+	var data = make(map[string]interface{})
+	data["paper_id"] = paper_id
+
+	//data["paper_title"] = comments[0].PaperTitle
+
+	data["comments"] = dataList
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"status":  200,
+		"message": "查找成功",
+		"data":    data,
+	})
 }
