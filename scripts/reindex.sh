@@ -1,60 +1,17 @@
 #!/bin/bash
-
-function reIndex {
-    echo creating "$INDEX"_dummy from $INDEX
-    curl -H "Content-Type: Application/json" -XPOST $ELHOST:$ELPORT/_reindex -d '{
+# reindex操作由es服务器内部起多线程完成，效率比较高，90s可以完成2G数据的reindex.Works中450G的数据预估需要5.6个小时
+st_time=$(date +%s)
+read -p "Source Index Name: " Source
+read -p "Destination Index Name: " Destination
+echo "Reindexing $Source to $Destination"
+curl -H "Content-Type: Application/json" -XPOST localhost:9200/_reindex -uelastic -p -d '{
         "source": {
-            "index": '\"$INDEX\"'
+            "index": '\"$Source\"'
         },
         "dest": {
-            "index": '\"$INDEX'_dummy"
+            "index": '\"$Destination\"'
         }
     }'
-
-    echo
-    echo "$INDEX"_dummy create complete
-
-    echo delete $INDEX
-    curl -XDELETE $ELHOST:$ELPORT/$INDEX
-
-    echo
-    echo wait for indexing
-    sleep 3
-    echo moving back $INDEX from "$INDEX"_dummy
-    curl -H "Content-Type: Application/json" -XPOST $ELHOST:$ELPORT/_reindex -d '{
-        "source": {
-            "index": '\"$INDEX'_dummy"
-        },
-        "dest": {
-            "index": '\"$INDEX\"'
-        }
-    }'
-
-    echo
-    echo move back $INDEX complete
-
-    echo cleaning up..
-    echo removing "$INDEX"_dummy
-    curl -XDELETE "$ELHOST:$ELPORT/$INDEX"_dummy
-
-    echo
-    echo all job done!
-    curl $ELHOST:$ELPORT/_cat/indices
-}
-
-read -p "Elasticsearch IP: " ELHOST
-read -p "Elasticsearch Port: " ELPORT
-read -p "Index Name: " INDEX
-
-read -p "Continue (y/n)?" choice
-case "$choice" in
-y | Y)
-    echo "yes"
-    reIndex
-    ;;
-n | N)
-    echo "bye"
-    exit 0
-    ;;
-*) echo "invalid" ;;
-esac
+echo "Reindexing $Source to $Destination completed"
+end_time=$(date +%s)
+echo "Total time taken: $((end_time-st_time)) seconds"

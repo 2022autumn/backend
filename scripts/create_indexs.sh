@@ -1,5 +1,6 @@
 #!/bin/bash
 # create works index
+# mapping modify: copy_to: <full> and del <raw_affiliations>
 curl -XPUT localhost:9200/works_v1 -uelastic -p -H 'Content-Type: application/json' -d '{
     "settings": {
         "index": {
