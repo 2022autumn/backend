@@ -48,7 +48,7 @@ func Register(c *gin.Context) {
 		Username: d.Username,
 		Password: string(hashedPassword),
 	}
-	// 成功创建用户
+	// 成功创建用户1
 	if err := service.CreateUser(&user); err != nil {
 		panic("CreateUser: create user error")
 	}
@@ -136,9 +136,6 @@ func UserInfo(c *gin.Context) {
 // @Tags        用户
 // @Param       user_id      query    string true "user_id"
 // @Param       data         body  response.ModifyQ true "data"
-// @Param       user_info    query string           true "个性签名"
-// @Param       phone_number query string           true "电话号码"
-// @Param       email        query string           true "Email"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"
