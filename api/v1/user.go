@@ -48,7 +48,7 @@ func Register(c *gin.Context) {
 		Username: d.Username,
 		Password: string(hashedPassword),
 	}
-	// 成功创建用户
+	// 成功创建用户1
 	if err := service.CreateUser(&user); err != nil {
 		panic("CreateUser: create user error")
 	}
