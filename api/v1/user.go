@@ -116,6 +116,7 @@ func Login(c *gin.Context) {
 // @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
 // @Router      /user/info [GET]
 func UserInfo(c *gin.Context) {
+	//GET
 	userID := c.Query("user_id")
 	id, _ := strconv.ParseInt(userID, 0, 64)
 	user, notFoundUserByID := service.QueryAUserByID(uint64(id))
