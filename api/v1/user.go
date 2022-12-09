@@ -311,7 +311,7 @@ func UploadHeadshot(c *gin.Context) {
 		})
 		return
 	}
-	//2、将文件保存到本地
+	//2、将文件保存到本地文件夹
 	filePath := "./media/headshot/" + header.Filename
 	out, e := os.Create(filePath)
 	if e != nil {
