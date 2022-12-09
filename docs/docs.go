@@ -169,13 +169,6 @@ const docTemplate = `{
                         "name": "id",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "token",
-                        "name": "x-token",
-                        "in": "header",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -518,6 +511,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.CommentCreation"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "x-token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -707,6 +707,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.FollowAuthorQ"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "x-token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -747,6 +754,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.GetUserFollowsQ"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "x-token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {

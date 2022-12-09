@@ -320,11 +320,6 @@ paths:
         name: id
         required: true
         type: string
-      - description: token
-        in: header
-        name: x-token
-        required: true
-        type: string
       responses:
         "200":
           description: '{"status":200,"res":{}}'
@@ -563,6 +558,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.CommentCreation'
+      - description: token
+        in: header
+        name: x-token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -684,6 +684,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.FollowAuthorQ'
+      - description: token
+        in: header
+        name: x-token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -712,6 +717,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.GetUserFollowsQ'
+      - description: token
+        in: header
+        name: x-token
+        required: true
+        type: string
       produces:
       - application/json
       responses:

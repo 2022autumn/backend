@@ -15,7 +15,8 @@ import (
 // @Summary     Vera
 // @Description 用户可以在某一篇文献的评论区中发表自己的评论
 // @Tags        社交
-// @Param       data body response.CommentCreation true "data"
+// @Param       data    body   response.CommentCreation true "data"
+// @Param       x-token header string                   true "token"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"success":true,"status":200,"msg":"评论创建成功","comment_id":string}"
@@ -32,6 +33,10 @@ func CreateComment(c *gin.Context) {
 	content := d.Content
 	userID := d.UserID
 	paper_id := d.PaperID
+	authuser, exist := c.Get("user")
+	if exist {
+		userID = authuser.(database.User).UserID
+	}
 	//userID, _ := strconv.ParseUint(user_id, 0, 64)
 	//验证用户是否存在
 	user, notFoundUserByID := service.QueryAUserByID(userID)
@@ -268,12 +273,14 @@ func ShowPaperCommentList(c *gin.Context) {
 // @Tags        社交
 // @Accept      json
 // @Produce     json
-// @Param       data body     response.FollowAuthorQ true "data"
-// @Success     200  {string} string                 "{"msg": "取消关注成功/关注成功"}"
-// @Failure     400  {string} string                 "{"err":err,"msg": "参数错误"}"
+// @Param       data    body     response.FollowAuthorQ true "data"
+// @Param       x-token header   string                 true "token"
+// @Success     200     {string} string                 "{"msg": "取消关注成功/关注成功"}"
+// @Failure     400     {string} string                 "{"err":err,"msg": "参数错误"}"
 // @Router      /social/follow [POST]
 // @security    ApiKeyAuth
 func FollowAuthor(c *gin.Context) {
+	//authuser, _ := c.Get("user")
 	var d response.FollowAuthorQ
 	if err := c.ShouldBind(&d); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -320,10 +327,11 @@ func FollowAuthor(c *gin.Context) {
 // @Tags        社交
 // @Accept      json
 // @Produce     json
-// @Param       data body     response.GetUserFollowsQ true "data"
-// @Success     200  {string} string                   "{"msg": "查找成功","data":data,"count":count}"
-// @Failure     400  {string} string                   "{"err":err,"msg": "参数错误"}"
-// @Failure     401  {string} string                   "{"msg": "用户ID不存在"}"
+// @Param       data    body     response.GetUserFollowsQ true "data"
+// @Param       x-token header   string                   true "token"
+// @Success     200     {string} string                   "{"msg": "查找成功","data":data,"count":count}"
+// @Failure     400     {string} string                   "{"err":err,"msg": "参数错误"}"
+// @Failure     401     {string} string                   "{"msg": "用户ID不存在"}"
 // @Router      /social/follow/list [POST]
 func GetUserFollows(c *gin.Context) {
 	var d response.GetUserFollowsQ

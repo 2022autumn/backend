@@ -44,12 +44,12 @@ func SetupRouter(r *gin.Engine) {
 	}
 	SocialRouter := baseGroup.Group("/social")
 	{
-		SocialRouter.POST("/comment/create", v1.CreateComment)
+		SocialRouter.POST("/comment/create", v1.CreateComment, middleware.AuthRequired())
 		SocialRouter.POST("/comment/like", v1.LikeComment)
 		SocialRouter.POST("/comment/unlike", v1.UnLikeComment)
 		SocialRouter.POST("/comment/list", v1.ShowPaperCommentList)
-		SocialRouter.POST("/follow", v1.FollowAuthor)
-		SocialRouter.POST("/follow/list", v1.GetUserFollows)
+		SocialRouter.POST("/follow", v1.FollowAuthor, middleware.AuthRequired())
+		SocialRouter.POST("/follow/list", v1.GetUserFollows, middleware.AuthRequired())
 	}
 	esGroup := baseGroup.Group("/es")
 	{
