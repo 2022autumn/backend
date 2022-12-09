@@ -17,13 +17,14 @@ import (
 
 // Register 注册
 // @Summary     ccf
+// @Description 注册
 // @Description 填入用户名和密码注册
 // @Tags        用户
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.RegisterQ true "data"
-// @Success     200  {string} json               "{"status":200,"msg":"register success"}"
-// @Failure     400  {string} json               "{"status":400,"msg":"username exists"}"
+// @Success     200  {string} json "{"status":200,"msg":"注册成功"}"
+// @Failure     400  {string} json "{"status":400,"msg":"用户名已存在"}"
 // @Router      /register [POST]
 func Register(c *gin.Context) {
 	// 获取请求数据
@@ -35,7 +36,7 @@ func Register(c *gin.Context) {
 	if _, notFound := service.GetUserByUsername(d.Username); !notFound {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": 400,
-			"msg":    "username exists",
+			"msg":    "用户名已存在",
 		})
 		return
 	}
@@ -55,20 +56,21 @@ func Register(c *gin.Context) {
 	// 返回响应
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "register success",
+		"msg":    "注册成功",
 	})
 }
 
 // Login 登录
 // @Summary     ccf
 // @Description 登录
+// @Description 填入用户名和密码
 // @Tags        用户
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.LoginQ true "data"
-// @Success     200  {string} json            "{"status":200,"success":true,"msg":"login success","token": 666}"
-// @Failure     400  {string} json            "{"status":400,"success":false,"msg":"username doesn't exist"}"
-// @Failure     401  {string} json            "{"status":401,"success":false,"msg":"password doesn't match"}"
+// @Success     200 {string} json "{"status":200,"msg":"登录成功","token": token,"ID": user.UserID}"
+// @Failure     400 {string} json "{"status":400,"msg":"用户名不存在"}"
+// @Failure     401 {string} json "{"status":401,"msg":"密码错误"}"
 // @Router      /login [POST]
 func Login(c *gin.Context) {
 	var d response.LoginQ
@@ -80,7 +82,7 @@ func Login(c *gin.Context) {
 	if notFound {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": 400,
-			"msg":    "username doesn't exist",
+			"msg":    "用户名不存在",
 		})
 		return
 	}
@@ -88,15 +90,16 @@ func Login(c *gin.Context) {
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(d.Password)); err != nil {
 		c.JSON(401, gin.H{
 			"status": 401,
-			"msg":    "password doesn't match",
+			"msg":    "密码错误",
 		})
 		return
 	}
 	// 成功返回响应
+	//token := 666
 	token := utils.GenerateToken(user.UserID)
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "login success",
+		"msg":    "登录成功",
 		"token":  token,
 		"ID":     user.UserID,
 	})
@@ -106,26 +109,27 @@ func Login(c *gin.Context) {
 // @Summary     ccf
 // @Description 查看用户个人信息
 // @Tags        用户
-// @Param       user_id      query string           true "user_id"
+// @Param       user_id query string true "user_id"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"status":200,"msg":"get info of user","data":{object}}"
-// @Failure     400 {string} json "{"status":400,"msg":"userID not exist"}"
+// @Success     200 {string} json "{"status":200,"msg":"获取用户信息成功","data":{object}}"
+// @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
 // @Router      /user/info [GET]
 func UserInfo(c *gin.Context) {
+	//GET
 	userID := c.Query("user_id")
 	id, _ := strconv.ParseInt(userID, 0, 64)
 	user, notFoundUserByID := service.QueryAUserByID(uint64(id))
 	if notFoundUserByID {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": 400,
-			"msg":    "userID not exist",
+			"msg":    "用户ID不存在",
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "get info of user",
+		"msg":    "获取用户信息成功",
 		"data":   user,
 	})
 }
@@ -134,21 +138,21 @@ func UserInfo(c *gin.Context) {
 // @Summary     ccf
 // @Description 编辑用户信息
 // @Tags        用户
-// @Param       user_id      query    string true "user_id"
-// @Param       data         body  response.ModifyQ true "data"
+// @Param       data body	response.ModifyQ true "data"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"
+// @Success     200 {string} json "{"status":200,"msg":"修改个人信息成功","data":{object}}"
 // @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
 // @Failure     401 {string} json "{"status":401,"msg":err.Error()}"
 // @Router      /user/mod [POST]
 func ModifyUser(c *gin.Context) {
-	userId := c.Query("user_id")
+	//userId := c.Query("user_id")
 	//获取修改信息
 	var d response.ModifyQ
 	if err := c.ShouldBind(&d); err != nil {
 		panic(err)
 	}
+	userId := d.ID
 	userInfo := d.UserInfo
 	name := d.Name
 	phoneNum := d.Phone
@@ -196,7 +200,7 @@ func ModifyUser(c *gin.Context) {
 	//修改成功
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "修改成功",
+		"msg":    "修改个人信息成功",
 		"data":   user,
 	})
 }
@@ -205,27 +209,27 @@ func ModifyUser(c *gin.Context) {
 // @Summary     ccf
 // @Description 编辑用户信息
 // @Tags        用户
-// @Param       user_id query string true "user_id"
-// @Param       Password_Old formData string true "旧密码"
-// @Param       Password_New formData string true "新密码"
+// @Param       data body	response.PwdModifyQ true "data"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"
+// @Success     200 {string} json "{"status":200,"msg":"修改密码成功","data":{object}}"
 // @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
 // @Failure     401 {string} json "{"status":401,"msg":"原密码输入错误"}"
 // @Failure     402 {string} json "{"status":402,"msg":err1.Error()}"
 // @Router      /user/pwd [POST]
 func ModifyPassword(c *gin.Context) {
-	userId := c.Query("user_id")
-	//userID, _ := strconv.ParseUint(c.Request.FormValue("user_id"), 0, 64)
-	//passwordOld := c.Query("password_old")
-	//passwordNew1 := c.Query("password_new")
-	//passwordNew2 := c.Query("password_new2")
+	//userId := c.Query("user_id")
+	//userID, _ := strconv.ParseUint(userId, 0, 64)
+
+	var d response.PwdModifyQ
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	userId := d.ID
+	passwordOld := d.PasswordOld
+	passwordNew := d.PasswordNew
+	//用户ID不存在
 	userID, _ := strconv.ParseUint(userId, 0, 64)
-
-	passwordOld := c.Request.FormValue("Password_Old")
-	passwordNew := c.Request.FormValue("Password_New")
-
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -236,9 +240,8 @@ func ModifyPassword(c *gin.Context) {
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(passwordOld)); err != nil {
 		c.JSON(401, gin.H{
-			"success": false,
-			"status":  401,
-			"msg":     "原密码输入错误",
+			"status": 401,
+			"msg":    "原密码输入错误",
 		})
 		return
 	}
@@ -260,7 +263,7 @@ func ModifyPassword(c *gin.Context) {
 	//修改成功
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "修改成功",
+		"msg":    "修改密码成功",
 		"data":   user,
 	})
 }
@@ -269,6 +272,7 @@ func ModifyPassword(c *gin.Context) {
 // @Summary     ccf
 // @Description 上传用户头像
 // @Tags        用户
+// @Param       user_id formData string true "用户ID"
 // @Param       Headshot formData file true "新头像"
 // @Accept      json
 // @Produce     json
@@ -279,8 +283,17 @@ func ModifyPassword(c *gin.Context) {
 // @Failure     403 {string} json "{"status":403,"msg":"保存文件路径到数据库中失败"}"
 // @Router      /user/headshot [POST]
 func UploadHeadshot(c *gin.Context) {
-	userId := c.Query("user_id")
+	//userId := c.Query("user_id")
+	userId := c.Request.FormValue("user_id")
 	userID, _ := strconv.ParseUint(userId, 0, 64)
+	/*
+		var d response.AvatarQ
+		if err := c.ShouldBind(&d); err != nil {
+			panic(err)
+		}
+		userId := d.ID
+		userID, _ := strconv.ParseUint(userId, 0, 64)
+	*/
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -327,7 +340,7 @@ func UploadHeadshot(c *gin.Context) {
 		return
 	}
 	//3、将文件对应路径更新到数据库中
-	user.HeadShot = filePath
+	user.HeadShot = "http://116.204.107.117:8000/media/headshot/" + header.Filename
 	err = global.DB.Save(user).Error
 	if err != nil {
 		c.JSON(403, gin.H{
@@ -338,7 +351,7 @@ func UploadHeadshot(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
-		"msg":    "头像上传成功",
+		"msg":    "修改用户头像成功",
 		"data":   user,
 	})
 	return

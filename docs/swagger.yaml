@@ -112,9 +112,28 @@ definitions:
       phone:
         description: 电话号码
         type: string
+      user_id:
+        type: string
       user_info:
         description: 个性签名
         type: string
+    required:
+    - user_id
+    type: object
+  response.PwdModifyQ:
+    properties:
+      password_new:
+        minLength: 6
+        type: string
+      password_old:
+        minLength: 6
+        type: string
+      user_id:
+        type: string
+    required:
+    - password_new
+    - password_old
+    - user_id
     type: object
   response.RegisterQ:
     properties:
@@ -269,7 +288,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: 登录
+      description: |-
+        登录
+        填入用户名和密码
       parameters:
       - description: data
         in: body
@@ -281,16 +302,15 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"status":200,"success":true,"msg":"login success","token":
-            666}'
+          description: '{"status":200,"msg":"登录成功","token": token,"ID": user.UserID}'
           schema:
             type: string
         "400":
-          description: '{"status":400,"success":false,"msg":"username doesn''t exist"}'
+          description: '{"status":400,"msg":"用户名不存在"}'
           schema:
             type: string
         "401":
-          description: '{"status":401,"success":false,"msg":"password doesn''t match"}'
+          description: '{"status":401,"msg":"密码错误"}'
           schema:
             type: string
       summary: ccf
@@ -300,7 +320,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: 填入用户名和密码注册
+      description: |-
+        注册
+        填入用户名和密码注册
       parameters:
       - description: data
         in: body
@@ -312,11 +334,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"status":200,"msg":"register success"}'
+          description: '{"status":200,"msg":"注册成功"}'
           schema:
             type: string
         "400":
-          description: '{"status":400,"msg":"username exists"}'
+          description: '{"status":400,"msg":"用户名已存在"}'
           schema:
             type: string
       summary: ccf
@@ -449,6 +471,11 @@ paths:
       - application/json
       description: 上传用户头像
       parameters:
+      - description: 用户ID
+        in: formData
+        name: user_id
+        required: true
+        type: string
       - description: 新头像
         in: formData
         name: Headshot
@@ -495,11 +522,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"status":200,"msg":"get info of user","data":{object}}'
+          description: '{"status":200,"msg":"获取用户信息成功","data":{object}}'
           schema:
             type: string
         "400":
-          description: '{"status":400,"msg":"userID not exist"}'
+          description: '{"status":400,"msg":"用户ID不存在"}'
           schema:
             type: string
       summary: ccf
@@ -511,11 +538,6 @@ paths:
       - application/json
       description: 编辑用户信息
       parameters:
-      - description: user_id
-        in: query
-        name: user_id
-        required: true
-        type: string
       - description: data
         in: body
         name: data
@@ -526,7 +548,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"status":200,"msg":"修改成功","data":{object}}'
+          description: '{"status":200,"msg":"修改个人信息成功","data":{object}}'
           schema:
             type: string
         "400":
@@ -546,26 +568,17 @@ paths:
       - application/json
       description: 编辑用户信息
       parameters:
-      - description: user_id
-        in: query
-        name: user_id
+      - description: data
+        in: body
+        name: data
         required: true
-        type: string
-      - description: 旧密码
-        in: formData
-        name: Password_Old
-        required: true
-        type: string
-      - description: 新密码
-        in: formData
-        name: Password_New
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/response.PwdModifyQ'
       produces:
       - application/json
       responses:
         "200":
-          description: '{"status":200,"msg":"修改成功","data":{object}}'
+          description: '{"status":200,"msg":"修改密码成功","data":{object}}'
           schema:
             type: string
         "400":
