@@ -43,6 +43,7 @@ func SetupRouter(r *gin.Engine) {
 	// }
 	esGroup := baseGroup.Group("/es")
 	{
+		esGroup.GET("/statistic", v1.GetStatistics)
 		esGroup.GET("/get/", v1.GetObject)
 		esGroup.POST("/search/base", v1.BaseSearch)
 		esGroup.POST("/search/doi", v1.DoiSearch)

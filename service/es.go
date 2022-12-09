@@ -81,6 +81,7 @@ func addAggToSearch(service *elastic.SearchService, aggNames map[string]bool) *e
 	if aggNames["publishers"] {
 		service = service.Aggregation("publishers",
 			elastic.NewTermsAggregation().Field("host_venue.publisher.keyword"))
+
 	}
 	if aggNames["authors"] {
 		service = service.Aggregation("authors",
@@ -89,7 +90,7 @@ func addAggToSearch(service *elastic.SearchService, aggNames map[string]bool) *e
 	}
 	if aggNames["publication_years"] {
 		service = service.Aggregation("publication_years",
-			elastic.NewTermsAggregation().Field("publication_year"))
+			elastic.NewTermsAggregation().Field("publication_year").Order("_key", false))
 	}
 	return service
 }
@@ -265,4 +266,19 @@ func getAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (er
 func GetAuthorRelationNet(authorid string) (Vertex_set []map[string]interface{}, Edge_set []map[string]interface{}, err error) {
 	Vertex_set, Edge_set, err = ComputeAuthorRelationNet(authorid)
 	return Vertex_set, Edge_set, err
+}
+
+var DocDict = []string{"authors", "works", "institutions", "venues", "concepts"}
+
+func GetStatistics() (map[string]int64, error) {
+	statistics := make(map[string]int64)
+	for _, doc := range DocDict {
+		count, err := global.ES.Count(doc).Do(context.Background())
+		if err != nil {
+			log.Println("GetStatistics of "+doc+" err: ", err)
+			return nil, err
+		}
+		statistics[doc] = count
+	}
+	return statistics, nil
 }

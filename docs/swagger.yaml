@@ -217,6 +217,21 @@ paths:
       summary: txc
       tags:
       - esSearch
+  /es/statistic:
+    get:
+      description: 获取统计信息
+      responses:
+        "200":
+          description: '{"res":{}}'
+          schema:
+            type: string
+        "301":
+          description: '{"err":{}}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - esSearch
   /login:
     post:
       consumes:
