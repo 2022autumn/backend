@@ -169,11 +169,18 @@ const docTemplate = `{
                         "name": "id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "x-token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"res\":{obeject}}",
+                        "description": "{\"status\":200,\"res\":{}}",
                         "schema": {
                             "type": "string"
                         }

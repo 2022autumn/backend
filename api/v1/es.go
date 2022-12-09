@@ -58,13 +58,16 @@ func TransRefs2Cited(refs []interface{}) []map[string]string {
 // @Summary     txc
 // @Description 根据id获取对象，可以是author，work，institution,venue,concept
 // @Tags    esSearch
-// @Param       id  query    string true "id"
-// @Success     200 {string} json   "{"status":200,"res":{obeject}}"
-// @Failure     404 {string} json   "{"status":201,"msg":"es get err or not found"}"
-// @Failure     400 {string} json   "{"status":400,"msg":"id type error"}"
+// @Param       id      query    string true "id"
+// @Param       x-token header   string true "token"
+// @Success     200     {string} json   "{"status":200,"res":{}}"
+// @Failure     404     {string} json   "{"status":201,"msg":"es get err or not found"}"
+// @Failure     400     {string} json   "{"status":400,"msg":"id type error"}"
 // @Router      /es/get/ [GET]
 func GetObject(c *gin.Context) {
 	id := c.Query("id")
+	//user, _ := c.MustGet("user").(database.User)
+	//println(user.UserID)
 	if id == "" {
 		c.JSON(400, gin.H{
 			"status": 400,

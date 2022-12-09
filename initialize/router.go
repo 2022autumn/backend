@@ -63,7 +63,7 @@ func SetupRouter(r *gin.Engine) {
 	}
 	scholarGroup := baseGroup.Group("/scholar")
 	{
-		scholarGroup.POST("/concept", v1.AddUserConcept)
+		scholarGroup.POST("/concept", v1.AddUserConcept, middleware.AuthRequired())
 	}
 }
 
