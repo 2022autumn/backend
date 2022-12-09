@@ -41,9 +41,6 @@ func SetupRouter(r *gin.Engine) {
 		ApplicationRouter.POST("/create", v1.CreateApplication)
 		ApplicationRouter.POST("/Handle", v1.HandleApplication)
 	}
-	// {
-	// 	baseGroup.Static("/media", "./media")
-	// }
 	SocialRouter := baseGroup.Group("/social")
 	{
 		SocialRouter.POST("/comment/create", v1.CreateComment)
@@ -63,11 +60,10 @@ func SetupRouter(r *gin.Engine) {
 		esGroup.GET("/getAuthorRelationNet", v1.GetAuthorRelationNet)
 		esGroup.GET("/getWorksOfAuthorByUrl", v1.GetWorksOfAuthorByUrl)
 	}
-	// userGroup := baseGroup.Group("/user", middleware.AuthRequired())
-	// {
-	// 	userGroup.POST("/upload_avatar", v1.UploadAvatar)
-	// }
-
+	scholarGroup := baseGroup.Group("/scholar")
+	{
+		scholarGroup.POST("/concept", v1.AddUserConcept)
+	}
 }
 
 func testGin(c *gin.Context) {

@@ -286,6 +286,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/scholar/concept": {
+            "post": {
+                "description": "添加user的关注关键词",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.AddUserConceptQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"添加成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"用户不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"concept不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"msg\":\"添加失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "{\"msg\":\"删除失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/social/comment/create": {
             "post": {
                 "description": "用户可以在某一篇文献的评论区中发表自己的评论",
@@ -751,6 +809,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "response.AddUserConceptQ": {
+            "type": "object",
+            "required": [
+                "concept_id",
+                "user_id"
+            ],
+            "properties": {
+                "concept_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.AdvancedSearchQ": {
             "type": "object",
             "properties": {

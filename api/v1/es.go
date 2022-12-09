@@ -57,7 +57,7 @@ func TransRefs2Cited(refs []interface{}) []map[string]string {
 // GetObject
 // @Summary     txc
 // @Description 根据id获取对象，可以是author，work，institution,venue,concept
-// @Tags        esSearch
+// @Tags    esSearch
 // @Param       id  query    string true "id"
 // @Success     200 {string} json   "{"status":200,"res":{obeject}}"
 // @Failure     404 {string} json   "{"status":201,"msg":"es get err or not found"}"
@@ -273,10 +273,10 @@ func DoiSearch(c *gin.Context) {
 // @Description 目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低
 // @Description
 // @Tags        esSearch
-// @Param       author_id  query    string true "author_id" Enums(A2764814280, A2900471938, A2227665069)
-// @Success     200 {object} response.AuthorRelationNet "{"data":{ "Vertex_set":[], "Edge_set":[]}}"
-// @Failure     201 {string} json   "{"msg":"Get Author Relation Net Error"}"
-// @Router      /es/getAuthorRelationNet [GET]
+// @Param   author_id query    string                     true "author_id" Enums(A2764814280, A2900471938, A2227665069)
+// @Success 200       {object} response.AuthorRelationNet "{"data":{ "Vertex_set":[], "Edge_set":[]}}"
+// @Failure 201       {string} json                       "{"msg":"Get Author Relation Net Error"}"
+// @Router  /es/getAuthorRelationNet [GET]
 func GetAuthorRelationNet(c *gin.Context) {
 	author_id := c.Query("author_id")
 	var err error
@@ -308,8 +308,8 @@ func GetWorksOfAuthorByUrl(c *gin.Context) {
 // @Summary     txc
 // @Description 获取统计信息
 // @Tags        esSearch
-// @Success     200 {string} json   "{"res":{}}"
-// @Failure     301 {string} json   "{"err":{}}"
+// @Success     200 {string} json "{"res":{}}"
+// @Failure     301 {string} json "{"err":{}}"
 // @Router      /es/statistic [GET]
 func GetStatistics(c *gin.Context) {
 	res, err := service.GetStatistics()

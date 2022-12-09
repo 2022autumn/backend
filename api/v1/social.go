@@ -15,7 +15,7 @@ import (
 // @Summary     Vera
 // @Description 用户可以在某一篇文献的评论区中发表自己的评论
 // @Tags        社交
-// @Param       data body     response.CommentCreation true "data"
+// @Param       data body response.CommentCreation true "data"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"success":true,"status":200,"msg":"评论创建成功","comment_id":string}"
@@ -61,13 +61,13 @@ func CreateComment(c *gin.Context) {
 // LikeComment 点赞评论
 // @Summary     Vera
 // @Description 用户可以对某一评论进行点赞
-// @Tags 		社交
+// @Tags        社交
 // @Param       data body     response.CommentUser true "data"
-// @Success		200 {string} json "{"success": true,"status":200,"msg": "操作成功"}"
-// @Failure     400 {string} json "{"success": false,"status":400,"msg":"用户ID不存在"}"
-// @Failure 	402 {string} json "{"success": false,"status":402, "msg": "用户已赞过该评论"}"
-// @Failure 	403 {string} json "{"success": false,"status":403, "msg": "评论不存在"}"
-// @Router 		/social/comment/like [POST]
+// @Success     200  {string} json                 "{"success": true,"status":200,"msg": "操作成功"}"
+// @Failure     400  {string} json                 "{"success": false,"status":400,"msg":"用户ID不存在"}"
+// @Failure     402  {string} json                 "{"success": false,"status":402, "msg": "用户已赞过该评论"}"
+// @Failure     403  {string} json                 "{"success": false,"status":403, "msg": "评论不存在"}"
+// @Router      /social/comment/like [POST]
 func LikeComment(c *gin.Context) {
 	//user_id := c.Query("user_id")
 	//comment_id := c.Query("comment_id")
@@ -121,13 +121,13 @@ func LikeComment(c *gin.Context) {
 // UnLikeComment  取消点赞
 // @Summary     Vera
 // @Description 取消点赞
-// @Tags 		社交
-// @Param       data body	   response.CommentUser true "data"
-// @Success		200 {string} json "{"success": true,"status":200,"msg": "已取消点赞"}"
-// @Failure     400 {string} json "{"success": false,"status":400,"msg":"用户ID不存在"}"
-// @Failure 	402 {string} json "{"success": false,"status":402, "msg": "用户未点赞"}"
-// @Failure 	403 {string} json "{"success": false,"status":403, "msg": "评论不存在"}"
-// @Router 		/social/comment/unlike [POST]
+// @Tags        社交
+// @Param       data body     response.CommentUser true "data"
+// @Success     200  {string} json                 "{"success": true,"status":200,"msg": "已取消点赞"}"
+// @Failure     400  {string} json                 "{"success": false,"status":400,"msg":"用户ID不存在"}"
+// @Failure     402  {string} json                 "{"success": false,"status":402, "msg": "用户未点赞"}"
+// @Failure     403  {string} json                 "{"success": false,"status":403, "msg": "评论不存在"}"
+// @Router      /social/comment/unlike [POST]
 func UnLikeComment(c *gin.Context) {
 	//user_id := c.Query("user_id")
 	//comment_id := c.Query("comment_id")
@@ -187,14 +187,14 @@ func UnLikeComment(c *gin.Context) {
 // ShowPaperCommentList 取消点赞
 // @Summary     Vera
 // @Description 显示文献评论列表，时间倒序
-// @Tags 社交
-// @Param       data body     response.CommentListQuery true "data"
+// @Tags        社交
+// @Param       data body response.CommentListQuery true "data"
 // @Accept      json
 // @Produce     json
-// @Success 200 {string} string "{"data":{"comments":[],"paper_id":"string"},"message":"查找成功","status": 200, "success": true}"
-// @Failure 403 {string} string "{"success": false, "status":  403,"message": "评论不存在"}"
-// @Failure 400 {string} string "{"status": 400, "msg": "用户ID不存在"}"
-// @Router /social/comment/list [POST]
+// @Success     200 {string} string "{"data":{"comments":[],"paper_id":"string"},"message":"查找成功","status": 200, "success": true}"
+// @Failure     403 {string} string "{"success": false, "status":  403,"message": "评论不存在"}"
+// @Failure     400 {string} string "{"status": 400, "msg": "用户ID不存在"}"
+// @Router      /social/comment/list [POST]
 func ShowPaperCommentList(c *gin.Context) {
 	//user_id := c.Query("user_id")
 	//paper_id := c.Query("paper_id")
@@ -265,13 +265,13 @@ func ShowPaperCommentList(c *gin.Context) {
 // FollowAuthor 关注学者
 // @Summary     txc
 // @Description 关注学者 包括了关注和取消关注（通过重复调用来实现）
-// @Tags 社交
+// @Tags        社交
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.FollowAuthorQ true "data"
-// @Success 200 {string} string "{"msg": "取消关注成功/关注成功"}"
-// @Failure 400 {string} string "{"err":err,"msg": "参数错误"}"
-// @Router /social/follow [POST]
+// @Success     200  {string} string                 "{"msg": "取消关注成功/关注成功"}"
+// @Failure     400  {string} string                 "{"err":err,"msg": "参数错误"}"
+// @Router      /social/follow [POST]
 func FollowAuthor(c *gin.Context) {
 	var d response.FollowAuthorQ
 	if err := c.ShouldBind(&d); err != nil {
@@ -316,14 +316,14 @@ func FollowAuthor(c *gin.Context) {
 // GetUserFollows
 // @Summary     txc
 // @Description 获取用户关注的学者
-// @Tags 社交
+// @Tags        社交
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.GetUserFollowsQ true "data"
-// @Success 200 {string} string "{"msg": "查找成功","data":data,"count":count}"
-// @Failure 400 {string} string "{"err":err,"msg": "参数错误"}"
-// @Failure 401 {string} string "{"msg": "用户ID不存在"}"
-// @Router /social/follow/list [POST]
+// @Success     200  {string} string                   "{"msg": "查找成功","data":data,"count":count}"
+// @Failure     400  {string} string                   "{"err":err,"msg": "参数错误"}"
+// @Failure     401  {string} string                   "{"msg": "用户ID不存在"}"
+// @Router      /social/follow/list [POST]
 func GetUserFollows(c *gin.Context) {
 	var d response.GetUserFollowsQ
 	if err := c.ShouldBind(&d); err != nil {
