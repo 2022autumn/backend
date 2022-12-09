@@ -272,7 +272,7 @@ func ModifyPassword(c *gin.Context) {
 // @Summary     ccf
 // @Description 上传用户头像
 // @Tags        用户
-// @Param       data body	response.AvatarQ true "data"
+// @Param       user_id formData string true "用户ID"
 // @Param       Headshot formData file true "新头像"
 // @Accept      json
 // @Produce     json
@@ -284,13 +284,16 @@ func ModifyPassword(c *gin.Context) {
 // @Router      /user/headshot [POST]
 func UploadHeadshot(c *gin.Context) {
 	//userId := c.Query("user_id")
-	//userID, _ := strconv.ParseUint(userId, 0, 64)
-	var d response.AvatarQ
-	if err := c.ShouldBind(&d); err != nil {
-		panic(err)
-	}
-	userId := d.ID
+	userId := c.Request.FormValue("user_id")
 	userID, _ := strconv.ParseUint(userId, 0, 64)
+	/*
+		var d response.AvatarQ
+		if err := c.ShouldBind(&d); err != nil {
+			panic(err)
+		}
+		userId := d.ID
+		userID, _ := strconv.ParseUint(userId, 0, 64)
+	*/
 	user, notFoundUserByID := service.QueryAUserByID(userID)
 	if notFoundUserByID {
 		c.JSON(http.StatusBadRequest, gin.H{
