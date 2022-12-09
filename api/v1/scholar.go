@@ -4,6 +4,7 @@ import (
 	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
+	"IShare/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,10 +32,15 @@ func AddUserConcept(c *gin.Context) {
 		c.JSON(401, gin.H{"msg": "用户不存在"})
 		return
 	}
-	if _, err := service.GetObject("concepts", d.ConceptID); err != nil {
-		c.JSON(402, gin.H{"msg": "concept不存在"})
+	index, err := utils.TransObjPrefix(d.ConceptID)
+	if err != nil || index != "concepts" {
+		c.JSON(402, gin.H{"msg": "concept参数错误"})
 		return
 	}
+	//if _, err := service.GetObject("concepts", d.ConceptID); err != nil {
+	//	c.JSON(402, gin.H{"msg": "concept不存在"})
+	//	return
+	//}
 	userConcept, notFound := service.GetUserConcept(d.UserID, d.ConceptID)
 	if notFound {
 		userConcept = database.UserConcept{
