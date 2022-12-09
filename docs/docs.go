@@ -470,6 +470,92 @@ const docTemplate = `{
                 }
             }
         },
+        "/social/follow": {
+            "post": {
+                "description": "关注学者 包括了关注和取消关注（通过重复调用来实现）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.FollowAuthorQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\": \"取消关注成功/关注成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"err\":err,\"msg\": \"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/social/follow/list": {
+            "post": {
+                "description": "获取用户关注的学者",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.GetUserFollowsQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\": \"查找成功\",\"data\":data,\"count\":count}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"err\":err,\"msg\": \"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\": \"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/user/headshot": {
             "post": {
                 "description": "上传用户头像",
@@ -789,6 +875,32 @@ const docTemplate = `{
                 "comment_id": {
                     "type": "integer"
                 },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.FollowAuthorQ": {
+            "type": "object",
+            "required": [
+                "author_id",
+                "user_id"
+            ],
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.GetUserFollowsQ": {
+            "type": "object",
+            "required": [
+                "user_id"
+            ],
+            "properties": {
                 "user_id": {
                     "type": "integer"
                 }

@@ -37,19 +37,8 @@ func InitMySQL() {
 		&database.Comment{},
 		&database.Like{},
 		&database.TagPaper{},
-		&database.TagPaper{},
 		&database.User{},
-
-		//&response.AuthResponse{},
-		//&response.CommonA{},
-		//&response.LoginQ{},
-		//&response.RegisterQ{},
-		//&response.BaseSearchA{},
-		//&response.BaseSearchQ{},
-		//&response.AdvancedSearchQ{},
-		//&response.DoiSearchQ{},
-		//&response.GetObjectA{},
-		//&database.User{},
+		&database.UserFollow{},
 	)
 	// 检查数据库连接是否存在, 好像没啥用
 	err = global.DB.DB().Ping()

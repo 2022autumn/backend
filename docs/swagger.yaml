@@ -85,6 +85,23 @@ definitions:
     - comment_id
     - user_id
     type: object
+  response.FollowAuthorQ:
+    properties:
+      author_id:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - author_id
+    - user_id
+    type: object
+  response.GetUserFollowsQ:
+    properties:
+      user_id:
+        type: integer
+    required:
+    - user_id
+    type: object
   response.LoginQ:
     properties:
       password:
@@ -460,6 +477,62 @@ paths:
           schema:
             type: string
       summary: Vera
+      tags:
+      - 社交
+  /social/follow:
+    post:
+      consumes:
+      - application/json
+      description: 关注学者 包括了关注和取消关注（通过重复调用来实现）
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.FollowAuthorQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg": "取消关注成功/关注成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"err":err,"msg": "参数错误"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - 社交
+  /social/follow/list:
+    post:
+      consumes:
+      - application/json
+      description: 获取用户关注的学者
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.GetUserFollowsQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg": "查找成功","data":data,"count":count}'
+          schema:
+            type: string
+        "400":
+          description: '{"err":err,"msg": "参数错误"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg": "用户ID不存在"}'
+          schema:
+            type: string
+      summary: txc
       tags:
       - 社交
   /user/headshot:
