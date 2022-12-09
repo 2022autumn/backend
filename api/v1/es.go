@@ -303,3 +303,19 @@ func GetWorksOfAuthorByUrl(c *gin.Context) {
 		"status": 200,
 	})
 }
+
+// GetStatistics
+// @Summary     txc
+// @Description 获取统计信息
+// @Tags        esSearch
+// @Success     200 {string} json   "{"res":{}}"
+// @Failure     301 {string} json   "{"err":{}}"
+// @Router      /es/statistic [GET]
+func GetStatistics(c *gin.Context) {
+	res, err := service.GetStatistics()
+	if err != nil {
+		c.JSON(301, gin.H{"err": err})
+		return
+	}
+	c.JSON(200, gin.H{"res": res})
+}

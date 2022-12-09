@@ -177,6 +177,29 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/es/statistic": {
+            "get": {
+                "description": "获取统计信息",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "responses": {
+                    "200": {
+                        "description": "{\"res\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "301": {
+                        "description": "{\"err\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "登录",
