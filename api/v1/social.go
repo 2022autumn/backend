@@ -89,7 +89,7 @@ func LikeComment(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Printf("debug 1")
+	//fmt.Printf("debug 1")
 	//commentID, _ := strconv.ParseUint(comment_id, 0, 64)
 	comment, notFound := service.GetCommentByID(commentID)
 	if notFound {
@@ -100,7 +100,7 @@ func LikeComment(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Printf("debug 2")
+	//fmt.Printf("debug 2")
 
 	isLike := service.GetLike_Rel(commentID, userID)
 	if isLike {
@@ -110,7 +110,7 @@ func LikeComment(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Printf("debug 3")
+	//fmt.Printf("debug 3")
 
 	service.UpdateCommentLike(comment, user)
 	c.JSON(http.StatusOK, gin.H{"success": true,

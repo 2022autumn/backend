@@ -4,6 +4,7 @@ import (
 	"IShare/global"
 	"IShare/model/database"
 	"errors"
+	"fmt"
 	"github.com/jinzhu/gorm"
 )
 
@@ -14,6 +15,7 @@ func CreateComment(comment *database.Comment) (err error) {
 	return nil
 }
 func GetCommentByID(comment_id uint64) (comment *database.Comment, notFound bool) {
+	comment = &database.Comment{}
 	err := global.DB.First(&comment, comment_id).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		return comment, true
@@ -34,6 +36,7 @@ func GetLike_Rel(comment_id uint64, user_id uint64) (isLike bool) {
 	}
 }
 func UpdateCommentLike(comment *database.Comment, user database.User) (err error) {
+	fmt.Println(comment.LikeNum)
 	comment.LikeNum++
 	err = global.DB.Save(comment).Error
 	if err != nil {
