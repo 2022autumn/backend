@@ -355,6 +355,98 @@ const docTemplate = `{
                 }
             }
         },
+        "/social/comment/list": {
+            "post": {
+                "description": "显示文献评论列表，时间倒序",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "summary": "Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.CommentListQuery"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"data\":{\"comments\":[],\"paper_id\":\"string\"},\"message\":\"查找成功\",\"status\": 200, \"success\": true}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\": 400, \"msg\": \"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"success\": false, \"status\":  403,\"message\": \"评论不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/social/comment/unlike": {
+            "post": {
+                "description": "取消点赞",
+                "tags": [
+                    "社交"
+                ],
+                "summary": "Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.CommentUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\": true,\"status\":200,\"msg\": \"已取消点赞\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"success\": false,\"status\":400,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"success\": false,\"status\":402, \"msg\": \"用户未点赞\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"success\": false,\"status\":403, \"msg\": \"评论不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/user/headshot": {
             "post": {
                 "description": "上传用户头像",
@@ -680,6 +772,21 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
+                "paper_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.CommentListQuery": {
+            "type": "object",
+            "required": [
+                "paper_id",
+                "user_id"
+            ],
+            "properties": {
                 "paper_id": {
                     "type": "string"
                 },

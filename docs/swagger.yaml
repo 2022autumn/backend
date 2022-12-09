@@ -65,6 +65,16 @@ definitions:
     - paper_id
     - user_id
     type: object
+  response.CommentListQuery:
+    properties:
+      paper_id:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - paper_id
+    - user_id
+    type: object
   response.CommentUser:
     properties:
       comment_id:
@@ -348,6 +358,67 @@ paths:
             type: string
         "402":
           description: '{"success": false,"status":402, "msg": "用户已赞过该评论"}'
+          schema:
+            type: string
+        "403":
+          description: '{"success": false,"status":403, "msg": "评论不存在"}'
+          schema:
+            type: string
+      summary: Vera
+      tags:
+      - 社交
+  /social/comment/list:
+    post:
+      consumes:
+      - application/json
+      description: 显示文献评论列表，时间倒序
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.CommentListQuery'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"data":{"comments":[],"paper_id":"string"},"message":"查找成功","status":
+            200, "success": true}'
+          schema:
+            type: string
+        "400":
+          description: '{"status": 400, "msg": "用户ID不存在"}'
+          schema:
+            type: string
+        "403":
+          description: '{"success": false, "status":  403,"message": "评论不存在"}'
+          schema:
+            type: string
+      summary: Vera
+      tags:
+      - 社交
+  /social/comment/unlike:
+    post:
+      description: 取消点赞
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.CommentUser'
+      responses:
+        "200":
+          description: '{"success": true,"status":200,"msg": "已取消点赞"}'
+          schema:
+            type: string
+        "400":
+          description: '{"success": false,"status":400,"msg":"用户ID不存在"}'
+          schema:
+            type: string
+        "402":
+          description: '{"success": false,"status":402, "msg": "用户未点赞"}'
           schema:
             type: string
         "403":

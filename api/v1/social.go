@@ -61,7 +61,7 @@ func CreateComment(c *gin.Context) {
 // LikeComment 点赞评论
 // @Summary     Vera
 // @Description 用户可以对某一评论进行点赞
-// @Tags 社交
+// @Tags 		社交
 // @Param       data body     response.CommentUser true "data"
 // @Success		200 {string} json "{"success": true,"status":200,"msg": "操作成功"}"
 // @Failure     400 {string} json "{"success": false,"status":400,"msg":"用户ID不存在"}"
@@ -121,14 +121,13 @@ func LikeComment(c *gin.Context) {
 // UnLikeComment  取消点赞
 // @Summary     Vera
 // @Description 取消点赞
-// @Tags 社交
-// @Param       data body     response.CommentUser true "data"
+// @Tags 		社交
+// @Param       data body	   response.CommentUser true "data"
 // @Success		200 {string} json "{"success": true,"status":200,"msg": "已取消点赞"}"
 // @Failure     400 {string} json "{"success": false,"status":400,"msg":"用户ID不存在"}"
 // @Failure 	402 {string} json "{"success": false,"status":402, "msg": "用户未点赞"}"
 // @Failure 	403 {string} json "{"success": false,"status":403, "msg": "评论不存在"}"
 // @Router 		/social/comment/unlike [POST]
-
 func UnLikeComment(c *gin.Context) {
 	//user_id := c.Query("user_id")
 	//comment_id := c.Query("comment_id")
@@ -185,8 +184,9 @@ func UnLikeComment(c *gin.Context) {
 	}
 }
 
-// ShowPaperCommentList doc
-// @description 显示文献评论列表，时间倒序
+// ShowPaperCommentList 取消点赞
+// @Summary     Vera
+// @Description 显示文献评论列表，时间倒序
 // @Tags 社交
 // @Param       data body     response.CommentListQuery true "data"
 // @Accept      json
@@ -195,7 +195,6 @@ func UnLikeComment(c *gin.Context) {
 // @Failure 403 {string} string "{"success": false, "status":  403,"message": "评论不存在"}"
 // @Failure 400 {string} string "{"status": 400, "msg": "用户ID不存在"}"
 // @Router /social/comment/list [POST]
-
 func ShowPaperCommentList(c *gin.Context) {
 	//user_id := c.Query("user_id")
 	//paper_id := c.Query("paper_id")
