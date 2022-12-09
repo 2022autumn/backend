@@ -69,9 +69,9 @@ func Register(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.LoginQ true "data"
-// @Success     200  {string} json            "{"status":200,"msg":"登录成功","token": token,"ID": user.UserID}"
-// @Failure     400  {string} json            "{"status":400,"msg":"用户名不存在"}"
-// @Failure     401  {string} json            "{"status":401,"msg":"密码错误"}"
+// @Success     200 {string} json "{"status":200,"msg":"登录成功","token": token,"ID": user.UserID}"
+// @Failure     400 {string} json "{"status":400,"msg":"用户名不存在"}"
+// @Failure     401 {string} json "{"status":401,"msg":"密码错误"}"
 // @Router      /login [POST]
 func Login(c *gin.Context) {
 	var d response.LoginQ
@@ -81,7 +81,7 @@ func Login(c *gin.Context) {
 	// 用户不存在
 	user, notFound := service.GetUserByUsername(d.Username)
 	if notFound {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"status": 400,
 			"msg":    "用户名不存在",
 		})
@@ -89,7 +89,7 @@ func Login(c *gin.Context) {
 	}
 	// 密码错误的情况
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(d.Password)); err != nil {
-		c.JSON(401, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"status": 401,
 			"msg":    "密码错误",
 		})
