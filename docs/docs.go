@@ -485,13 +485,11 @@ const docTemplate = `{
                 "summary": "ccf",
                 "parameters": [
                     {
-                        "description": "data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/response.AvatarQ"
-                        }
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "user_id",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "file",
@@ -721,17 +719,6 @@ const docTemplate = `{
                         "type": "object",
                         "additionalProperties": true
                     }
-                }
-            }
-        },
-        "response.AvatarQ": {
-            "type": "object",
-            "required": [
-                "user_id"
-            ],
-            "properties": {
-                "user_id": {
-                    "type": "string"
                 }
             }
         },

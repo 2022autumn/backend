@@ -33,13 +33,6 @@ definitions:
           type: object
         type: array
     type: object
-  response.AvatarQ:
-    properties:
-      user_id:
-        type: string
-    required:
-    - user_id
-    type: object
   response.BaseSearchQ:
     properties:
       asc:
@@ -478,12 +471,11 @@ paths:
       - application/json
       description: 上传用户头像
       parameters:
-      - description: data
-        in: body
-        name: data
+      - description: 用户ID
+        in: formData
+        name: user_id
         required: true
-        schema:
-          $ref: '#/definitions/response.AvatarQ'
+        type: string
       - description: 新头像
         in: formData
         name: Headshot
