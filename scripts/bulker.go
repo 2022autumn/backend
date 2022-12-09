@@ -282,12 +282,14 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 			return
 		}
 		filterData(&data, &filter)
+		if index == "works" {
+			index = "works_v1" // 测试用
+		}
 		req := elastic.NewBulkIndexRequest().Index(index).Id(data["id"].(string)).Doc(data)
 		bulkRequest = bulkRequest.Add(req)
 		// 每BULK_SIZE条数据提交一次
 		if bulkRequest.NumberOfActions() >= BULK_SIZE {
 			// 插入时，遇到相同id的数据，会更新原数据
-
 			_, err := bulkRequest.Do(context.Background())
 			if err != nil {
 				log.Println("bulk error: ", err, " error file: ", file)
@@ -303,7 +305,7 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 			return
 		}
 	}
-	os.Remove(dir_path + fileName)
+	// os.Remove(dir_path + fileName)
 	log.Println("processFile: ", dir_path+fileName, " done, cost time: ", time.Since(startTime))
 }
 
