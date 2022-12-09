@@ -305,7 +305,7 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 			return
 		}
 	}
-	// os.Remove(dir_path + fileName)
+	os.Remove(dir_path + fileName)
 	log.Println("processFile: ", dir_path+fileName, " done, cost time: ", time.Since(startTime))
 }
 
