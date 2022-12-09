@@ -33,7 +33,9 @@ func SetupRouter(r *gin.Engine) {
 		baseGroup.POST("/user/mod", v1.ModifyUser)          //编辑个人信息
 		baseGroup.POST("/user/pwd", v1.ModifyPassword)      //重置用户密码
 		baseGroup.POST("/user/headshot", v1.UploadHeadshot) //上传用户头像
+		baseGroup.Static("/media", "./media")
 	}
+
 	ApplicationRouter := baseGroup.Group("/application")
 	{
 		ApplicationRouter.POST("/create", v1.CreateApplication)
@@ -48,10 +50,13 @@ func SetupRouter(r *gin.Engine) {
 		SocialRouter.POST("/comment/create", v1.CreateComment)
 		SocialRouter.POST("/comment/like", v1.LikeComment)
 		SocialRouter.POST("/comment/unlike", v1.UnLikeComment)
-		SocialRouter.POST("comment/list", v1.ShowPaperCommentList)
+		SocialRouter.POST("/comment/list", v1.ShowPaperCommentList)
+		SocialRouter.POST("/follow", v1.FollowAuthor)
+		SocialRouter.POST("/follow/list", v1.GetUserFollows)
 	}
 	esGroup := baseGroup.Group("/es")
 	{
+		esGroup.GET("/statistic", v1.GetStatistics)
 		esGroup.GET("/get/", v1.GetObject)
 		esGroup.POST("/search/base", v1.BaseSearch)
 		esGroup.POST("/search/doi", v1.DoiSearch)

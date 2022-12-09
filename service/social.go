@@ -70,3 +70,21 @@ func GetCommentsByPaperId(paperId string) (comments []database.Comment) {
 	global.DB.Where(map[string]interface{}{"paper_id": paperId}).Order("comment_time desc").Find(&comments)
 	return comments
 }
+
+func GetUserFollow(userID uint64, authorID string) (uf database.UserFollow, notFound bool) {
+	notFound = global.DB.Where("user_id = ? AND author_id = ?", userID, authorID).
+		First(&uf).RecordNotFound()
+	return uf, notFound
+}
+func CreateUserFollow(uf *database.UserFollow) (err error) {
+	err = global.DB.Create(uf).Error
+	return err
+}
+func DeleteUserFollow(uf *database.UserFollow) (err error) {
+	err = global.DB.Delete(uf).Error
+	return err
+}
+func GetUserFollows(userID uint64) (userFollows []database.UserFollow) {
+	global.DB.Where("user_id = ?", userID).Find(&userFollows)
+	return userFollows
+}

@@ -261,3 +261,84 @@ func ShowPaperCommentList(c *gin.Context) {
 		"data":    data,
 	})
 }
+
+// FollowAuthor 关注学者
+// @Summary     txc
+// @Description 关注学者 包括了关注和取消关注（通过重复调用来实现）
+// @Tags 社交
+// @Accept      json
+// @Produce     json
+// @Param       data body     response.FollowAuthorQ true "data"
+// @Success 200 {string} string "{"msg": "取消关注成功/关注成功"}"
+// @Failure 400 {string} string "{"err":err,"msg": "参数错误"}"
+// @Router /social/follow [POST]
+func FollowAuthor(c *gin.Context) {
+	var d response.FollowAuthorQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"err": err,
+			"msg": "参数错误",
+		})
+		return
+	}
+	_, notFound := service.QueryAUserByID(d.UserID)
+	if notFound {
+		c.JSON(401, gin.H{"msg": "用户ID不存在"})
+		return
+	}
+	_, err := service.GetObject("authors", d.AuthorID)
+	if err != nil {
+		c.JSON(402, gin.H{"msg": "学者不存在"})
+		return
+	}
+	uf, notFound := service.GetUserFollow(d.UserID, d.AuthorID)
+	if notFound {
+		uf = database.UserFollow{
+			UserID:   d.UserID,
+			AuthorID: d.AuthorID,
+		}
+		err := service.CreateUserFollow(&uf)
+		if err != nil {
+			c.JSON(403, gin.H{"msg": "关注失败"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"msg": "关注成功"})
+		return
+	}
+	err = service.DeleteUserFollow(&uf)
+	if err != nil {
+		c.JSON(404, gin.H{"msg": "取消关注失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "取消关注成功"})
+}
+
+// GetUserFollows
+// @Summary     txc
+// @Description 获取用户关注的学者
+// @Tags 社交
+// @Accept      json
+// @Produce     json
+// @Param       data body     response.GetUserFollowsQ true "data"
+// @Success 200 {string} string "{"msg": "查找成功","data":data,"count":count}"
+// @Failure 400 {string} string "{"err":err,"msg": "参数错误"}"
+// @Failure 401 {string} string "{"msg": "用户ID不存在"}"
+// @Router /social/follow/list [POST]
+func GetUserFollows(c *gin.Context) {
+	var d response.GetUserFollowsQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err, "msg": "参数错误"})
+		return
+	}
+	_, notFound := service.QueryAUserByID(d.UserID)
+	if notFound {
+		c.JSON(401, gin.H{"msg": "用户ID不存在"})
+		return
+	}
+	ufs := service.GetUserFollows(d.UserID)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "查找成功",
+		"data":    ufs,
+		"count":   len(ufs),
+	})
+}

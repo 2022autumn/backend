@@ -46,15 +46,9 @@ func GetApplicationByID(application_id uint64) (application database.Application
 func MakeUserScholar(user database.User, application database.Application) {
 	user.Email = application.Email
 	user.AuthorName = application.AuthorName
-	//user.Affiliation = application.InstitutionName
 	user.UserType = 1
 	user.Fields = application.Fields
-	//user.HomePage = submit.HomePage
-	//user.PaperCount += submit.PaperCount
 	user.AuthorID = application.AuthorID
-	//author := GetSimpleAuthors(append(make([]string, 0), submit.AuthorID))[0].(map[string]interface{})
-	//user.PaperCount = int(author["paper_count"].(float64))
-	//user.CitationCount = int(author["citation_count"].(float64))
 	err := global.DB.Save(&user).Error
 	if err != nil {
 		panic(err)

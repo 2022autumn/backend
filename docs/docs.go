@@ -316,9 +316,32 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/es/statistic": {
+            "get": {
+                "description": "获取统计信息",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "responses": {
+                    "200": {
+                        "description": "{\"res\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "301": {
+                        "description": "{\"err\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
-                "description": "登录",
+                "description": "登录\n填入用户名和密码",
                 "consumes": [
                     "application/json"
                 ],
@@ -342,19 +365,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"success\":true,\"msg\":\"login success\",\"token\": 666}",
+                        "description": "{\"status\":200,\"msg\":\"登录成功\",\"token\": token,\"ID\": user.UserID}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "{\"status\":400,\"success\":false,\"msg\":\"username doesn't exist\"}",
+                        "description": "{\"status\":400,\"msg\":\"用户名不存在\"}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "401": {
-                        "description": "{\"status\":401,\"success\":false,\"msg\":\"password doesn't match\"}",
+                        "description": "{\"status\":401,\"msg\":\"密码错误\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -364,7 +387,7 @@ const docTemplate = `{
         },
         "/register": {
             "post": {
-                "description": "填入用户名和密码注册",
+                "description": "注册\n填入用户名和密码注册",
                 "consumes": [
                     "application/json"
                 ],
@@ -388,13 +411,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"msg\":\"register success\"}",
+                        "description": "{\"status\":200,\"msg\":\"注册成功\"}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "{\"status\":400,\"msg\":\"username exists\"}",
+                        "description": "{\"status\":400,\"msg\":\"用户名已存在\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -586,9 +609,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/headshot": {
+        "/social/follow": {
             "post": {
-                "description": "上传用户头像",
+                "description": "关注学者 包括了关注和取消关注（通过重复调用来实现）",
                 "consumes": [
                     "application/json"
                 ],
@@ -596,10 +619,97 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
+                    "社交"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.FollowAuthorQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\": \"取消关注成功/关注成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"err\":err,\"msg\": \"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/social/follow/list": {
+            "post": {
+                "description": "获取用户关注的学者",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.GetUserFollowsQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\": \"查找成功\",\"data\":data,\"count\":count}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"err\":err,\"msg\": \"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\": \"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/headshot": {
+            "post": {
+                "description": "上传用户头像",
+                "tags": [
                     "用户"
                 ],
                 "summary": "ccf",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "user_id",
+                        "in": "formData",
+                        "required": true
+                    },
                     {
                         "type": "file",
                         "description": "新头像",
@@ -666,13 +776,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"msg\":\"get info of user\",\"data\":{object}}",
+                        "description": "{\"status\":200,\"msg\":\"获取用户信息成功\",\"data\":{object}}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "{\"status\":400,\"msg\":\"userID not exist\"}",
+                        "description": "{\"status\":400,\"msg\":\"用户ID不存在\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -695,13 +805,6 @@ const docTemplate = `{
                 "summary": "ccf",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "data",
                         "name": "data",
                         "in": "body",
@@ -709,32 +812,11 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.ModifyQ"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "个性签名",
-                        "name": "user_info",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "电话号码",
-                        "name": "phone_number",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Email",
-                        "name": "email",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"msg\":\"修改成功\",\"data\":{object}}",
+                        "description": "{\"status\":200,\"msg\":\"修改个人信息成功\",\"data\":{object}}",
                         "schema": {
                             "type": "string"
                         }
@@ -769,30 +851,18 @@ const docTemplate = `{
                 "summary": "ccf",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "user_id",
-                        "name": "user_id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "旧密码",
-                        "name": "Password_Old",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "新密码",
-                        "name": "Password_New",
-                        "in": "formData",
-                        "required": true
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.PwdModifyQ"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"msg\":\"修改成功\",\"data\":{object}}",
+                        "description": "{\"status\":200,\"msg\":\"修改密码成功\",\"data\":{object}}",
                         "schema": {
                             "type": "string"
                         }
@@ -980,6 +1050,32 @@ const docTemplate = `{
                 }
             }
         },
+        "response.FollowAuthorQ": {
+            "type": "object",
+            "required": [
+                "author_id",
+                "user_id"
+            ],
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.GetUserFollowsQ": {
+            "type": "object",
+            "required": [
+                "user_id"
+            ],
+            "properties": {
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.HandleApplicationQ": {
             "type": "object",
             "required": [
@@ -1022,6 +1118,9 @@ const docTemplate = `{
         },
         "response.ModifyQ": {
             "type": "object",
+            "required": [
+                "user_id"
+            ],
             "properties": {
                 "email": {
                     "description": "邮箱",
@@ -1029,10 +1128,6 @@ const docTemplate = `{
                 },
                 "fields": {
                     "description": "研究领域",
-                    "type": "string"
-                },
-                "interest_tag": {
-                    "description": "兴趣词",
                     "type": "string"
                 },
                 "name": {
@@ -1043,8 +1138,32 @@ const docTemplate = `{
                     "description": "电话号码",
                     "type": "string"
                 },
+                "user_id": {
+                    "type": "string"
+                },
                 "user_info": {
                     "description": "个性签名",
+                    "type": "string"
+                }
+            }
+        },
+        "response.PwdModifyQ": {
+            "type": "object",
+            "required": [
+                "password_new",
+                "password_old",
+                "user_id"
+            ],
+            "properties": {
+                "password_new": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "password_old": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "user_id": {
                     "type": "string"
                 }
             }
