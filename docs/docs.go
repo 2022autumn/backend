@@ -593,27 +593,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.ModifyQ"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "个性签名",
-                        "name": "user_info",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "电话号码",
-                        "name": "phone_number",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Email",
-                        "name": "email",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {

@@ -522,21 +522,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.ModifyQ'
-      - description: 个性签名
-        in: query
-        name: user_info
-        required: true
-        type: string
-      - description: 电话号码
-        in: query
-        name: phone_number
-        required: true
-        type: string
-      - description: Email
-        in: query
-        name: email
-        required: true
-        type: string
       produces:
       - application/json
       responses:
