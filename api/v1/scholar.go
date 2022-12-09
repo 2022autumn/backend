@@ -13,13 +13,14 @@ import (
 // @Tags        scholar
 // @Accept      json
 // @Produce     json
-// @Param       data body     response.AddUserConceptQ true "data"
-// @Success     200  {string} json                     "{"msg":"添加成功"}"
-// @Failure     400  {string} json                     "{"msg":"参数错误"}"
-// @Failure     401  {string} json                     "{"msg":"用户不存在"}"
-// @Failure     402  {string} json                     "{"msg":"concept不存在"}"
-// @Failure     403  {string} json                     "{"msg":"添加失败"}"
-// @Failure     404  {string} json                     "{"msg":"删除失败"}"
+// @Param       data    body     response.AddUserConceptQ true "data"
+// @Param       x-token header   string                   true "token"
+// @Success     200     {string} json                     "{"msg":"添加成功"}"
+// @Failure     400     {string} json                     "{"msg":"参数错误"}"
+// @Failure     401     {string} json                     "{"msg":"用户不存在"}"
+// @Failure     402     {string} json                     "{"msg":"concept不存在"}"
+// @Failure     403     {string} json                     "{"msg":"添加失败"}"
+// @Failure     404     {string} json                     "{"msg":"删除失败"}"
 // @Router      /scholar/concept [POST]
 func AddUserConcept(c *gin.Context) {
 	var d response.AddUserConceptQ

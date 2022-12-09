@@ -516,6 +516,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.AddUserConceptQ'
+      - description: token
+        in: header
+        name: x-token
+        required: true
+        type: string
       produces:
       - application/json
       responses:

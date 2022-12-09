@@ -447,6 +447,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.AddUserConceptQ"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "x-token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
