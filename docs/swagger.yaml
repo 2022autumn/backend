@@ -523,6 +523,10 @@ paths:
           description: '{"msg":"添加成功"}'
           schema:
             type: string
+        "400":
+          description: '{"msg":"参数错误"}'
+          schema:
+            type: string
         "401":
           description: '{"msg":"用户不存在"}'
           schema:
@@ -686,6 +690,8 @@ paths:
           description: '{"err":err,"msg": "参数错误"}'
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: txc
       tags:
       - 社交

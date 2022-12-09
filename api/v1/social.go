@@ -272,6 +272,7 @@ func ShowPaperCommentList(c *gin.Context) {
 // @Success     200  {string} string                 "{"msg": "取消关注成功/关注成功"}"
 // @Failure     400  {string} string                 "{"err":err,"msg": "参数错误"}"
 // @Router      /social/follow [POST]
+// @security    ApiKeyAuth
 func FollowAuthor(c *gin.Context) {
 	var d response.FollowAuthorQ
 	if err := c.ShouldBind(&d); err != nil {

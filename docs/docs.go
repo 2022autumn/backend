@@ -456,6 +456,12 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "401": {
                         "description": "{\"msg\":\"用户不存在\"}",
                         "schema": {
@@ -669,6 +675,11 @@ const docTemplate = `{
         },
         "/social/follow": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "关注学者 包括了关注和取消关注（通过重复调用来实现）",
                 "consumes": [
                     "application/json"
