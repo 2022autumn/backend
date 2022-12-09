@@ -473,12 +473,6 @@ const docTemplate = `{
         "/user/headshot": {
             "post": {
                 "description": "上传用户头像",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "用户"
                 ],

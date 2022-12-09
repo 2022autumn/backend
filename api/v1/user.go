@@ -9,10 +9,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"io"
 	"net/http"
-	"os"
+	"path"
 	"strconv"
+	"strings"
+	"time"
 )
 
 // Register 注册
@@ -270,8 +271,6 @@ func ModifyPassword(c *gin.Context) {
 // @Tags        用户
 // @Param       user_id formData string true "用户ID"
 // @Param       Headshot formData file true "新头像"
-// @Accept      json
-// @Produce     json
 // @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"
 // @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
 // @Failure     401 {string} json "{"status":401,"msg":"头像文件上传失败"}"
@@ -279,18 +278,8 @@ func ModifyPassword(c *gin.Context) {
 // @Failure     403 {string} json "{"status":403,"msg":"保存文件路径到数据库中失败"}"
 // @Router      /user/headshot [POST]
 func UploadHeadshot(c *gin.Context) {
-	//userId := c.Query("user_id")
-	userId := c.Request.FormValue("user_id")
-	userID, _ := strconv.ParseUint(userId, 0, 64)
-	/*
-		var d response.AvatarQ
-		if err := c.ShouldBind(&d); err != nil {
-			panic(err)
-		}
-		userId := d.ID
-		userID, _ := strconv.ParseUint(userId, 0, 64)
-	*/
-	user, notFoundUserByID := service.QueryAUserByID(userID)
+	userId, _ := strconv.ParseUint(c.Request.FormValue("user_id"), 0, 64)
+	user, notFoundUserByID := service.QueryAUserByID(userId)
 	if notFoundUserByID {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": 400,
@@ -299,56 +288,28 @@ func UploadHeadshot(c *gin.Context) {
 		return
 	}
 	//1、获取上传的文件
-	file, header, fileErr := c.Request.FormFile("Headshot")
-	if fileErr != nil {
-		c.JSON(401, gin.H{
-			"status": 401,
-			"msg":    "头像文件上传失败",
-		})
-		return
-	}
-	//2、将文件保存到本地
-	filePath := "./media/headshot/" + header.Filename
-	out, e := os.Create(filePath)
-	if e != nil {
-		fmt.Println(e)
-		_ = os.Mkdir(filePath, 777)
-		out, e = os.Create(filePath)
-		if e != nil {
-			fmt.Println(e)
-			c.JSON(402, gin.H{
-				"status": 402,
-				"msg":    "文件保存失败",
-			})
-		}
-		return
-	}
-	//defer out.Close()
-	defer func(out *os.File) {
-		err := out.Close()
-		if err != nil {
-
-		}
-	}(out)
-	_, err := io.Copy(out, file)
+	file, err := c.FormFile("Headshot")
 	if err != nil {
-		fmt.Println(err)
+		c.JSON(401, gin.H{"msg": "头像文件上传失败"})
+		return
+	}
+	raw := fmt.Sprintf("%d", userId) + time.Now().String() + file.Filename
+	md5 := utils.GetMd5(raw)
+	suffix := strings.Split(file.Filename, ".")[1]
+	saveDir := "./media/headshot/"
+	saveName := md5 + "." + suffix
+	savePath := path.Join(saveDir, saveName)
+	if err = c.SaveUploadedFile(file, savePath); err != nil {
+		c.JSON(402, gin.H{"msg": "文件保存失败"})
 		return
 	}
 	//3、将文件对应路径更新到数据库中
-	user.HeadShot = "http://116.204.107.117:8000/media/headshot/" + header.Filename
+	user.HeadShot = "http://116.204.107.117:8000/media/headshot/" + saveName
 	err = global.DB.Save(user).Error
 	if err != nil {
-		c.JSON(403, gin.H{
-			"status": 403,
-			"msg":    "保存文件路径到数据库中失败",
-		})
+		c.JSON(403, gin.H{"msg": "保存文件路径到数据库中失败"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"status": 200,
-		"msg":    "修改用户头像成功",
-		"data":   user,
-	})
+	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": user})
 	return
 }
