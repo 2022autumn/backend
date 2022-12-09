@@ -464,8 +464,6 @@ paths:
       - 社交
   /user/headshot:
     post:
-      consumes:
-      - application/json
       description: 上传用户头像
       parameters:
       - description: 用户ID
@@ -478,8 +476,6 @@ paths:
         name: Headshot
         required: true
         type: file
-      produces:
-      - application/json
       responses:
         "200":
           description: '{"status":200,"msg":"修改成功","data":{object}}'
