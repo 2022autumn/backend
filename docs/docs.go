@@ -829,10 +829,6 @@ const docTemplate = `{
                     "description": "研究领域",
                     "type": "string"
                 },
-                "interest_tag": {
-                    "description": "兴趣词",
-                    "type": "string"
-                },
                 "name": {
                     "description": "真实姓名",
                     "type": "string"

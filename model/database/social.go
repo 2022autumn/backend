@@ -36,3 +36,9 @@ type TagPaper struct {
 	PaperID    string    `json:"paper_id"`
 	CreateTime time.Time `gorm:"type:datetime" json:"create_time"`
 }
+
+type UserFollow struct {
+	UserID     uint64    `gorm:"not null"`
+	AuthorID   string    `gorm:"type:varchar(32);not null"`
+	FollowTime time.Time `gorm:"type:datetime" json:"follow_time"`
+}

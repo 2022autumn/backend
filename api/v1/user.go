@@ -158,7 +158,6 @@ func ModifyUser(c *gin.Context) {
 	phoneNum := d.Phone
 	email := d.Email
 	fields := d.Fields
-	interestTag := d.InterestTag
 	// 用户不存在
 	userID, _ := strconv.ParseUint(userId, 0, 64)
 	user, notFoundUserByID := service.QueryAUserByID(userID)
@@ -184,9 +183,6 @@ func ModifyUser(c *gin.Context) {
 	}
 	if len(fields) != 0 {
 		user.Fields = fields
-	}
-	if len(interestTag) != 0 {
-		user.InterestTag = interestTag
 	}
 	//成功修改数据库
 	err := global.DB.Save(user).Error
