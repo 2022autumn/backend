@@ -53,3 +53,7 @@ type Application struct {
 	ApplyTime       time.Time    `gorm:"type:datetime;" json:"apply_time"`
 	HandleTime      sql.NullTime `gorm:"type:datetime;" json:"handle_time"`
 }
+type UserConcept struct {
+	UserID  uint64 `gorm:"not null;" json:"user_id"`
+	Concept string `gorm:"not null;" json:"concept"`
+}

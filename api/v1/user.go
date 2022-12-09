@@ -24,8 +24,8 @@ import (
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.RegisterQ true "data"
-// @Success     200  {string} json "{"status":200,"msg":"注册成功"}"
-// @Failure     400  {string} json "{"status":400,"msg":"用户名已存在"}"
+// @Success     200  {string} json               "{"status":200,"msg":"注册成功"}"
+// @Failure     400  {string} json               "{"status":400,"msg":"用户名已存在"}"
 // @Router      /register [POST]
 func Register(c *gin.Context) {
 	// 获取请求数据
@@ -69,9 +69,9 @@ func Register(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.LoginQ true "data"
-// @Success     200 {string} json "{"status":200,"msg":"登录成功","token": token,"ID": user.UserID}"
-// @Failure     400 {string} json "{"status":400,"msg":"用户名不存在"}"
-// @Failure     401 {string} json "{"status":401,"msg":"密码错误"}"
+// @Success     200  {string} json            "{"status":200,"msg":"登录成功","token": token,"ID": user.UserID}"
+// @Failure     400  {string} json            "{"status":400,"msg":"用户名不存在"}"
+// @Failure     401  {string} json            "{"status":401,"msg":"密码错误"}"
 // @Router      /login [POST]
 func Login(c *gin.Context) {
 	var d response.LoginQ
@@ -114,7 +114,7 @@ func Login(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status":200,"msg":"获取用户信息成功","data":{object}}"
-// @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
+// @Failure     400      {string} json   "{"status":400,"msg":"用户ID不存在"}"
 // @Router      /user/info [GET]
 func UserInfo(c *gin.Context) {
 	//GET
@@ -139,7 +139,7 @@ func UserInfo(c *gin.Context) {
 // @Summary     ccf
 // @Description 编辑用户信息
 // @Tags        用户
-// @Param       data body	response.ModifyQ true "data"
+// @Param       data body response.ModifyQ true "data"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status":200,"msg":"修改个人信息成功","data":{object}}"
@@ -206,7 +206,7 @@ func ModifyUser(c *gin.Context) {
 // @Summary     ccf
 // @Description 编辑用户信息
 // @Tags        用户
-// @Param       data body	response.PwdModifyQ true "data"
+// @Param       data body response.PwdModifyQ true "data"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status":200,"msg":"修改密码成功","data":{object}}"
@@ -269,13 +269,13 @@ func ModifyPassword(c *gin.Context) {
 // @Summary     ccf
 // @Description 上传用户头像
 // @Tags        用户
-// @Param       user_id formData string true "用户ID"
-// @Param       Headshot formData file true "新头像"
-// @Success     200 {string} json "{"status":200,"msg":"修改成功","data":{object}}"
+// @Param       user_id  formData string true "用户ID"
+// @Param       Headshot formData file   true "新头像"
+// @Success     200      {string} json   "{"status":200,"msg":"修改成功","data":{object}}"
 // @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
-// @Failure     401 {string} json "{"status":401,"msg":"头像文件上传失败"}"
-// @Failure     402 {string} json "{"status":402,"msg":"文件保存失败"}"
-// @Failure     403 {string} json "{"status":403,"msg":"保存文件路径到数据库中失败"}"
+// @Failure     401      {string} json   "{"status":401,"msg":"头像文件上传失败"}"
+// @Failure     402      {string} json   "{"status":402,"msg":"文件保存失败"}"
+// @Failure     403      {string} json   "{"status":403,"msg":"保存文件路径到数据库中失败"}"
 // @Router      /user/headshot [POST]
 func UploadHeadshot(c *gin.Context) {
 	userId, _ := strconv.ParseUint(c.Request.FormValue("user_id"), 0, 64)

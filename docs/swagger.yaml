@@ -1,4 +1,14 @@
 definitions:
+  response.AddUserConceptQ:
+    properties:
+      concept_id:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - concept_id
+    - user_id
+    type: object
   response.AdvancedSearchQ:
     properties:
       asc:
@@ -358,6 +368,44 @@ paths:
       summary: ccf
       tags:
       - 用户
+  /scholar/concept:
+    post:
+      consumes:
+      - application/json
+      description: 添加user的关注关键词
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.AddUserConceptQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg":"添加成功"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg":"用户不存在"}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg":"concept不存在"}'
+          schema:
+            type: string
+        "403":
+          description: '{"msg":"添加失败"}'
+          schema:
+            type: string
+        "404":
+          description: '{"msg":"删除失败"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - scholar
   /social/comment/create:
     post:
       consumes:
