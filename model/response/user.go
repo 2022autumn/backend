@@ -11,13 +11,12 @@ type RegisterQ struct {
 }
 
 type ModifyQ struct {
-	ID          string `gorm:"size:64;" json:"user_id" binding:"required"`
-	UserInfo    string `gorm:"size:64;" json:"user_info"`     //个性签名
-	Name        string `gorm:"size:32;" json:"name"`          //真实姓名
-	Phone       string `gorm:"size:32;" json:"phone"`         //电话号码
-	Email       string `gorm:"size:32;" json:"email"`         //邮箱
-	Fields      string `gorm:"size:256;" json:"fields"`       //研究领域
-	InterestTag string `gorm:"size:256;" json:"interest_tag"` //兴趣词
+	ID       string `gorm:"size:64;" json:"user_id" binding:"required"`
+	UserInfo string `gorm:"size:64;" json:"user_info"` //个性签名
+	Name     string `gorm:"size:32;" json:"name"`      //真实姓名
+	Phone    string `gorm:"size:32;" json:"phone"`     //电话号码
+	Email    string `gorm:"size:32;" json:"email"`     //邮箱
+	Fields   string `gorm:"size:256;" json:"fields"`   //研究领域
 }
 
 type PwdModifyQ struct {
