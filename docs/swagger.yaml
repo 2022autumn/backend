@@ -1,4 +1,14 @@
 definitions:
+  response.AddUserConceptQ:
+    properties:
+      concept_id:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - concept_id
+    - user_id
+    type: object
   response.AdvancedSearchQ:
     properties:
       asc:
@@ -85,6 +95,28 @@ definitions:
     - comment_id
     - user_id
     type: object
+  response.CreateApplicationQ:
+    properties:
+      author_id:
+        type: string
+      author_name:
+        type: string
+      field:
+        type: string
+      institution_name:
+        type: string
+      user_id:
+        type: integer
+      work_email:
+        type: string
+    required:
+    - author_id
+    - author_name
+    - field
+    - institution_name
+    - user_id
+    - work_email
+    type: object
   response.FollowAuthorQ:
     properties:
       author_id:
@@ -100,6 +132,24 @@ definitions:
       user_id:
         type: integer
     required:
+    - user_id
+    type: object
+  response.HandleApplicationQ:
+    properties:
+      application_id:
+        type: integer
+      content:
+        description: 审批意见
+        type: string
+      success:
+        description: 是否通过
+        type: string
+      user_id:
+        type: integer
+    required:
+    - application_id
+    - content
+    - success
     - user_id
     type: object
   response.LoginQ:
@@ -165,6 +215,102 @@ definitions:
 info:
   contact: {}
 paths:
+  /application/create:
+    post:
+      consumes:
+      - application/json
+      description: 用户可以申请认领自己的学者门户
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.CreateApplicationQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success": true, "application_id": submit.ApplicationID,
+            "message": "申请提交成功", "status": 200}'
+          schema:
+            type: string
+        "401":
+          description: '{"success": false, "message": "申请创建失败", "status": 401}'
+          schema:
+            type: string
+        "404":
+          description: '{"success": false, "message": "没有该用户", "status": 404}'
+          schema:
+            type: string
+        "405":
+          description: '{"success": false, "message": "该作者已被认领", "status": 405, "the_authorname":
+            the_submit.AuthorName}'
+          schema:
+            type: string
+        "406":
+          description: '{"success": false, "message": "您已经是认证学者，请勿重复申请", "status":
+            406}'
+          schema:
+            type: string
+      summary: Vera
+      tags:
+      - 管理
+  /application/handle:
+    post:
+      consumes:
+      - application/json
+      description: 管理员对用户提交的申请进行审核，并给出审核意见content
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.HandleApplicationQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success": true, "message": "申请审批成功", "status": 200}'
+          schema:
+            type: string
+        "401":
+          description: '{"success": false, "message": "申请不存在", "status": 404}'
+          schema:
+            type: string
+        "403":
+          description: '{"success": false, "message": "success 不为true false", "status":
+            403}'
+          schema:
+            type: string
+        "405":
+          description: '{"success": false, "message": "没有该用户", "status": 405}'
+          schema:
+            type: string
+        "406":
+          description: '{"success": false, "message": "已审核过该申请", "status": 406}'
+          schema:
+            type: string
+      summary: Vera
+      tags:
+      - 管理
+  /application/list:
+    post:
+      consumes:
+      - application/json
+      description: 显示未审核的申请列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success": true, "message": "获取成功", "status": 200, "submits":
+            submits_arr, "submit_count": len(submits)}'
+          schema:
+            type: string
+      summary: Vera
+      tags:
+      - 管理
   /es/get/:
     get:
       description: 根据id获取对象，可以是author，work，institution,venue,concept
@@ -176,7 +322,7 @@ paths:
         type: string
       responses:
         "200":
-          description: '{"status":200,"res":{obeject}}'
+          description: '{"status":200,"res":{}}'
           schema:
             type: string
         "400":
@@ -358,6 +504,53 @@ paths:
       summary: ccf
       tags:
       - 用户
+  /scholar/concept:
+    post:
+      consumes:
+      - application/json
+      description: 添加user的关注关键词
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.AddUserConceptQ'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg":"添加成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"参数错误"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg":"用户不存在"}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg":"concept不存在"}'
+          schema:
+            type: string
+        "403":
+          description: '{"msg":"添加失败"}'
+          schema:
+            type: string
+        "404":
+          description: '{"msg":"删除失败"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - scholar
   /social/comment/create:
     post:
       consumes:
@@ -370,6 +563,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.CommentCreation'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -491,6 +689,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.FollowAuthorQ'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -502,6 +705,8 @@ paths:
           description: '{"err":err,"msg": "参数错误"}'
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: txc
       tags:
       - 社交
@@ -517,6 +722,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.GetUserFollowsQ'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
       produces:
       - application/json
       responses:

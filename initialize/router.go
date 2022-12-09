@@ -39,19 +39,17 @@ func SetupRouter(r *gin.Engine) {
 	ApplicationRouter := baseGroup.Group("/application")
 	{
 		ApplicationRouter.POST("/create", v1.CreateApplication)
-		ApplicationRouter.POST("/Handle", v1.HandleApplication)
+		ApplicationRouter.POST("/handle", v1.HandleApplication)
+		ApplicationRouter.POST("/list", v1.UncheckedApplicationList)
 	}
-	// {
-	// 	baseGroup.Static("/media", "./media")
-	// }
 	SocialRouter := baseGroup.Group("/social")
 	{
-		SocialRouter.POST("/comment/create", v1.CreateComment)
+		SocialRouter.POST("/comment/create", v1.CreateComment, middleware.AuthRequired())
 		SocialRouter.POST("/comment/like", v1.LikeComment)
 		SocialRouter.POST("/comment/unlike", v1.UnLikeComment)
 		SocialRouter.POST("/comment/list", v1.ShowPaperCommentList)
-		SocialRouter.POST("/follow", v1.FollowAuthor)
-		SocialRouter.POST("/follow/list", v1.GetUserFollows)
+		SocialRouter.POST("/follow", v1.FollowAuthor, middleware.AuthRequired())
+		SocialRouter.POST("/follow/list", v1.GetUserFollows, middleware.AuthRequired())
 	}
 	esGroup := baseGroup.Group("/es")
 	{
@@ -63,11 +61,10 @@ func SetupRouter(r *gin.Engine) {
 		esGroup.GET("/getAuthorRelationNet", v1.GetAuthorRelationNet)
 		esGroup.GET("/getWorksOfAuthorByUrl", v1.GetWorksOfAuthorByUrl)
 	}
-	// userGroup := baseGroup.Group("/user", middleware.AuthRequired())
-	// {
-	// 	userGroup.POST("/upload_avatar", v1.UploadAvatar)
-	// }
-
+	scholarGroup := baseGroup.Group("/scholar")
+	{
+		scholarGroup.POST("/concept", v1.AddUserConcept, middleware.AuthRequired())
+	}
 }
 
 func testGin(c *gin.Context) {

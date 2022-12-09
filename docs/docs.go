@@ -16,6 +16,145 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/application/create": {
+            "post": {
+                "description": "用户可以申请认领自己的学者门户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理"
+                ],
+                "summary": "Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.CreateApplicationQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\": true, \"application_id\": submit.ApplicationID, \"message\": \"申请提交成功\", \"status\": 200}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"success\": false, \"message\": \"申请创建失败\", \"status\": 401}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "{\"success\": false, \"message\": \"没有该用户\", \"status\": 404}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "405": {
+                        "description": "{\"success\": false, \"message\": \"该作者已被认领\", \"status\": 405, \"the_authorname\": the_submit.AuthorName}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "406": {
+                        "description": "{\"success\": false, \"message\": \"您已经是认证学者，请勿重复申请\", \"status\": 406}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/application/handle": {
+            "post": {
+                "description": "管理员对用户提交的申请进行审核，并给出审核意见content",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理"
+                ],
+                "summary": "Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.HandleApplicationQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\": true, \"message\": \"申请审批成功\", \"status\": 200}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"success\": false, \"message\": \"申请不存在\", \"status\": 404}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"success\": false, \"message\": \"success 不为true false\", \"status\": 403}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "405": {
+                        "description": "{\"success\": false, \"message\": \"没有该用户\", \"status\": 405}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "406": {
+                        "description": "{\"success\": false, \"message\": \"已审核过该申请\", \"status\": 406}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/application/list": {
+            "post": {
+                "description": "显示未审核的申请列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理"
+                ],
+                "summary": "Vera",
+                "responses": {
+                    "200": {
+                        "description": "{\"success\": true, \"message\": \"获取成功\", \"status\": 200, \"submits\": submits_arr, \"submit_count\": len(submits)}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/es/get/": {
             "get": {
                 "description": "根据id获取对象，可以是author，work，institution,venue,concept",
@@ -34,7 +173,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"res\":{obeject}}",
+                        "description": "{\"status\":200,\"res\":{}}",
                         "schema": {
                             "type": "string"
                         }
@@ -286,6 +425,77 @@ const docTemplate = `{
                 }
             }
         },
+        "/scholar/concept": {
+            "post": {
+                "description": "添加user的关注关键词",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.AddUserConceptQ"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"添加成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"用户不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"concept不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"msg\":\"添加失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "{\"msg\":\"删除失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/social/comment/create": {
             "post": {
                 "description": "用户可以在某一篇文献的评论区中发表自己的评论",
@@ -308,6 +518,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.CommentCreation"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -472,6 +689,11 @@ const docTemplate = `{
         },
         "/social/follow": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "关注学者 包括了关注和取消关注（通过重复调用来实现）",
                 "consumes": [
                     "application/json"
@@ -492,6 +714,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.FollowAuthorQ"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -532,6 +761,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.GetUserFollowsQ"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -751,6 +987,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "response.AddUserConceptQ": {
+            "type": "object",
+            "required": [
+                "concept_id",
+                "user_id"
+            ],
+            "properties": {
+                "concept_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.AdvancedSearchQ": {
             "type": "object",
             "properties": {
@@ -880,6 +1131,37 @@ const docTemplate = `{
                 }
             }
         },
+        "response.CreateApplicationQ": {
+            "type": "object",
+            "required": [
+                "author_id",
+                "author_name",
+                "field",
+                "institution_name",
+                "user_id",
+                "work_email"
+            ],
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "author_name": {
+                    "type": "string"
+                },
+                "field": {
+                    "type": "string"
+                },
+                "institution_name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "work_email": {
+                    "type": "string"
+                }
+            }
+        },
         "response.FollowAuthorQ": {
             "type": "object",
             "required": [
@@ -901,6 +1183,31 @@ const docTemplate = `{
                 "user_id"
             ],
             "properties": {
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.HandleApplicationQ": {
+            "type": "object",
+            "required": [
+                "application_id",
+                "content",
+                "success",
+                "user_id"
+            ],
+            "properties": {
+                "application_id": {
+                    "type": "integer"
+                },
+                "content": {
+                    "description": "审批意见",
+                    "type": "string"
+                },
+                "success": {
+                    "description": "是否通过",
+                    "type": "string"
+                },
                 "user_id": {
                     "type": "integer"
                 }
