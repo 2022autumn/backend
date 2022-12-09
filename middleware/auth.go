@@ -9,7 +9,7 @@ import (
 
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("x-token")
+		token := c.GetHeader("token")
 		//id, err := utils.ParseToken(token)
 		id, err := strconv.ParseUint(token, 0, 64)
 		if err != nil {

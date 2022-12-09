@@ -439,7 +439,7 @@
                     {
                         "type": "string",
                         "description": "token",
-                        "name": "x-token",
+                        "name": "token",
                         "in": "header",
                         "required": true
                     }
@@ -510,7 +510,7 @@
                     {
                         "type": "string",
                         "description": "token",
-                        "name": "x-token",
+                        "name": "token",
                         "in": "header",
                         "required": true
                     }
@@ -706,7 +706,7 @@
                     {
                         "type": "string",
                         "description": "token",
-                        "name": "x-token",
+                        "name": "token",
                         "in": "header",
                         "required": true
                     }
@@ -753,7 +753,7 @@
                     {
                         "type": "string",
                         "description": "token",
-                        "name": "x-token",
+                        "name": "token",
                         "in": "header",
                         "required": true
                     }

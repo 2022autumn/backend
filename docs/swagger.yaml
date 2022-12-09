@@ -518,7 +518,7 @@ paths:
           $ref: '#/definitions/response.AddUserConceptQ'
       - description: token
         in: header
-        name: x-token
+        name: token
         required: true
         type: string
       produces:
@@ -565,7 +565,7 @@ paths:
           $ref: '#/definitions/response.CommentCreation'
       - description: token
         in: header
-        name: x-token
+        name: token
         required: true
         type: string
       produces:
@@ -691,7 +691,7 @@ paths:
           $ref: '#/definitions/response.FollowAuthorQ'
       - description: token
         in: header
-        name: x-token
+        name: token
         required: true
         type: string
       produces:
@@ -724,7 +724,7 @@ paths:
           $ref: '#/definitions/response.GetUserFollowsQ'
       - description: token
         in: header
-        name: x-token
+        name: token
         required: true
         type: string
       produces:
