@@ -37,7 +37,8 @@ func SetupRouter(r *gin.Engine) {
 	ApplicationRouter := baseGroup.Group("/application")
 	{
 		ApplicationRouter.POST("/create", v1.CreateApplication)
-		ApplicationRouter.POST("/Handle", v1.HandleApplication)
+		ApplicationRouter.POST("/handle", v1.HandleApplication)
+		ApplicationRouter.POST("/list", v1.UncheckedApplicationList)
 	}
 	// {
 	// 	baseGroup.Static("/media", "./media")
