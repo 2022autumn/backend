@@ -68,6 +68,7 @@ func AddUserConcept(c *gin.Context) {
 // @Success     200 {string} json "{"msg":"获取成功","data":{}}"
 // @Router      /scholar/roll [GET]
 func RollWorks(c *gin.Context) {
+
 	c.JSON(200, gin.H{"msg": "error"})
 }
 

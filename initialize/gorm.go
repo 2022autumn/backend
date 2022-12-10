@@ -27,12 +27,10 @@ func InitMySQL() {
 	}
 	// 迁移
 	global.DB.AutoMigrate(
-		//base
-		// &database.User{},
 		&database.Author{},
-		&database.Institution{},
-		&database.Venue{},
-		&database.AuthorConnection{},
+		//&database.Institution{},
+		//&database.Venue{},
+		//&database.AuthorConnection{},
 		&database.Application{},
 		&database.Comment{},
 		&database.Like{},
