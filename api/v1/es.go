@@ -17,11 +17,13 @@ func GetWorkCited(w json.RawMessage) string {
 	var work = make(map[string]interface{})
 	_ = json.Unmarshal(w, &work)
 	var cited string
-	for _, v := range work["authorships"].([]interface{}) {
+	for i, v := range work["authorships"].([]interface{}) {
 		authorship := v.(map[string]interface{})
-		if authorship["author_position"] == "first" {
+		if i <= 2 {
 			author := authorship["author"].(map[string]interface{})
 			cited += author["display_name"].(string) + ", "
+		} else {
+			break
 		}
 	}
 	cited += "\"" + work["title"].(string) + "\""
@@ -30,7 +32,7 @@ func GetWorkCited(w json.RawMessage) string {
 			cited += "," + work["host_venue"].(map[string]interface{})["display_name"].(string)
 		}
 	}
-	cited += "."
+	cited += strconv.Itoa(work["publication_year"].(int)) + "."
 	return cited
 }
 
