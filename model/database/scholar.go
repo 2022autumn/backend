@@ -51,8 +51,9 @@ type Application struct {
 	HandleContent string    `gorm:"type:text;" json:"handle_content"`
 }
 type UserConcept struct {
-	UserID    uint64 `gorm:"not null;" json:"user_id"`
-	ConceptID string `gorm:"not null;" json:"concept_id"`
+	UserID      uint64 `gorm:"not null;" json:"user_id"`
+	ConceptID   string `gorm:"not null;" json:"concept_id"`
+	ConceptName string `gorm:"not null;" json:"concept_name"`
 }
 type WorkView struct {
 	WorkID    string `gorm:"primary_key;not null;" json:"work_id"`

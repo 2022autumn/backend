@@ -659,6 +659,11 @@ paths:
   /scholar/roll:
     get:
       description: 获取用户推荐的文章 请勿使用
+      parameters:
+      - description: userid
+        in: query
+        name: userid
+        type: string
       responses:
         "200":
           description: '{"msg":"获取成功","data":{}}'

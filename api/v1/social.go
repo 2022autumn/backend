@@ -4,6 +4,7 @@ import (
 	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -295,16 +296,19 @@ func FollowAuthor(c *gin.Context) {
 		c.JSON(401, gin.H{"msg": "用户ID不存在"})
 		return
 	}
-	_, err := service.GetObject("authors", d.AuthorID)
+	author, err := service.GetObject("authors", d.AuthorID)
 	if err != nil {
 		c.JSON(402, gin.H{"msg": "学者不存在"})
 		return
 	}
 	uf, notFound := service.GetUserFollow(d.UserID, d.AuthorID)
 	if notFound {
+		var tmp map[string]interface{}
+		_ = json.Unmarshal(author.Source, &tmp)
 		uf = database.UserFollow{
-			UserID:   d.UserID,
-			AuthorID: d.AuthorID,
+			UserID:     d.UserID,
+			AuthorID:   d.AuthorID,
+			AuthorName: tmp["display_name"].(string),
 		}
 		err := service.CreateUserFollow(&uf)
 		if err != nil {
@@ -345,7 +349,7 @@ func GetUserFollows(c *gin.Context) {
 		c.JSON(401, gin.H{"msg": "用户ID不存在"})
 		return
 	}
-	ufs := service.GetUserFollows(d.UserID)
+	ufs, _ := service.GetUserFollows(d.UserID)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "查找成功",
 		"data":    ufs,

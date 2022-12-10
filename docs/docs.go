@@ -603,6 +603,14 @@ const docTemplate = `{
                     "scholar"
                 ],
                 "summary": "txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "userid",
+                        "name": "userid",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "{\"msg\":\"获取成功\",\"data\":{}}",
