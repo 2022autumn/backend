@@ -285,23 +285,23 @@ func GetStatistics() (map[string]int64, error) {
 	return statistics, nil
 }
 
-// elasticsearch前缀查询,给出前缀prefix，从works的title字段查询具有前缀的前topN个结果
-func PrefixSearch(prefix string, topN int) (suggestions []string, err error) {
-	query := elastic.NewPrefixQuery("title", prefix) // title字段前缀查询
-	timeout := global.VP.GetString("es.timeout")
-	searchResult, err := global.ES.Search().Index("works_v1").Query(query).Size(topN).TerminateAfter(LIMITCOUNT).Timeout(timeout).Do(context.Background())
+// elasticsearch前缀查询,给出前缀prefix，返回前topN个搜索提示结果
+func PrefixSearch(index string, field string, prefix string, topN int) ([]string, error) {
+	query := elastic.NewPrefixQuery(field+".keyword", prefix)
+	searchResult, err := global.ES.Search().Index(index).Query(query).Size(topN).Do(context.Background())
 	if err != nil {
 		log.Println("PrefixSearch err: ", err)
 		return nil, err
 	}
-	var data = make(map[string]interface{})
-	for _, item := range searchResult.Hits.Hits {
-		json.Unmarshal(item.Source, &data)
-		if data["title"] == nil {
-			continue
+	results := make([]string, 0)
+	for _, hit := range searchResult.Hits.Hits {
+		item := make(map[string]interface{})
+		err := json.Unmarshal(hit.Source, &item)
+		if err != nil {
+			panic(err)
 		}
-		suggestions = append(suggestions, data["title"].(string))
+		results = append(results, item[field].(string))
 	}
-	log.Println(suggestions)
-	return
+	log.Println(results)
+	return results, nil
 }

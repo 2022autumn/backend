@@ -67,9 +67,8 @@ func CreateApplication(c *gin.Context) {
 
 	err := service.CreateApplication(&submit)
 	if err != nil {
-		panic(err)
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "申请创建失败", "status": 401})
-		return
+		panic(err)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "application_id": submit.ApplicationID, "message": "申请提交成功", "status": 200}) //, "papers": service.GetAuthorSomePapers(author_id, 100)})

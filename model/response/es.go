@@ -37,6 +37,11 @@ type AuthorRelationNet struct {
 	Edge_set   []map[string]interface{}
 }
 
-type PrefixRecommendA struct {
-	recommends []string
+type PrefixSuggestionQ struct {
+	Field  string
+	Prefix string
+}
+
+type PrefixSuggestionA struct {
+	Suggestions []string
 }

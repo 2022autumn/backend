@@ -45,14 +45,13 @@ func InitMySQL() {
 	// 检查数据库连接是否存在, 好像没啥用
 	err = global.DB.DB().Ping()
 	if err != nil {
-		panic(fmt.Errorf("数据库出问题啦: %s \n", err))
+		panic(fmt.Errorf("数据库出问题啦: %s", err))
 	}
-	return
 }
 
 func CloseMySQL() {
 	err := global.DB.Close()
 	if err != nil {
-		panic(fmt.Errorf("数据库出问题啦: %s \n", err))
+		panic(fmt.Errorf("数据库出问题啦: %s", err))
 	}
 }
