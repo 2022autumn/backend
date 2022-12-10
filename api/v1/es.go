@@ -32,7 +32,7 @@ func GetWorkCited(w json.RawMessage) string {
 			cited += "," + work["host_venue"].(map[string]interface{})["display_name"].(string)
 		}
 	}
-	cited += strconv.Itoa(work["publication_year"].(int)) + "."
+	cited += " " + strconv.Itoa(int(work["publication_year"].(float64))) + "."
 	return cited
 }
 
