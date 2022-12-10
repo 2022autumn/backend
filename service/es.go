@@ -48,12 +48,8 @@ func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
 	sortType int, ascending bool, aggs map[string]bool) (res *elastic.SearchResult, err error) {
 	timeout := global.VP.GetString("es.timeout")
-<<<<<<< HEAD
-	service := global.ES.Search().Index("works_v1").Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
-=======
 	workIndex := "works_v1"
 	service := global.ES.Search().Index(workIndex).Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
->>>>>>> a2d6a51b47f9f2efd6dbaff9e09a6508d59097d9
 	addAggToSearch(service, aggs)
 	if sortType == 0 {
 		res, err = service.From((page - 1) * size).Do(context.Background())
