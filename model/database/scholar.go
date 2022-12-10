@@ -41,14 +41,14 @@ type AuthorConnection struct {
 }
 
 type Application struct {
-	ApplicationID   uint64       `gorm:"primary_key;not null;" json:"application_id"`
-	UserID          uint64       `gorm:"not null;" json:"user_id"` //申请者的用户id
-	AuthorName      string       `gorm:"not null;type:varchar(100);" json:"author_name"`
-	AuthorID        string       `gorm:"type:varchar(150);not null;" json:"author_id"`
-	Fields          string       `gorm:"type:varchar(256);" json:"fields"`
-	Status          int          `gorm:"not null;default:0" json:"status"` //0:未处理；1：通过申请 2：未通过申请
-	Content         string       `gorm:"type:varchar(255)" json:"content"`
-	WorksCount      int          `gorm:"type:int;" json:"works_count"`
+	ApplicationID uint64 `gorm:"primary_key;not null;" json:"application_id"`
+	UserID        uint64 `gorm:"not null;" json:"user_id"` //申请者的用户id
+	AuthorName    string `gorm:"not null;type:varchar(100);" json:"author_name"`
+	AuthorID      string `gorm:"type:varchar(150);not null;" json:"author_id"`
+	//Fields          string       `gorm:"type:varchar(256);" json:"fields"`
+	Status  int    `gorm:"not null;default:0" json:"status"` //0:未处理；1：通过申请 2：未通过申请
+	Content string `gorm:"type:varchar(255)" json:"content"`
+	//WorksCount      int          `gorm:"type:int;" json:"works_count"`
 	InstitutionName string       `gorm:"type:varchar(150);not null;" json:"institution_name"`
 	Email           string       `gorm:"size:32;" json:"email"` //邮箱
 	ApplyTime       time.Time    `gorm:"type:datetime;" json:"apply_time"`

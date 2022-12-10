@@ -36,6 +36,7 @@ func InitMySQL() {
 		&database.Application{},
 		&database.Comment{},
 		&database.Like{},
+		&database.Tag{},
 		&database.TagPaper{},
 		&database.User{},
 		&database.UserFollow{},

@@ -695,6 +695,265 @@ const docTemplate = `{
                 }
             }
         },
+        "/social/tag/collectPaper": {
+            "post": {
+                "description": "将某篇文献加入到某一收藏夹下",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "summary": "Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.AddTagToPaper"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": 200, \"msg\": \"收藏成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\": 400,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\": 401, \"msg\": \"用户无此收藏夹\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"status\": 402, \"msg\": \"文章已在此收藏夹下\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"status\": 403, \"msg\": \"收藏失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/social/tag/create": {
+            "post": {
+                "description": "用户可以按照需要建立收藏夹",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "summary": "Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.TagCreation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": 200, \"msg\": \"收藏夹创建成功\", \"tag_id\": tag.TagID}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\": 401, \"msg\":    \"收藏夹已存在，换个名字吧～\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"status\": 402, \"msg\": \"创建失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/social/tag/delete": {
+            "post": {
+                "description": "删除标签",
+                "tags": [
+                    "社交"
+                ],
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.TagPaperListQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\": true,\"status\":200, \"message\": \"标签删除成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"success\": false,\"status\":400, \"message\": \"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"success\": false,\"status\":403, \"message\": \"标签不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/social/tag/sublist": {
+            "post": {
+                "description": "返回某一收藏夹内的文献信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "summary": "Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.TagPaperListQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\": true, \"status\": 200,\"num\":int, \"paper_list\": paper_list,\"msg\": \"查询成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "210": {
+                        "description": "{\"success\": true, \"status\": 402,\"num\":0, \"msg\": \"标签下没有文章\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"success\": false,\"status\": 400, \"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"success\": false,\"status\": 401, \"msg\": \"用户无此收藏夹\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"status\": 403, \"msg\": \"收藏失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "{\"success\": false, \"status\": 404, \"msg\":\"查询失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/social/tag/taglist": {
+            "post": {
+                "description": "显示用户建立的所有收藏夹",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "summary": "Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.UserInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\": true, \"status\":  200, \"message\": \"查看收藏夹列表成功\", \"data\":tags}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"success\": false,\"status\": 400, \"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"success\": false,\"status\": 403, \"msg\":\"未查询到结果\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/user/headshot": {
             "post": {
                 "description": "上传用户头像",
@@ -890,6 +1149,25 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "response.AddTagToPaper": {
+            "type": "object",
+            "required": [
+                "paper_id",
+                "tag_id",
+                "user_id"
+            ],
+            "properties": {
+                "paper_id": {
+                    "type": "string"
+                },
+                "tag_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.AdvancedSearchQ": {
             "type": "object",
             "properties": {
@@ -1024,19 +1302,16 @@ const docTemplate = `{
             "required": [
                 "author_id",
                 "author_name",
-                "field",
                 "institution_name",
                 "user_id",
                 "work_email"
             ],
             "properties": {
                 "author_id": {
+                    "description": "Field           string ` + "`" + `json:\"field\" binding:\"required\"` + "`" + `",
                     "type": "string"
                 },
                 "author_name": {
-                    "type": "string"
-                },
-                "field": {
                     "type": "string"
                 },
                 "institution_name": {
@@ -1183,6 +1458,47 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 100,
                     "minLength": 3
+                }
+            }
+        },
+        "response.TagCreation": {
+            "type": "object",
+            "required": [
+                "tag_name",
+                "user_id"
+            ],
+            "properties": {
+                "tag_name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.TagPaperListQ": {
+            "type": "object",
+            "required": [
+                "tag_id",
+                "user_id"
+            ],
+            "properties": {
+                "tag_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.UserInfo": {
+            "type": "object",
+            "required": [
+                "user_id"
+            ],
+            "properties": {
+                "user_id": {
+                    "type": "integer"
                 }
             }
         }
