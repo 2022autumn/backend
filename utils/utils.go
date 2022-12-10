@@ -123,7 +123,7 @@ func NormalizationSearchResult(res *elastic.SearchResult) (hits int64, result []
 			_ = json.Unmarshal(hit.Source, &tmp)
 			// tmp["highlight"] = hit.Highlight
 			for k, v := range hit.Highlight {
-				tmp[k] = v
+				tmp[k] = v[0]
 				log.Println(tmp[k])
 			}
 			by, _ := json.Marshal(tmp)
