@@ -32,7 +32,7 @@ func GetWorkCited(w json.RawMessage) string {
 			cited += "," + work["host_venue"].(map[string]interface{})["display_name"].(string)
 		}
 	}
-	cited += " " + strconv.Itoa(int(work["publication_year"].(float64))) + "."
+	cited += "," + strconv.Itoa(int(work["publication_year"].(float64))) + "."
 	return cited
 }
 
@@ -50,6 +50,38 @@ func TransRefs2Cited(refs []interface{}) []map[string]string {
 					"id":    ids[i],
 					"cited": GetWorkCited(v.Source),
 				})
+			} else {
+				println(ids[i] + " not found")
+			}
+		}
+	}
+	return newReferencedWorks
+}
+func TransRefs2Intro(refs []interface{}) []map[string]interface{} {
+	var newReferencedWorks = make([]map[string]interface{}, 0)
+	var ids []string
+	for _, v := range refs {
+		ids = append(ids, v.(string))
+	}
+	works, _ := service.GetObjects("works_v1", ids)
+	if works != nil {
+		for i, v := range works.Docs {
+			if v.Found == true {
+				var work = make(map[string]interface{})
+				_ = json.Unmarshal(v.Source, &work)
+				var host_venue = make(map[string]interface{})
+				var newRef = map[string]interface{}{
+					"id":               ids[i],
+					"title":            work["title"],
+					"publication_year": work["publication_year"],
+				}
+				if work["host_venue"] != nil {
+					host_venue = work["host_venue"].(map[string]interface{})
+					newRef["host_venue"] = host_venue["display_name"]
+				} else {
+					newRef["host_venue"] = ""
+				}
+				newReferencedWorks = append(newReferencedWorks, newRef)
 			} else {
 				println(ids[i] + " not found")
 			}
@@ -114,7 +146,7 @@ func GetObject(c *gin.Context) {
 		referenced_works := tmp["referenced_works"].([]interface{})
 		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := tmp["related_works"].([]interface{})
-		tmp["related_works"] = TransRefs2Cited(related_works)
+		tmp["related_works"] = TransRefs2Intro(related_works)
 		wv, notFound := service.GetWorkView(id)
 		if notFound {
 			wv = database.WorkView{
