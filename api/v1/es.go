@@ -276,7 +276,7 @@ func DoiSearch(c *gin.Context) {
 // @Description
 // @Tags        esSearch
 // @Param   author_id query    string                     true "author_id" Enums(A2764814280, A2900471938, A2227665069)
-// @Success 200       {object} response.AuthorRelationNet "{"data":{ "Vertex_set":[], "Edge_set":[]}}"
+// @Success 200       {object} response.AuthorRelationNet "{"res":{ "Vertex_set":[], "Edge_set":[]}}"
 // @Failure 201       {string} json                       "{"msg":"Get Author Relation Net Error"}"
 // @Router  /es/getAuthorRelationNet [GET]
 func GetAuthorRelationNet(c *gin.Context) {
@@ -292,7 +292,7 @@ func GetAuthorRelationNet(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{
-		"data": data,
+		"res": data,
 	})
 }
 
@@ -320,4 +320,24 @@ func GetStatistics(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"res": res})
+}
+
+// GetPrefixSuggestion
+// @Summary     hr
+// @Description 根据前缀串，获取智能联想
+// @Tags        esSearch
+// @Param		prefix	query	string	true	"prefix"
+// @Success     200 {string} json "{"res":{}}"
+// @Failure     301 {string} json "{"PrefixSearch Service err":{}}"
+// @Router      /es/prefix [GET]
+func GetPrefixSuggestions(c *gin.Context) {
+	prefix := c.Query("prefix")
+	res, err := service.PrefixSearch(prefix, 10)
+	if err != nil {
+		c.JSON(301, gin.H{"PrefixSearch Service err": err})
+		return
+	}
+	c.JSON(200, gin.H{
+		"res": res,
+	})
 }

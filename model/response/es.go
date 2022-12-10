@@ -36,3 +36,7 @@ type AuthorRelationNet struct {
 	Vertex_set []map[string]interface{}
 	Edge_set   []map[string]interface{}
 }
+
+type PrefixRecommendA struct {
+	recommends []string
+}

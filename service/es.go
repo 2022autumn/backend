@@ -19,20 +19,32 @@ import (
 var LIMITCOUNT = 10000000
 
 func GetWork(boolQuery *elastic.BoolQuery) (res *elastic.SearchResult, err error) {
-	return global.ES.Search().Index("works").Query(boolQuery).Do(context.Background())
+	return global.ES.Search().Index("works_v1").Query(boolQuery).Do(context.Background())
 }
+
+// 通过ids批量获取对象，multiGet
 func GetObjects(index string, ids []string) (res *elastic.MgetResponse, err error) {
 	mgetService := global.ES.MultiGet()
 	for _, id := range ids {
+		if index == "works" {
+			index = "works_v1"
+		}
 		mgetService.Add(elastic.NewMultiGetItem().Index(index).Id(id))
 	}
 	return mgetService.Do(context.Background())
 }
+
+// 通过id获取对象，get
 func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 	//termQuery := elastic.NewMatchQuery("id", id)
 	//return global.ES.Search().Index(index).Query(termQuery).Do(context.Background())
+	if index == "works" {
+		index = "works_v1"
+	}
 	return global.ES.Get().Index(index).Id(id).Do(context.Background())
 }
+
+// 通用搜索，针对works
 func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
 	sortType int, ascending bool, aggs map[string]bool) (
 	*elastic.SearchResult, error) {
@@ -44,7 +56,7 @@ func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
 	//minDateAgg, maxYearAgg := elastic.NewMinAggregation().Field("publication_year"), elastic.NewMaxAggregation().Field("publication_year")
 	//publicationYearAgg := elastic.NewTermsAggregation().Field("publication_year")
 	timeout := global.VP.GetString("es.timeout")
-	service := global.ES.Search().Index("works").Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
+	service := global.ES.Search().Index("works_v1").Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
 	addAggToSearch(service, aggs)
 	//Aggregation("types", typesAgg).
 	//Aggregation("institutions", institutionsAgg).
@@ -65,6 +77,8 @@ func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
 	}
 	return res, err
 }
+
+//
 func addAggToSearch(service *elastic.SearchService, aggNames map[string]bool) *elastic.SearchService {
 	if aggNames["types"] {
 		service = service.Aggregation("types",
@@ -185,6 +199,7 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 	return TopVertex_set, TopEdge_set, nil
 }
 
+// GetTopN 获取Top N 的Vertex和Edge
 func GetTopN(Vertex_set *[]map[string]interface{}, Edge_set *[]map[string]interface{}, TopVertex_set *[]map[string]interface{}, TopEdge_set *[]map[string]interface{}, n int) {
 	// 1. 获取Top N 的Edge
 	sort.Slice(*Edge_set, func(i, j int) bool {
@@ -215,6 +230,7 @@ exit:
 	}
 }
 
+// GetWorksByUrl 获取作者的作品，分页获取并返回总页数
 func GetWorksByUrl(works_api_url string, page int, works *[]map[string]interface{}) (total_pages int, err error) {
 	request_url := works_api_url + "&page=" + strconv.Itoa(page)
 	resp, err := http.Get(request_url)
@@ -243,6 +259,7 @@ func GetWorksByUrl(works_api_url string, page int, works *[]map[string]interface
 	return
 }
 
+// getAllWorksByUrl 获取作者的所有作品的列表
 func getAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (err error) {
 	total_pages, err := GetWorksByUrl(works_api_url, 1, works)
 	if err != nil {
@@ -263,6 +280,7 @@ func getAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (er
 	return nil
 }
 
+// GetAuthorRelationNet 获取作者的关系网络，向上层提供接口
 func GetAuthorRelationNet(authorid string) (Vertex_set []map[string]interface{}, Edge_set []map[string]interface{}, err error) {
 	Vertex_set, Edge_set, err = ComputeAuthorRelationNet(authorid)
 	return Vertex_set, Edge_set, err
@@ -270,6 +288,7 @@ func GetAuthorRelationNet(authorid string) (Vertex_set []map[string]interface{},
 
 var DocDict = []string{"authors", "works", "institutions", "venues", "concepts"}
 
+// GetStatistics 获取学术数据的数目统计信息
 func GetStatistics() (map[string]int64, error) {
 	statistics := make(map[string]int64)
 	for _, doc := range DocDict {
@@ -281,4 +300,25 @@ func GetStatistics() (map[string]int64, error) {
 		statistics[doc] = count
 	}
 	return statistics, nil
+}
+
+// elasticsearch前缀查询,给出前缀prefix，从works的title字段查询具有前缀的前topN个结果
+func PrefixSearch(prefix string, topN int) (suggestions []string, err error) {
+	query := elastic.NewPrefixQuery("title", prefix) // title字段前缀查询
+	timeout := global.VP.GetString("es.timeout")
+	searchResult, err := global.ES.Search().Index("works_v1").Query(query).Size(topN).TerminateAfter(LIMITCOUNT).Timeout(timeout).Do(context.Background())
+	if err != nil {
+		log.Println("PrefixSearch err: ", err)
+		return nil, err
+	}
+	var data = make(map[string]interface{})
+	for _, item := range searchResult.Hits.Hits {
+		json.Unmarshal(item.Source, &data)
+		if data["title"] == nil {
+			continue
+		}
+		suggestions = append(suggestions, data["title"].(string))
+	}
+	log.Println(suggestions)
+	return
 }

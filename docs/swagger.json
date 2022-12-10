@@ -204,13 +204,45 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"data\":{ \"Vertex_set\":[], \"Edge_set\":[]}}",
+                        "description": "{\"res\":{ \"Vertex_set\":[], \"Edge_set\":[]}}",
                         "schema": {
                             "$ref": "#/definitions/response.AuthorRelationNet"
                         }
                     },
                     "201": {
                         "description": "{\"msg\":\"Get Author Relation Net Error\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/es/prefix": {
+            "get": {
+                "description": "根据前缀串，获取智能联想",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "hr",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "prefix",
+                        "name": "prefix",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"res\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "301": {
+                        "description": "{\"PrefixSearch Service err\":{}}",
                         "schema": {
                             "type": "string"
                         }
