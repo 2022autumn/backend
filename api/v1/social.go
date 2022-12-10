@@ -249,7 +249,7 @@ func ShowPaperCommentList(c *gin.Context) {
 		}
 		com["username"] = user.Username
 		com["headshot"] = user.HeadShot
-		//com["userinfo"] = user.UserInfo
+		com["userinfo"] = user.UserInfo
 		//com["username"] = comment.Username
 		com["content"] = comment.Content
 		com["time"] = comment.CommentTime
