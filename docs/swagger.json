@@ -16,7 +16,7 @@
                 "tags": [
                     "管理"
                 ],
-                "summary": "申请学者门户 Vera",
+                "summary": "申请学者门户 Vera \u0026 txc",
                 "parameters": [
                     {
                         "description": "data",
@@ -30,31 +30,31 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"success\": true, \"application_id\": submit.ApplicationID, \"message\": \"申请提交成功\", \"status\": 200}",
+                        "description": "{\"msg\": \"申请成功\", \"status\": 200,\"application\": application,}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\": \"数据格式错误\", \"status\": 400}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "401": {
-                        "description": "{\"success\": false, \"message\": \"申请创建失败\", \"status\": 401}",
+                        "description": "{\"msg\": \"没有该用户\", \"status\": 401}",
                         "schema": {
                             "type": "string"
                         }
                     },
-                    "404": {
-                        "description": "{\"success\": false, \"message\": \"没有该用户\", \"status\": 404}",
+                    "402": {
+                        "description": "{\"msg\": \"创建申请失败\", \"status\": 402}",
                         "schema": {
                             "type": "string"
                         }
                     },
-                    "405": {
-                        "description": "{\"success\": false, \"message\": \"该作者已被认领\", \"status\": 405, \"the_authorname\": the_submit.AuthorName}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "406": {
-                        "description": "{\"success\": false, \"message\": \"您已经是认证学者，请勿重复申请\", \"status\": 406}",
+                    "403": {
+                        "description": "{\"msg\": \"该学者已被认领\", \"status\": 403}",
                         "schema": {
                             "type": "string"
                         }
@@ -74,7 +74,7 @@
                 "tags": [
                     "管理"
                 ],
-                "summary": "审核学者门户申请 Vera",
+                "summary": "审核学者门户申请 Vera \u0026 txc",
                 "parameters": [
                     {
                         "description": "data",
@@ -88,31 +88,37 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"success\": true, \"message\": \"申请审批成功\", \"status\": 200}",
+                        "description": "{\"msg\": \"审核成功\", \"status\": 200}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\": \"数据格式错误\", \"status\": 400}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "401": {
-                        "description": "{\"success\": false, \"message\": \"申请不存在\", \"status\": 404}",
+                        "description": "{\"msg\": \"管理员不存在 or 不是管理员\", \"status\": 401}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\": \"申请不存在\", \"status\": 402}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "403": {
-                        "description": "{\"success\": false, \"message\": \"success 不为true false\", \"status\": 403}",
+                        "description": "{\"msg\": \"已审核过该申请\", \"status\": 403}",
                         "schema": {
                             "type": "string"
                         }
                     },
-                    "405": {
-                        "description": "{\"success\": false, \"message\": \"没有该用户\", \"status\": 405}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "406": {
-                        "description": "{\"success\": false, \"message\": \"已审核过该申请\", \"status\": 406}",
+                    "404": {
+                        "description": "{\"msg\": \"数据库错误\", \"status\": 404}",
                         "schema": {
                             "type": "string"
                         }
@@ -121,21 +127,15 @@
             }
         },
         "/application/list": {
-            "post": {
+            "get": {
                 "description": "显示未审核的申请列表",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "管理"
                 ],
-                "summary": "显示未审核的申请列表 Vera",
+                "summary": "显示未审核的申请列表 Vera \u0026 txc",
                 "responses": {
                     "200": {
-                        "description": "{\"success\": true, \"message\": \"获取成功\", \"status\": 200, \"submits\": submits_arr, \"submit_count\": len(submits)}",
+                        "description": "{\"applications\": []database.Application, \"msg\": \"获取成功\", \"status\": 200}",
                         "schema": {
                             "type": "string"
                         }
@@ -464,6 +464,32 @@
                 }
             }
         },
+        "/scholar/author/headshot": {
+            "post": {
+                "description": "上传作者头像",
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "上传作者头像 txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "author_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "新头像",
+                        "name": "Headshot",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/scholar/concept": {
             "post": {
                 "description": "添加user的关注关键词",
@@ -711,6 +737,14 @@
                     "scholar"
                 ],
                 "summary": "获取用户推荐的论文 请勿使用 txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "userid",
+                        "name": "userid",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "{\"msg\":\"获取成功\",\"data\":{}}",
@@ -1770,25 +1804,31 @@
             "required": [
                 "author_id",
                 "author_name",
-                "institution_name",
+                "email",
+                "institution",
                 "user_id",
-                "work_email"
+                "verify_code"
             ],
             "properties": {
                 "author_id": {
-                    "description": "Field           string `json:\"field\" binding:\"required\"`",
                     "type": "string"
                 },
                 "author_name": {
                     "type": "string"
                 },
-                "institution_name": {
+                "content": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "institution": {
                     "type": "string"
                 },
                 "user_id": {
                     "type": "integer"
                 },
-                "work_email": {
+                "verify_code": {
                     "type": "string"
                 }
             }
@@ -1823,8 +1863,7 @@
             "type": "object",
             "required": [
                 "application_id",
-                "content",
-                "success",
+                "status",
                 "user_id"
             ],
             "properties": {
@@ -1835,11 +1874,12 @@
                     "description": "审批意见",
                     "type": "string"
                 },
-                "success": {
+                "status": {
                     "description": "是否通过",
-                    "type": "string"
+                    "type": "integer"
                 },
                 "user_id": {
+                    "description": "谁审核的",
                     "type": "integer"
                 }
             }

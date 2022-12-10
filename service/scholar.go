@@ -135,3 +135,8 @@ func TopWork(author_id string, work_id string) (err error) {
 	tx.Commit()
 	return nil
 }
+
+func GetAuthor(author_id string) (author database.Author, notFound bool) {
+	notFound = global.DB.Where("author_id = ?", author_id).First(&author).RecordNotFound()
+	return author, notFound
+}
