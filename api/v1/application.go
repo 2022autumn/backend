@@ -35,7 +35,7 @@ func CreateApplication(c *gin.Context) {
 	author_name := d.AuthorName
 	instituition_name := d.InstitutionName
 	work_email := d.WorkEmail
-	field := d.Field
+	//field := d.Field
 	//home_page := c.Request.FormValue("home_page")
 	author_id := d.AuthorID
 	user_id := d.UserID
@@ -60,8 +60,8 @@ func CreateApplication(c *gin.Context) {
 		InstitutionName: instituition_name, AuthorName: author_name, Email: work_email,
 		//HomePage: home_page,
 		AuthorID: author_id,
-		Fields:   field,
-		Status:   0, Content: "",
+		//Fields:   field,
+		Status: 0, Content: "",
 		//PaperCount: int(author["paper_count"].(float64)),
 		ApplyTime: time.Now()}
 

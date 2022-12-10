@@ -47,6 +47,13 @@ func SetupRouter(r *gin.Engine) {
 		SocialRouter.POST("/comment/like", v1.LikeComment)
 		SocialRouter.POST("/comment/unlike", v1.UnLikeComment)
 		SocialRouter.POST("/comment/list", v1.ShowPaperCommentList)
+		//SocialRouter.POST("/follow", v1.FollowAuthor)
+		//SocialRouter.POST("/follow/list", v1.GetUserFollows)
+		SocialRouter.POST("/tag/create", v1.CreateTag)
+		SocialRouter.POST("/tag/collectPaper", v1.AddTagToPaper)
+		SocialRouter.POST("/tag/sublist", v1.ShowTagPaperList)
+		SocialRouter.POST("/tag/taglist", v1.ShowUserTagList)
+		SocialRouter.POST("/tag/delete", v1.DeleteTag)
 		SocialRouter.POST("/follow", v1.FollowAuthor, middleware.AuthRequired())
 		SocialRouter.POST("/follow/list", v1.GetUserFollows, middleware.AuthRequired())
 	}

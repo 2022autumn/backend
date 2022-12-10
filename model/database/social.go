@@ -24,15 +24,15 @@ type Like struct {
 //}
 
 type Tag struct {
-	TagID      string    `gorm:"primary_key;not null;unique;autoIncrement" json:"tag_id"`
+	TagID      uint64    `gorm:"primary_key;not null;unique;autoIncrement" json:"tag_id"`
 	TagName    string    `gorm:"type:varchar(50);not null" json:"tag_name"`
 	UserID     uint64    `gorm:"not null;" json:"user_id"` //评论者的用户id
 	CreateTime time.Time `gorm:"type:datetime" json:"create_time"`
 }
 
 type TagPaper struct {
-	RelationID uint64    `gorm:"primary_key;type:integer;not null;autoIncrement" json:"relation_id"`
-	TagID      string    `json:"tag_id"`
+	RelationID uint64    `gorm:"primary_key;" json:"relation_id"`
+	TagID      uint64    `json:"tag_id"`
 	PaperID    string    `json:"paper_id"`
 	CreateTime time.Time `gorm:"type:datetime" json:"create_time"`
 }

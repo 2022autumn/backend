@@ -47,7 +47,7 @@ func MakeUserScholar(user database.User, application database.Application) {
 	user.Email = application.Email
 	user.AuthorName = application.AuthorName
 	user.UserType = 1
-	user.Fields = application.Fields
+	//user.Fields = application.Fields
 	user.AuthorID = application.AuthorID
 	err := global.DB.Save(&user).Error
 	if err != nil {

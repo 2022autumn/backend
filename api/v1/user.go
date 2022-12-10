@@ -54,6 +54,11 @@ func Register(c *gin.Context) {
 	if err := service.CreateUser(&user); err != nil {
 		panic("CreateUser: create user error")
 	}
+
+	//为用户创建默认收藏夹
+	tag := database.Tag{UserID: user.UserID, TagName: "默认收藏夹", CreateTime: time.Now()}
+	_ = service.CreateUserTag(&tag)
+
 	// 返回响应
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
