@@ -5,10 +5,10 @@ import (
 	"IShare/service"
 	"IShare/utils"
 	"encoding/json"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic/v7"
+	"net/http"
+	"strconv"
 )
 
 func GetWorkCited(w json.RawMessage) string {
@@ -33,12 +33,12 @@ func GetWorkCited(w json.RawMessage) string {
 }
 
 func TransRefs2Cited(refs []interface{}) []map[string]string {
-	var newReferencedWorks []map[string]string
+	var newReferencedWorks = make([]map[string]string, 0)
 	var ids []string
 	for _, v := range refs {
 		ids = append(ids, v.(string))
 	}
-	works, _ := service.GetObjects("works", ids)
+	works, _ := service.GetObjects("works_v1", ids)
 	if works != nil {
 		for i, v := range works.Docs {
 			if v.Found == true {
@@ -56,58 +56,64 @@ func TransRefs2Cited(refs []interface{}) []map[string]string {
 
 // GetObject
 // @Summary     txc
-// @Description 根据id获取对象，可以是author，work，institution,venue,concept
+// @Description 根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759
 // @Tags    esSearch
-// @Param       id  query    string true "id"
-// @Success     200 {string} json   "{"status":200,"res":{}}"
-// @Failure     404 {string} json   "{"status":201,"msg":"es get err or not found"}"
-// @Failure     400 {string} json   "{"status":400,"msg":"id type error"}"
+// @Param       id     query    string true  "对象id"
+// @Param       userid query    string false "用户id"
+// @Success     200    {string} json   "{"status":200,"res":{}}"
+// @Failure     404    {string} json   "{"status":201,"msg":"es get err or not found"}"
+// @Failure     400    {string} json   "{"status":400,"msg":"id type error"}"
 // @Router      /es/get/ [GET]
 func GetObject(c *gin.Context) {
 	id := c.Query("id")
-	//user, _ := c.MustGet("user").(database.User)
-	//println(user.UserID)
-	if id == "" {
-		c.JSON(400, gin.H{
-			"status": 400,
-			"msg":    "id type error",
-		})
-		return
-	}
+	userid := c.Query("userid")
 	idx, err := utils.TransObjPrefix(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status": 400,
-			"msg":    "id type error",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "id type error"})
 		return
 	}
 	res, err := service.GetObject(idx, id)
 	if err != nil {
-		c.JSON(404, gin.H{
-			"msg":    "es get err or not found",
-			"status": 404,
-		})
+		c.JSON(404, gin.H{"msg": "es get err or not found"})
 		return
 	}
-	if idx == "works" && res.Found == true {
-		var tmp = make(map[string]interface{})
-		_ = json.Unmarshal(res.Source, &tmp)
+	var tmp = make(map[string]interface{})
+	_ = json.Unmarshal(res.Source, &tmp)
+	if userid != "" {
+		userid, _ := strconv.ParseUint(userid, 0, 64)
+		ucs, err := service.GetUserConcepts(userid)
+		if err != nil {
+			c.JSON(405, gin.H{"msg": "get user concepts err"})
+			return
+		}
+		if tmp["concepts"] != nil {
+			concepts := tmp["concepts"].([]interface{})
+			for _, c := range concepts {
+				concept := c.(map[string]interface{})
+				conceptid := concept["id"].(string)
+				var flag = false
+				for i, uc := range ucs {
+					if conceptid == uc.ConceptID {
+						concept["islike"] = true
+						flag = true
+						ucs = append(ucs[:i], ucs[i+1:]...)
+						break
+					}
+				}
+				if flag == false {
+					concept["islike"] = false
+				}
+			}
+		}
+	}
+	if idx == "works_v1" {
 		referenced_works := tmp["referenced_works"].([]interface{})
 		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := tmp["related_works"].([]interface{})
 		tmp["related_works"] = TransRefs2Cited(related_works)
-		c.JSON(http.StatusOK, gin.H{
-			"data":   tmp,
-			"status": 200,
-		})
-		return
-	}
-	var data = response.GetObjectA{
-		RawMessage: res.Source,
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"data":   data,
+		"data":   tmp,
 		"status": 200,
 	})
 }

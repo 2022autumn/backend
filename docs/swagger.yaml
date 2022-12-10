@@ -313,12 +313,16 @@ paths:
       - 管理
   /es/get/:
     get:
-      description: 根据id获取对象，可以是author，work，institution,venue,concept
+      description: 根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759
       parameters:
-      - description: id
+      - description: 对象id
         in: query
         name: id
         required: true
+        type: string
+      - description: 用户id
+        in: query
+        name: userid
         type: string
       responses:
         "200":

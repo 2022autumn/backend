@@ -157,7 +157,7 @@ const docTemplate = `{
         },
         "/es/get/": {
             "get": {
-                "description": "根据id获取对象，可以是author，work，institution,venue,concept",
+                "description": "根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759",
                 "tags": [
                     "esSearch"
                 ],
@@ -165,10 +165,16 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id",
+                        "description": "对象id",
                         "name": "id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户id",
+                        "name": "userid",
+                        "in": "query"
                     }
                 ],
                 "responses": {

@@ -34,28 +34,11 @@ func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 	return global.ES.Get().Index(index).Id(id).Do(context.Background())
 }
 func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
-	sortType int, ascending bool, aggs map[string]bool) (
-	*elastic.SearchResult, error) {
-	//typesAgg := elastic.NewTermsAggregation().Field("type.keyword")
-	//institutionsAgg := elastic.NewTermsAggregation().Field("authorships.institutions.display_name.keyword")
-	//publishersAgg := elastic.NewTermsAggregation().Field("host_venue.publisher.keyword")
-	//venuesAgg := elastic.NewTermsAggregation().Field("host_venue.display_name.keyword")
-	//authorsAgg := elastic.NewTermsAggregation().Field("authorships.author.display_name.keyword").Size(30)
-	//minDateAgg, maxYearAgg := elastic.NewMinAggregation().Field("publication_year"), elastic.NewMaxAggregation().Field("publication_year")
-	//publicationYearAgg := elastic.NewTermsAggregation().Field("publication_year")
+	sortType int, ascending bool, aggs map[string]bool) (res *elastic.SearchResult, err error) {
 	timeout := global.VP.GetString("es.timeout")
-	service := global.ES.Search().Index("works").Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
+	workIndex := "works_v1"
+	service := global.ES.Search().Index(workIndex).Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
 	addAggToSearch(service, aggs)
-	//Aggregation("types", typesAgg).
-	//Aggregation("institutions", institutionsAgg).
-	//Aggregation("venues", venuesAgg).
-	//Aggregation("publishers", publishersAgg).
-	//Aggregation("authors", authorsAgg).
-	//Aggregation("publication_years", publicationYearAgg)
-	//Aggregation("min_year", minDateAgg).
-	//Aggregation("max_year", maxYearAgg)
-	var res *elastic.SearchResult
-	var err error
 	if sortType == 0 {
 		res, err = service.From((page - 1) * size).Do(context.Background())
 	} else if sortType == 1 {
