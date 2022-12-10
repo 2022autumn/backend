@@ -287,7 +287,8 @@ func GetStatistics() (map[string]int64, error) {
 
 // elasticsearch前缀查询,给出前缀prefix，返回前topN个搜索提示结果
 func PrefixSearch(index string, field string, prefix string, topN int) ([]string, error) {
-	query := elastic.NewPrefixQuery(field+".keyword", prefix)
+
+	query := elastic.NewMatchPhrasePrefixQuery(field, prefix)
 	searchResult, err := global.ES.Search().Index(index).Query(query).Size(topN).Do(context.Background())
 	if err != nil {
 		log.Println("PrefixSearch err: ", err)

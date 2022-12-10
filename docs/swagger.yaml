@@ -372,14 +372,14 @@ paths:
     post:
       description: 根据前缀得到搜索建议，返回results 字符串数组
       parameters:
-      - description: name 表示需要查询的字段名
+      - description: Field 表示需要查询的字段名
         in: query
-        name: name
+        name: Field
         required: true
         type: string
-      - description: prefix 表示用户已经输入的前缀
+      - description: Prefix 表示用户已经输入的前缀
         in: query
-        name: prefix
+        name: Prefix
         required: true
         type: string
       responses:

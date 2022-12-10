@@ -6,6 +6,7 @@ import (
 	"IShare/service"
 	"IShare/utils"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -352,8 +353,8 @@ func GetStatistics(c *gin.Context) {
 // @Summary     hr
 // @description 根据前缀得到搜索建议，返回results 字符串数组
 // @Tags esSearch
-// @Param name query string true "name 表示需要查询的字段名"
-// @Param prefix query string true "prefix 表示用户已经输入的前缀"
+// @Param Field query string true "Field 表示需要查询的字段名"
+// @Param Prefix query string true "Prefix 表示用户已经输入的前缀"
 // @Success 200 {string} string "{"success": true, "msg": "获取成功"}"
 // @Failure 400 {string} string "{"success": false, "msg": 参数错误"}"
 // @Failure 402 {string} string "{"success": false, "msg": "es服务出错"}"
@@ -364,11 +365,12 @@ func GetPrefixSuggestions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "msg": "参数错误"})
 		panic(err)
 	}
-	index, field, prefix, topN := "works_v1", d.Prefix, d.Field, 10
+	index, field, prefix, topN := "works_v1", d.Field, d.Prefix, 5
+	log.Println("index:", index, "field:", field, "prefix:", prefix, "topN:", topN)
 	prefixResult, err := service.PrefixSearch(index, field, prefix, topN)
 	if err != nil {
-		c.JSON(402, gin.H{"success": false, "msg": "es服务出错"})
+		c.JSON(402, gin.H{"success": false, "msg": "es服务出错", "err": err})
 		panic(err)
 	}
-	c.JSON(http.StatusOK, gin.H{"success": true, "msg": "成功", "res": prefixResult})
+	c.JSON(http.StatusOK, gin.H{"success": true, "msg": "获取成功", "res": prefixResult})
 }
