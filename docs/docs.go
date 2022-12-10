@@ -157,7 +157,7 @@ const docTemplate = `{
         },
         "/es/get/": {
             "get": {
-                "description": "根据id获取对象，可以是author，work，institution,venue,concept",
+                "description": "根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759",
                 "tags": [
                     "esSearch"
                 ],
@@ -165,10 +165,16 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id",
+                        "description": "对象id",
                         "name": "id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户id",
+                        "name": "userid",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -521,6 +527,46 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "{\"msg\":\"删除失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/hot": {
+            "get": {
+                "description": "获取热门文章（根据访问量）",
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "txc",
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"获取失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/roll": {
+            "get": {
+                "description": "获取用户推荐的文章 请勿使用",
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "txc",
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
                         "schema": {
                             "type": "string"
                         }

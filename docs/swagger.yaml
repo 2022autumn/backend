@@ -313,12 +313,16 @@ paths:
       - 管理
   /es/get/:
     get:
-      description: 根据id获取对象，可以是author，work，institution,venue,concept
+      description: 根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759
       parameters:
-      - description: id
+      - description: 对象id
         in: query
         name: id
         required: true
+        type: string
+      - description: 用户id
+        in: query
+        name: userid
         type: string
       responses:
         "200":
@@ -567,6 +571,32 @@ paths:
             type: string
         "404":
           description: '{"msg":"删除失败"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - scholar
+  /scholar/hot:
+    get:
+      description: 获取热门文章（根据访问量）
+      responses:
+        "200":
+          description: '{"msg":"获取成功","data":{}}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"获取失败"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - scholar
+  /scholar/roll:
+    get:
+      description: 获取用户推荐的文章 请勿使用
+      responses:
+        "200":
+          description: '{"msg":"获取成功","data":{}}'
           schema:
             type: string
       summary: txc

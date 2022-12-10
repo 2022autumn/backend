@@ -60,3 +60,29 @@ func AddUserConcept(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{"msg": "删除成功"})
 }
+
+// RollWorks
+// @Summary     txc
+// @Description 获取用户推荐的文章 请勿使用
+// @Tags        scholar
+// @Success     200 {string} json "{"msg":"获取成功","data":{}}"
+// @Router      /scholar/roll [GET]
+func RollWorks(c *gin.Context) {
+	c.JSON(200, gin.H{"msg": "error"})
+}
+
+// GetHotWorks
+// @Summary     txc
+// @Description 获取热门文章（根据访问量）
+// @Tags        scholar
+// @Success     200 {string} json "{"msg":"获取成功","data":{}}"
+// @Failure     400 {string} json "{"msg":"获取失败"}"
+// @Router      /scholar/hot [GET]
+func GetHotWorks(c *gin.Context) {
+	works, err := service.GetHotWorks(10)
+	if err != nil {
+		c.JSON(400, gin.H{"msg": "获取失败"})
+		return
+	}
+	c.JSON(200, gin.H{"msg": "获取成功", "data": works})
+}
