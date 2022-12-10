@@ -237,8 +237,8 @@ const docTemplate = `{
             }
         },
         "/es/prefix": {
-            "get": {
-                "description": "根据前缀串，获取智能联想",
+            "post": {
+                "description": "根据前缀得到搜索建议，返回results 字符串数组",
                 "tags": [
                     "esSearch"
                 ],
@@ -246,7 +246,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "prefix",
+                        "description": "name 表示需要查询的字段名",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "prefix 表示用户已经输入的前缀",
                         "name": "prefix",
                         "in": "query",
                         "required": true
@@ -254,13 +261,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"res\":{}}",
+                        "description": "{\"success\": true, \"msg\": \"获取成功\"}",
                         "schema": {
                             "type": "string"
                         }
                     },
-                    "301": {
-                        "description": "{\"PrefixSearch Service err\":{}}",
+                    "400": {
+                        "description": "{\"success\": false, \"msg\": 参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"success\": false, \"msg\": \"es服务出错\"}",
                         "schema": {
                             "type": "string"
                         }

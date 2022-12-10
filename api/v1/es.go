@@ -358,7 +358,7 @@ func GetStatistics(c *gin.Context) {
 // @Failure 400 {string} string "{"success": false, "msg": 参数错误"}"
 // @Failure 402 {string} string "{"success": false, "msg": "es服务出错"}"
 // @Router /es/prefix [POST]
-func GetPrefixSuggestion(c *gin.Context) {
+func GetPrefixSuggestions(c *gin.Context) {
 	var d response.PrefixSuggestionQ
 	if err := c.ShouldBind(&d); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "msg": "参数错误"})
