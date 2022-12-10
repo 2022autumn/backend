@@ -364,7 +364,7 @@ func GetPrefixSuggestions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "msg": "参数错误"})
 		panic(err)
 	}
-	index, field, prefix, topN := "work_v1", d.Prefix, d.Field, 10
+	index, field, prefix, topN := "works_v1", d.Prefix, d.Field, 10
 	prefixResult, err := service.PrefixSearch(index, field, prefix, topN)
 	if err != nil {
 		c.JSON(402, gin.H{"success": false, "msg": "es服务出错"})
