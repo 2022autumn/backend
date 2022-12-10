@@ -1,12 +1,11 @@
 package database
 
 import (
-	"database/sql"
 	"time"
 )
 
 type Author struct {
-	AuthorId string `gorm:"primary_key;not null;" json:"author_id"`
+	AuthorID string `gorm:"primary_key;not null;" json:"author_id"`
 	HeadShot string `gorm:"default:'author_default.jpg'" json:"head_shot"` //头像url
 	Intro    string `gorm:"type:text;" json:"intro"`
 }
@@ -38,18 +37,18 @@ type Author struct {
 //}
 
 type Application struct {
-	ApplicationID uint64 `gorm:"primary_key;not null;" json:"application_id"`
-	UserID        uint64 `gorm:"not null;" json:"user_id"` //申请者的用户id
-	AuthorName    string `gorm:"not null;type:varchar(100);" json:"author_name"`
-	AuthorID      string `gorm:"type:varchar(150);not null;" json:"author_id"`
-	//Fields          string       `gorm:"type:varchar(256);" json:"fields"`
-	Status  int    `gorm:"not null;default:0" json:"status"` //0:未处理；1：通过申请 2：未通过申请
-	Content string `gorm:"type:varchar(255)" json:"content"`
-	//WorksCount      int          `gorm:"type:int;" json:"works_count"`
-	InstitutionName string       `gorm:"type:varchar(150);not null;" json:"institution_name"`
-	Email           string       `gorm:"size:32;" json:"email"` //邮箱
-	ApplyTime       time.Time    `gorm:"type:datetime;" json:"apply_time"`
-	HandleTime      sql.NullTime `gorm:"type:datetime;" json:"handle_time"`
+	ApplicationID uint64    `gorm:"primary_key;not null;" json:"application_id"`
+	UserID        uint64    `gorm:"not null;" json:"user_id"` //申请者的用户id
+	RealName      string    `gorm:"not null;type:varchar(100);" json:"real_name"`
+	AuthorID      string    `gorm:"not null;" json:"author_id"`
+	Status        int       `gorm:"not null;default:0" json:"status"` //0:未处理；1：通过申请 2：未通过申请
+	Content       string    `gorm:"type:text" json:"content"`
+	Institution   string    `gorm:"not null;" json:"institution"`
+	Email         string    `gorm:"not null;" json:"email"` //邮箱
+	VerifyCode    string    `gorm:"not null;" json:"verify_code"`
+	ApplyTime     time.Time `gorm:"type:datetime;default:Now()" json:"apply_time"`
+	HandleTime    time.Time `gorm:"type:datetime;default:Now()" json:"handle_time"`
+	HandleContent string    `gorm:"type:text;" json:"handle_content"`
 }
 type UserConcept struct {
 	UserID    uint64 `gorm:"not null;" json:"user_id"`

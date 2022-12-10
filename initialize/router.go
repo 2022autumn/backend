@@ -39,7 +39,7 @@ func SetupRouter(r *gin.Engine) {
 	{
 		ApplicationRouter.POST("/create", v1.CreateApplication)
 		ApplicationRouter.POST("/handle", v1.HandleApplication)
-		ApplicationRouter.POST("/list", v1.UncheckedApplicationList)
+		ApplicationRouter.GET("/list", v1.UncheckedApplicationList)
 	}
 	SocialRouter := baseGroup.Group("/social")
 	{
@@ -73,6 +73,7 @@ func SetupRouter(r *gin.Engine) {
 		scholarGroup.POST("/concept", v1.AddUserConcept, middleware.AuthRequired())
 		scholarGroup.GET("/roll", v1.RollWorks)
 		scholarGroup.GET("/hot", v1.GetHotWorks)
+		scholarGroup.POST("/author/headshot", v1.UploadAuthorHeadshot)
 	}
 }
 
