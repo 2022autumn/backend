@@ -13,5 +13,4 @@ func InitMedia() {
 	if os.IsNotExist(err) {
 		_ = os.MkdirAll("./media/headshot", 0755)
 	}
-	return
 }
