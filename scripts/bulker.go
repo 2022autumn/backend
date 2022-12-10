@@ -260,7 +260,16 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 		return
 	}
 	defer file.Close()
-
+	// 文件大小为0，直接跳过
+	fileInfo, err := file.Stat()
+	if err != nil {
+		log.Println("get file info error: ", err)
+		return
+	}
+	if fileInfo.Size() == 0 {
+		log.Println("file size is 0, skip: ", dir_path+fileName)
+		return
+	}
 	reader := bufio.NewReader(file)
 	client := global.ES
 	bulkRequest := client.Bulk()

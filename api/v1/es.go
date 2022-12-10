@@ -92,7 +92,7 @@ func TransRefs2Intro(refs []interface{}) []map[string]interface{} {
 }
 
 // GetObject
-// @Summary     txc
+// @Summary     根据id获取对象 txc
 // @Description 根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759
 // @Tags    esSearch
 // @Param       id     query    string true  "对象id"
@@ -192,7 +192,7 @@ var query2field = map[string]string{
 }
 
 // BaseSearch
-// @Summary     txc
+// @Summary     基本搜索 txc
 // @Description 基本搜索，Cond里面填筛选条件，key仅包含["type", "author", "institution", "publisher", "venue", "publication_year"]
 // @Tags        esSearch
 // @Accept      json
@@ -243,7 +243,7 @@ func BaseSearch(c *gin.Context) {
 }
 
 // AdvancedSearch
-// @Summary     txc
+// @Summary     高级搜索 txc
 // @Description 高级搜索，query是一个map列表， 每个map包含"content" "field" "logic"
 // @Description logic 仅包含["and", "or", "not"]
 // @Description field 仅包含["title", "abstract", "venue", "publisher", "author", "institution", "concept"]
@@ -309,7 +309,7 @@ func AdvancedSearch(c *gin.Context) {
 }
 
 // DoiSearch
-// @Summary     txc
+// @Summary     使用doi查找work，未测试，请勿使用 txc
 // @Description 使用doi查找work，未测试，请勿使用
 // @Tags        esSearch
 // @Param       doi query string true "doi"
@@ -334,7 +334,7 @@ func DoiSearch(c *gin.Context) {
 }
 
 // GetAuthorRelationNet
-// @Summary     hr
+// @Summary     根据author的id获取专家关系网络 hr
 // @Description 根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我
 // @Description
 // @Description 目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低
@@ -372,7 +372,7 @@ func GetWorksOfAuthorByUrl(c *gin.Context) {
 }
 
 // GetStatistics
-// @Summary     txc
+// @Summary     获取统计信息 txc
 // @Description 获取统计信息
 // @Tags        esSearch
 // @Success     200 {string} json "{"res":{}}"
@@ -388,7 +388,7 @@ func GetStatistics(c *gin.Context) {
 }
 
 // GetPrefixSuggestion doc
-// @Summary     hr
+// @Summary     根据前缀得到搜索建议，返回results 字符串数组 hr
 // @description 根据前缀得到搜索建议，返回results 字符串数组
 // @Tags esSearch
 // @Param Field query string true "Field 表示需要查询的字段名"

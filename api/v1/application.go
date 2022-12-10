@@ -15,7 +15,7 @@ import (
 )
 
 // CreateApplication 申请学者门户
-// @Summary     Vera
+// @Summary     申请学者门户 Vera
 // @Description 用户可以申请认领自己的学者门户
 // @Tags        管理
 // @Param       data body response.CreateApplicationQ true "data"
@@ -75,7 +75,7 @@ func CreateApplication(c *gin.Context) {
 }
 
 // HandleApplication 审核学者门户申请
-// @Summary     Vera
+// @Summary     审核学者门户申请 Vera
 // @Description 管理员对用户提交的申请进行审核，并给出审核意见content
 // @Tags        管理
 // @Param       data body response.HandleApplicationQ true "data"
@@ -131,7 +131,7 @@ func HandleApplication(c *gin.Context) {
 }
 
 // UncheckedApplicationList 未审核的学者门户申请列表
-// @Summary     Vera
+// @Summary     显示未审核的申请列表 Vera
 // @Description 显示未审核的申请列表
 // @Tags        管理
 // @Accept      json

@@ -28,7 +28,7 @@ const docTemplate = `{
                 "tags": [
                     "管理"
                 ],
-                "summary": "Vera",
+                "summary": "申请学者门户 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -86,7 +86,7 @@ const docTemplate = `{
                 "tags": [
                     "管理"
                 ],
-                "summary": "Vera",
+                "summary": "审核学者门户申请 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -144,7 +144,7 @@ const docTemplate = `{
                 "tags": [
                     "管理"
                 ],
-                "summary": "Vera",
+                "summary": "显示未审核的申请列表 Vera",
                 "responses": {
                     "200": {
                         "description": "{\"success\": true, \"message\": \"获取成功\", \"status\": 200, \"submits\": submits_arr, \"submit_count\": len(submits)}",
@@ -161,7 +161,7 @@ const docTemplate = `{
                 "tags": [
                     "esSearch"
                 ],
-                "summary": "txc",
+                "summary": "根据id获取对象 txc",
                 "parameters": [
                     {
                         "type": "string",
@@ -205,7 +205,7 @@ const docTemplate = `{
                 "tags": [
                     "esSearch"
                 ],
-                "summary": "hr",
+                "summary": "根据author的id获取专家关系网络 hr",
                 "parameters": [
                     {
                         "enum": [
@@ -242,7 +242,7 @@ const docTemplate = `{
                 "tags": [
                     "esSearch"
                 ],
-                "summary": "hr",
+                "summary": "根据前缀得到搜索建议，返回results 字符串数组 hr",
                 "parameters": [
                     {
                         "type": "string",
@@ -293,7 +293,7 @@ const docTemplate = `{
                 "tags": [
                     "esSearch"
                 ],
-                "summary": "txc",
+                "summary": "高级搜索 txc",
                 "parameters": [
                     {
                         "description": "data",
@@ -320,7 +320,7 @@ const docTemplate = `{
                 "tags": [
                     "esSearch"
                 ],
-                "summary": "txc",
+                "summary": "基本搜索 txc",
                 "parameters": [
                     {
                         "description": "搜索条件",
@@ -354,7 +354,7 @@ const docTemplate = `{
                 "tags": [
                     "esSearch"
                 ],
-                "summary": "txc",
+                "summary": "使用doi查找work，未测试，请勿使用 txc",
                 "parameters": [
                     {
                         "type": "string",
@@ -373,7 +373,7 @@ const docTemplate = `{
                 "tags": [
                     "esSearch"
                 ],
-                "summary": "txc",
+                "summary": "获取统计信息 txc",
                 "responses": {
                     "200": {
                         "description": "{\"res\":{}}",
@@ -402,7 +402,7 @@ const docTemplate = `{
                 "tags": [
                     "用户"
                 ],
-                "summary": "ccf",
+                "summary": "登录 ccf",
                 "parameters": [
                     {
                         "description": "data",
@@ -448,7 +448,7 @@ const docTemplate = `{
                 "tags": [
                     "用户"
                 ],
-                "summary": "ccf",
+                "summary": "注册 ccf",
                 "parameters": [
                     {
                         "description": "data",
@@ -488,7 +488,7 @@ const docTemplate = `{
                 "tags": [
                     "scholar"
                 ],
-                "summary": "txc",
+                "summary": "添加user的关注关键词 txc",
                 "parameters": [
                     {
                         "description": "data",
@@ -549,11 +549,11 @@ const docTemplate = `{
         },
         "/scholar/hot": {
             "get": {
-                "description": "获取热门文章（根据访问量）",
+                "description": "获取热门论文（根据访问量）",
                 "tags": [
                     "scholar"
                 ],
-                "summary": "txc",
+                "summary": "获取热门论文（根据访问量） txc",
                 "responses": {
                     "200": {
                         "description": "{\"msg\":\"获取成功\",\"data\":{}}",
@@ -570,16 +570,293 @@ const docTemplate = `{
                 }
             }
         },
-        "/scholar/roll": {
-            "get": {
-                "description": "获取用户推荐的文章 请勿使用",
+        "/scholar/ignore": {
+            "post": {
+                "description": "学者管理主页--忽略论文 通过重复调用该接口可以完成论文的忽略与取消忽略",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "scholar"
                 ],
-                "summary": "txc",
+                "summary": "学者管理主页--忽略论文 hr 未测试",
+                "parameters": [
+                    {
+                        "description": "author_id 是作者的id",
+                        "name": "author_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "work_id 是论文的id",
+                        "name": "work_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "ignore 是当前论文的忽略状态",
+                        "name": "ignore",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"忽略成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"忽略失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/modify": {
+            "post": {
+                "description": "学者管理主页--修改论文顺序",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "学者管理主页--修改论文顺序 hr 未测试",
+                "parameters": [
+                    {
+                        "description": "author_id 是作者的id",
+                        "name": "author_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "work_id 是论文的id",
+                        "name": "work_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "direction 是论文的移动方向，1为向上，-1为向下",
+                        "name": "direction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"修改成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"未找到该论文\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"论文已经在顶部\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"msg\":\"论文已经在底部\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "{\"msg\":\"修改失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/roll": {
+            "get": {
+                "description": "获取用户推荐的论文 请勿使用",
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "获取用户推荐的论文 请勿使用 txc",
                 "responses": {
                     "200": {
                         "description": "{\"msg\":\"获取成功\",\"data\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/top": {
+            "post": {
+                "description": "学者管理主页--置顶论文 通过重复调用而取消置顶",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "学者管理主页--置顶论文 hr 未测试",
+                "parameters": [
+                    {
+                        "description": "author_id 是作者的id",
+                        "name": "author_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "work_id 是论文的id",
+                        "name": "work_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"置顶成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"未找到该论文\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"修改失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/works": {
+            "get": {
+                "description": "获取学者的论文",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "获取学者的论文 hr 未测试",
+                "parameters": [
+                    {
+                        "description": "author_id 是作者的id",
+                        "name": "author_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "page 获取第几页的数据",
+                        "name": "page",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "page_size 是分页的大小",
+                        "name": "page_size",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"作者不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"该作者没有论文\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -599,7 +876,7 @@ const docTemplate = `{
                 "tags": [
                     "社交"
                 ],
-                "summary": "Vera",
+                "summary": "用户可以在某一篇文献的评论区中发表自己的评论 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -646,7 +923,7 @@ const docTemplate = `{
                 "tags": [
                     "社交"
                 ],
-                "summary": "Vera",
+                "summary": "用户可以对某一评论进行点赞 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -698,7 +975,7 @@ const docTemplate = `{
                 "tags": [
                     "社交"
                 ],
-                "summary": "Vera",
+                "summary": "显示文献评论列表，时间倒序 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -738,7 +1015,7 @@ const docTemplate = `{
                 "tags": [
                     "社交"
                 ],
-                "summary": "Vera",
+                "summary": "取消点赞 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -795,7 +1072,7 @@ const docTemplate = `{
                 "tags": [
                     "社交"
                 ],
-                "summary": "txc",
+                "summary": "关注学者 包括了关注和取消关注（通过重复调用来实现） txc",
                 "parameters": [
                     {
                         "description": "data",
@@ -842,7 +1119,7 @@ const docTemplate = `{
                 "tags": [
                     "社交"
                 ],
-                "summary": "txc",
+                "summary": "获取用户关注的学者 txc",
                 "parameters": [
                     {
                         "description": "data",
@@ -895,7 +1172,7 @@ const docTemplate = `{
                 "tags": [
                     "社交"
                 ],
-                "summary": "Vera",
+                "summary": "将某篇文献加入到某一收藏夹下 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -953,7 +1230,7 @@ const docTemplate = `{
                 "tags": [
                     "社交"
                 ],
-                "summary": "Vera",
+                "summary": "用户可以按照需要建立收藏夹 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -1044,7 +1321,7 @@ const docTemplate = `{
                 "tags": [
                     "社交"
                 ],
-                "summary": "Vera",
+                "summary": "返回某一收藏夹内的文献信息 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -1108,7 +1385,7 @@ const docTemplate = `{
                 "tags": [
                     "社交"
                 ],
-                "summary": "Vera",
+                "summary": "显示用户建立的所有收藏夹 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -1148,7 +1425,7 @@ const docTemplate = `{
                 "tags": [
                     "用户"
                 ],
-                "summary": "ccf",
+                "summary": "上传用户头像 ccf",
                 "parameters": [
                     {
                         "type": "string",
@@ -1211,7 +1488,7 @@ const docTemplate = `{
                 "tags": [
                     "用户"
                 ],
-                "summary": "ccf",
+                "summary": "查看用户个人信息 ccf",
                 "parameters": [
                     {
                         "type": "string",
@@ -1249,7 +1526,7 @@ const docTemplate = `{
                 "tags": [
                     "用户"
                 ],
-                "summary": "ccf",
+                "summary": "编辑用户信息 ccf",
                 "parameters": [
                     {
                         "description": "data",
@@ -1285,7 +1562,7 @@ const docTemplate = `{
         },
         "/user/pwd": {
             "post": {
-                "description": "编辑用户信息",
+                "description": "编辑用户密码",
                 "consumes": [
                     "application/json"
                 ],
@@ -1295,7 +1572,7 @@ const docTemplate = `{
                 "tags": [
                     "用户"
                 ],
-                "summary": "ccf",
+                "summary": "编辑用户密码 ccf",
                 "parameters": [
                     {
                         "description": "data",

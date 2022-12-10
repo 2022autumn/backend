@@ -134,7 +134,7 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 
 	// 4. 获取author_id对应的author的所有作品
 	works := make([]map[string]interface{}, 0)
-	getAllWorksByUrl(works_api_url, &works)
+	GetAllWorksByUrl(works_api_url, &works)
 
 	Vertex_set = make([]map[string]interface{}, 0)
 	Edge_set = make([]map[string]interface{}, 0)
@@ -258,7 +258,7 @@ func GetWorksByUrl(works_api_url string, page int, works *[]map[string]interface
 }
 
 // getAllWorksByUrl 获取作者的所有作品的列表
-func getAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (err error) {
+func GetAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (err error) {
 	total_pages, err := GetWorksByUrl(works_api_url, 1, works)
 	if err != nil {
 		log.Println("GetWorksByUrl err: ", err)
