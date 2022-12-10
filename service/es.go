@@ -51,7 +51,7 @@ func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
 	workIndex := "works_v1"
 	service := global.ES.Search().Index(workIndex).Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
 	addAggToSearch(service, aggs)
-	addHighlightToSearch(service, fields)
+	// addHighlightToSearch(service, fields)
 	if sortType == 0 {
 		res, err = service.From((page - 1) * size).Do(context.Background())
 	} else if sortType == 1 {
