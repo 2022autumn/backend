@@ -502,6 +502,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/scholar/hot": {
+            "get": {
+                "description": "获取热门文章（根据访问量）",
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "txc",
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"获取失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/roll": {
+            "get": {
+                "description": "获取用户推荐的文章 请勿使用",
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "txc",
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/social/comment/create": {
             "post": {
                 "description": "用户可以在某一篇文献的评论区中发表自己的评论",

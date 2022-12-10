@@ -22,3 +22,19 @@ func DeleteUserConcept(uc *database.UserConcept) (err error) {
 	err = global.DB.Delete(uc).Error
 	return err
 }
+func GetWorkView(work_id string) (work database.WorkView, notFound bool) {
+	notFound = global.DB.Where("work_id = ?", work_id).First(&work).RecordNotFound()
+	return work, notFound
+}
+func SaveWorkView(work *database.WorkView) (err error) {
+	err = global.DB.Save(work).Error
+	return err
+}
+func CreateWorkView(work *database.WorkView) (err error) {
+	err = global.DB.Create(work).Error
+	return err
+}
+func GetHotWorks(size int) (works []database.WorkView, err error) {
+	err = global.DB.Order("views desc").Limit(size).Find(&works).Error
+	return works, err
+}

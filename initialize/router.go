@@ -35,7 +35,6 @@ func SetupRouter(r *gin.Engine) {
 		baseGroup.POST("/user/headshot", v1.UploadHeadshot) //上传用户头像
 		baseGroup.Static("/media", "./media")
 	}
-
 	ApplicationRouter := baseGroup.Group("/application")
 	{
 		ApplicationRouter.POST("/create", v1.CreateApplication)
@@ -64,6 +63,8 @@ func SetupRouter(r *gin.Engine) {
 	scholarGroup := baseGroup.Group("/scholar")
 	{
 		scholarGroup.POST("/concept", v1.AddUserConcept, middleware.AuthRequired())
+		scholarGroup.GET("/roll", v1.RollWorks)
+		scholarGroup.GET("/hot", v1.GetHotWorks)
 	}
 }
 

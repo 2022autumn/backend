@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
 	"IShare/utils"
@@ -111,6 +112,24 @@ func GetObject(c *gin.Context) {
 		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := tmp["related_works"].([]interface{})
 		tmp["related_works"] = TransRefs2Cited(related_works)
+		wv, notFound := service.GetWorkView(id)
+		if notFound {
+			wv = database.WorkView{
+				WorkID:    id,
+				Views:     1,
+				WorkTitle: tmp["title"].(string),
+			}
+			err := service.CreateWorkView(&wv)
+			if err != nil {
+				println("create work view err")
+			}
+		} else {
+			wv.Views += 1
+			err := service.SaveWorkView(&wv)
+			if err != nil {
+				println("save work view err")
+			}
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"data":   tmp,

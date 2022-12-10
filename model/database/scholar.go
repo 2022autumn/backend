@@ -58,3 +58,8 @@ type UserConcept struct {
 	UserID    uint64 `gorm:"not null;" json:"user_id"`
 	ConceptID string `gorm:"not null;" json:"concept_id"`
 }
+type WorkView struct {
+	WorkID    string `gorm:"primary_key;not null;" json:"work_id"`
+	Views     int    `gorm:"not null;default:0" json:"views"`
+	WorkTitle string `gorm:"not null;" json:"work_title"`
+}
