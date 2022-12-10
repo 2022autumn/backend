@@ -36,3 +36,12 @@ type AuthorRelationNet struct {
 	Vertex_set []map[string]interface{}
 	Edge_set   []map[string]interface{}
 }
+
+type PrefixSuggestionQ struct {
+	Field  string
+	Prefix string
+}
+
+type PrefixSuggestionA struct {
+	Suggestions []string
+}

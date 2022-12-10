@@ -45,9 +45,12 @@ func CloseFile(file *os.File) {
 }
 
 func TransObjPrefix(id string) (ty string, err error) {
+	if len(id) == 0 {
+		return "", errors.New("id is empty")
+	}
 	switch id[0] {
 	case 'W':
-		return "works", nil
+		return "works_v1", nil
 	case 'A':
 		return "authors", nil
 	case 'I':

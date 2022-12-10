@@ -1,11 +1,14 @@
 package v1
 
 import (
+	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
 	"IShare/utils"
 	"encoding/json"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic/v7"
@@ -15,11 +18,13 @@ func GetWorkCited(w json.RawMessage) string {
 	var work = make(map[string]interface{})
 	_ = json.Unmarshal(w, &work)
 	var cited string
-	for _, v := range work["authorships"].([]interface{}) {
+	for i, v := range work["authorships"].([]interface{}) {
 		authorship := v.(map[string]interface{})
-		if authorship["author_position"] == "first" {
+		if i <= 2 {
 			author := authorship["author"].(map[string]interface{})
 			cited += author["display_name"].(string) + ", "
+		} else {
+			break
 		}
 	}
 	cited += "\"" + work["title"].(string) + "\""
@@ -28,17 +33,17 @@ func GetWorkCited(w json.RawMessage) string {
 			cited += "," + work["host_venue"].(map[string]interface{})["display_name"].(string)
 		}
 	}
-	cited += "."
+	cited += "," + strconv.Itoa(int(work["publication_year"].(float64))) + "."
 	return cited
 }
 
 func TransRefs2Cited(refs []interface{}) []map[string]string {
-	var newReferencedWorks []map[string]string
+	var newReferencedWorks = make([]map[string]string, 0)
 	var ids []string
 	for _, v := range refs {
 		ids = append(ids, v.(string))
 	}
-	works, _ := service.GetObjects("works", ids)
+	works, _ := service.GetObjects("works_v1", ids)
 	if works != nil {
 		for i, v := range works.Docs {
 			if v.Found == true {
@@ -53,59 +58,117 @@ func TransRefs2Cited(refs []interface{}) []map[string]string {
 	}
 	return newReferencedWorks
 }
+func TransRefs2Intro(refs []interface{}) []map[string]interface{} {
+	var newReferencedWorks = make([]map[string]interface{}, 0)
+	var ids []string
+	for _, v := range refs {
+		ids = append(ids, v.(string))
+	}
+	works, _ := service.GetObjects("works_v1", ids)
+	if works != nil {
+		for i, v := range works.Docs {
+			if v.Found == true {
+				var work = make(map[string]interface{})
+				_ = json.Unmarshal(v.Source, &work)
+				var host_venue = make(map[string]interface{})
+				var newRef = map[string]interface{}{
+					"id":               ids[i],
+					"title":            work["title"],
+					"publication_year": work["publication_year"],
+				}
+				if work["host_venue"] != nil {
+					host_venue = work["host_venue"].(map[string]interface{})
+					newRef["host_venue"] = host_venue["display_name"]
+				} else {
+					newRef["host_venue"] = ""
+				}
+				newReferencedWorks = append(newReferencedWorks, newRef)
+			} else {
+				println(ids[i] + " not found")
+			}
+		}
+	}
+	return newReferencedWorks
+}
 
 // GetObject
 // @Summary     txc
-// @Description 根据id获取对象，可以是author，work，institution,venue,concept
-// @Tags        esSearch
-// @Param       id  query    string true "id"
-// @Success     200 {string} json   "{"status":200,"res":{obeject}}"
-// @Failure     404 {string} json   "{"status":201,"msg":"es get err or not found"}"
-// @Failure     400 {string} json   "{"status":400,"msg":"id type error"}"
+// @Description 根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759
+// @Tags    esSearch
+// @Param       id     query    string true  "对象id"
+// @Param       userid query    string false "用户id"
+// @Success     200    {string} json   "{"status":200,"res":{}}"
+// @Failure     404    {string} json   "{"status":201,"msg":"es get err or not found"}"
+// @Failure     400    {string} json   "{"status":400,"msg":"id type error"}"
 // @Router      /es/get/ [GET]
 func GetObject(c *gin.Context) {
 	id := c.Query("id")
-	if id == "" {
-		c.JSON(400, gin.H{
-			"status": 400,
-			"msg":    "id type error",
-		})
-		return
-	}
+	userid := c.Query("userid")
 	idx, err := utils.TransObjPrefix(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status": 400,
-			"msg":    "id type error",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "id type error"})
 		return
 	}
 	res, err := service.GetObject(idx, id)
 	if err != nil {
-		c.JSON(404, gin.H{
-			"msg":    "es get err or not found",
-			"status": 404,
-		})
+		c.JSON(404, gin.H{"msg": "es get err or not found"})
 		return
 	}
-	if idx == "works" && res.Found == true {
-		var tmp = make(map[string]interface{})
-		_ = json.Unmarshal(res.Source, &tmp)
+	var tmp = make(map[string]interface{})
+	_ = json.Unmarshal(res.Source, &tmp)
+	if userid != "" {
+		userid, _ := strconv.ParseUint(userid, 0, 64)
+		ucs, err := service.GetUserConcepts(userid)
+		if err != nil {
+			c.JSON(405, gin.H{"msg": "get user concepts err"})
+			return
+		}
+		if tmp["concepts"] != nil {
+			concepts := tmp["concepts"].([]interface{})
+			for _, c := range concepts {
+				concept := c.(map[string]interface{})
+				conceptid := concept["id"].(string)
+				var flag = false
+				for i, uc := range ucs {
+					if conceptid == uc.ConceptID {
+						concept["islike"] = true
+						flag = true
+						ucs = append(ucs[:i], ucs[i+1:]...)
+						break
+					}
+				}
+				if flag == false {
+					concept["islike"] = false
+				}
+			}
+		}
+	}
+	if idx == "works_v1" {
 		referenced_works := tmp["referenced_works"].([]interface{})
 		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := tmp["related_works"].([]interface{})
-		tmp["related_works"] = TransRefs2Cited(related_works)
-		c.JSON(http.StatusOK, gin.H{
-			"data":   tmp,
-			"status": 200,
-		})
-		return
-	}
-	var data = response.GetObjectA{
-		RawMessage: res.Source,
+		tmp["related_works"] = TransRefs2Intro(related_works)
+		wv, notFound := service.GetWorkView(id)
+		if notFound {
+			wv = database.WorkView{
+				WorkID:    id,
+				Views:     1,
+				WorkTitle: tmp["title"].(string),
+			}
+			err := service.CreateWorkView(&wv)
+			if err != nil {
+				println("create work view err")
+			}
+		} else {
+			wv.Views += 1
+			err := service.SaveWorkView(&wv)
+			if err != nil {
+				println("save work view err")
+			}
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"data":   data,
+		"data":   tmp,
 		"status": 200,
 	})
 }
@@ -273,10 +336,10 @@ func DoiSearch(c *gin.Context) {
 // @Description 目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低
 // @Description
 // @Tags        esSearch
-// @Param       author_id  query    string true "author_id" Enums(A2764814280, A2900471938, A2227665069)
-// @Success     200 {object} response.AuthorRelationNet "{"data":{ "Vertex_set":[], "Edge_set":[]}}"
-// @Failure     201 {string} json   "{"msg":"Get Author Relation Net Error"}"
-// @Router      /es/getAuthorRelationNet [GET]
+// @Param   author_id query    string                     true "author_id" Enums(A2764814280, A2900471938, A2227665069)
+// @Success 200       {object} response.AuthorRelationNet "{"res":{ "Vertex_set":[], "Edge_set":[]}}"
+// @Failure 201       {string} json                       "{"msg":"Get Author Relation Net Error"}"
+// @Router  /es/getAuthorRelationNet [GET]
 func GetAuthorRelationNet(c *gin.Context) {
 	author_id := c.Query("author_id")
 	var err error
@@ -290,7 +353,7 @@ func GetAuthorRelationNet(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{
-		"data": data,
+		"res": data,
 	})
 }
 
@@ -308,8 +371,8 @@ func GetWorksOfAuthorByUrl(c *gin.Context) {
 // @Summary     txc
 // @Description 获取统计信息
 // @Tags        esSearch
-// @Success     200 {string} json   "{"res":{}}"
-// @Failure     301 {string} json   "{"err":{}}"
+// @Success     200 {string} json "{"res":{}}"
+// @Failure     301 {string} json "{"err":{}}"
 // @Router      /es/statistic [GET]
 func GetStatistics(c *gin.Context) {
 	res, err := service.GetStatistics()
@@ -318,4 +381,30 @@ func GetStatistics(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"res": res})
+}
+
+// GetPrefixSuggestion doc
+// @Summary     hr
+// @description 根据前缀得到搜索建议，返回results 字符串数组
+// @Tags esSearch
+// @Param Field query string true "Field 表示需要查询的字段名"
+// @Param Prefix query string true "Prefix 表示用户已经输入的前缀"
+// @Success 200 {string} string "{"success": true, "msg": "获取成功"}"
+// @Failure 400 {string} string "{"success": false, "msg": 参数错误"}"
+// @Failure 402 {string} string "{"success": false, "msg": "es服务出错"}"
+// @Router /es/prefix [POST]
+func GetPrefixSuggestions(c *gin.Context) {
+	var d response.PrefixSuggestionQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "msg": "参数错误"})
+		panic(err)
+	}
+	index, field, prefix, topN := "works_v1", d.Field, d.Prefix, 5
+	log.Println("index:", index, "field:", field, "prefix:", prefix, "topN:", topN)
+	prefixResult, err := service.PrefixSearch(index, field, prefix, topN)
+	if err != nil {
+		c.JSON(402, gin.H{"success": false, "msg": "es服务出错", "err": err})
+		panic(err)
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "msg": "获取成功", "res": prefixResult})
 }

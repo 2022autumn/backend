@@ -19,43 +19,38 @@ import (
 var LIMITCOUNT = 10000000
 
 func GetWork(boolQuery *elastic.BoolQuery) (res *elastic.SearchResult, err error) {
-	return global.ES.Search().Index("works").Query(boolQuery).Do(context.Background())
+	return global.ES.Search().Index("works_v1").Query(boolQuery).Do(context.Background())
 }
+
+// 通过ids批量获取对象，multiGet
 func GetObjects(index string, ids []string) (res *elastic.MgetResponse, err error) {
 	mgetService := global.ES.MultiGet()
 	for _, id := range ids {
+		if index == "works" {
+			index = "works_v1"
+		}
 		mgetService.Add(elastic.NewMultiGetItem().Index(index).Id(id))
 	}
 	return mgetService.Do(context.Background())
 }
+
+// 通过id获取对象，get
 func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 	//termQuery := elastic.NewMatchQuery("id", id)
 	//return global.ES.Search().Index(index).Query(termQuery).Do(context.Background())
+	if index == "works" {
+		index = "works_v1"
+	}
 	return global.ES.Get().Index(index).Id(id).Do(context.Background())
 }
+
+// 通用搜索，针对works
 func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
-	sortType int, ascending bool, aggs map[string]bool) (
-	*elastic.SearchResult, error) {
-	//typesAgg := elastic.NewTermsAggregation().Field("type.keyword")
-	//institutionsAgg := elastic.NewTermsAggregation().Field("authorships.institutions.display_name.keyword")
-	//publishersAgg := elastic.NewTermsAggregation().Field("host_venue.publisher.keyword")
-	//venuesAgg := elastic.NewTermsAggregation().Field("host_venue.display_name.keyword")
-	//authorsAgg := elastic.NewTermsAggregation().Field("authorships.author.display_name.keyword").Size(30)
-	//minDateAgg, maxYearAgg := elastic.NewMinAggregation().Field("publication_year"), elastic.NewMaxAggregation().Field("publication_year")
-	//publicationYearAgg := elastic.NewTermsAggregation().Field("publication_year")
+	sortType int, ascending bool, aggs map[string]bool) (res *elastic.SearchResult, err error) {
 	timeout := global.VP.GetString("es.timeout")
-	service := global.ES.Search().Index("works").Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
+	workIndex := "works_v1"
+	service := global.ES.Search().Index(workIndex).Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
 	addAggToSearch(service, aggs)
-	//Aggregation("types", typesAgg).
-	//Aggregation("institutions", institutionsAgg).
-	//Aggregation("venues", venuesAgg).
-	//Aggregation("publishers", publishersAgg).
-	//Aggregation("authors", authorsAgg).
-	//Aggregation("publication_years", publicationYearAgg)
-	//Aggregation("min_year", minDateAgg).
-	//Aggregation("max_year", maxYearAgg)
-	var res *elastic.SearchResult
-	var err error
 	if sortType == 0 {
 		res, err = service.From((page - 1) * size).Do(context.Background())
 	} else if sortType == 1 {
@@ -65,6 +60,8 @@ func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
 	}
 	return res, err
 }
+
+//
 func addAggToSearch(service *elastic.SearchService, aggNames map[string]bool) *elastic.SearchService {
 	if aggNames["types"] {
 		service = service.Aggregation("types",
@@ -185,6 +182,7 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 	return TopVertex_set, TopEdge_set, nil
 }
 
+// GetTopN 获取Top N 的Vertex和Edge
 func GetTopN(Vertex_set *[]map[string]interface{}, Edge_set *[]map[string]interface{}, TopVertex_set *[]map[string]interface{}, TopEdge_set *[]map[string]interface{}, n int) {
 	// 1. 获取Top N 的Edge
 	sort.Slice(*Edge_set, func(i, j int) bool {
@@ -215,6 +213,7 @@ exit:
 	}
 }
 
+// GetWorksByUrl 获取作者的作品，分页获取并返回总页数
 func GetWorksByUrl(works_api_url string, page int, works *[]map[string]interface{}) (total_pages int, err error) {
 	request_url := works_api_url + "&page=" + strconv.Itoa(page)
 	resp, err := http.Get(request_url)
@@ -243,6 +242,7 @@ func GetWorksByUrl(works_api_url string, page int, works *[]map[string]interface
 	return
 }
 
+// getAllWorksByUrl 获取作者的所有作品的列表
 func getAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (err error) {
 	total_pages, err := GetWorksByUrl(works_api_url, 1, works)
 	if err != nil {
@@ -263,6 +263,7 @@ func getAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (er
 	return nil
 }
 
+// GetAuthorRelationNet 获取作者的关系网络，向上层提供接口
 func GetAuthorRelationNet(authorid string) (Vertex_set []map[string]interface{}, Edge_set []map[string]interface{}, err error) {
 	Vertex_set, Edge_set, err = ComputeAuthorRelationNet(authorid)
 	return Vertex_set, Edge_set, err
@@ -270,6 +271,7 @@ func GetAuthorRelationNet(authorid string) (Vertex_set []map[string]interface{},
 
 var DocDict = []string{"authors", "works", "institutions", "venues", "concepts"}
 
+// GetStatistics 获取学术数据的数目统计信息
 func GetStatistics() (map[string]int64, error) {
 	statistics := make(map[string]int64)
 	for _, doc := range DocDict {
@@ -281,4 +283,27 @@ func GetStatistics() (map[string]int64, error) {
 		statistics[doc] = count
 	}
 	return statistics, nil
+}
+
+// elasticsearch前缀查询,给出前缀prefix，返回前topN个搜索提示结果
+func PrefixSearch(index string, field string, prefix string, topN int) ([]string, error) {
+	query := elastic.NewMatchPhrasePrefixQuery(field, prefix)
+	// slop 参数告诉 match_phrase 查询词条相隔多远时仍然能将文档视为匹配 什么是相隔多远？ 意思是说为了让查询和文档匹配你需要移动词条多少次？
+	query = query.MaxExpansions(topN * 2).Slop(2) //最多扩展到topN*2个结果
+	searchResult, err := global.ES.Search().Index(index).Query(query).Size(topN).Do(context.Background())
+	if err != nil {
+		log.Println("PrefixSearch err: ", err)
+		return nil, err
+	}
+	results := make([]string, 0)
+	for _, hit := range searchResult.Hits.Hits {
+		item := make(map[string]interface{})
+		err := json.Unmarshal(hit.Source, &item)
+		if err != nil {
+			panic(err)
+		}
+		results = append(results, item[field].(string))
+	}
+	log.Println(results)
+	return results, nil
 }

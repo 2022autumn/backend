@@ -18,11 +18,11 @@ import (
 // @Summary     Vera
 // @Description 用户可以申请认领自己的学者门户
 // @Tags        管理
-// @Param       data body     response.CreateApplicationQ true "data"
+// @Param       data body response.CreateApplicationQ true "data"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"success": true, "application_id": submit.ApplicationID, "message": "申请提交成功", "status": 200}"
-// @Failure		401 {string} json "{"success": false, "message": "申请创建失败", "status": 401}"
+// @Failure     401 {string} json "{"success": false, "message": "申请创建失败", "status": 401}"
 // @Failure     404 {string} json "{"success": false, "message": "没有该用户", "status": 404}"
 // @Failure     405 {string} json "{"success": false, "message": "该作者已被认领", "status": 405, "the_authorname": the_submit.AuthorName}"
 // @Failure     406 {string} json "{"success": false, "message": "您已经是认证学者，请勿重复申请", "status": 406}"
@@ -67,9 +67,8 @@ func CreateApplication(c *gin.Context) {
 
 	err := service.CreateApplication(&submit)
 	if err != nil {
-		panic(err)
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": "申请创建失败", "status": 401})
-		return
+		panic(err)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"success": true, "application_id": submit.ApplicationID, "message": "申请提交成功", "status": 200}) //, "papers": service.GetAuthorSomePapers(author_id, 100)})
@@ -79,11 +78,11 @@ func CreateApplication(c *gin.Context) {
 // @Summary     Vera
 // @Description 管理员对用户提交的申请进行审核，并给出审核意见content
 // @Tags        管理
-// @Param       data body     response.HandleApplicationQ true "data"
+// @Param       data body response.HandleApplicationQ true "data"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"success": true, "message": "申请审批成功", "status": 200}"
-// @Failure		401 {string} json "{"success": false, "message": "申请不存在", "status": 404}"
+// @Failure     401 {string} json "{"success": false, "message": "申请不存在", "status": 404}"
 // @Failure     405 {string} json "{"success": false, "message": "没有该用户", "status": 405}"
 // @Failure     406 {string} json "{"success": false, "message": "已审核过该申请", "status": 406}"
 // @Failure     403 {string} json "{"success": false, "message": "success 不为true false", "status": 403}"

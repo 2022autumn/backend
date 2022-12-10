@@ -27,12 +27,10 @@ func InitMySQL() {
 	}
 	// 迁移
 	global.DB.AutoMigrate(
-		//base
-		// &database.User{},
 		&database.Author{},
-		&database.Institution{},
-		&database.Venue{},
-		&database.AuthorConnection{},
+		//&database.Institution{},
+		//&database.Venue{},
+		//&database.AuthorConnection{},
 		&database.Application{},
 		&database.Comment{},
 		&database.Like{},
@@ -40,18 +38,19 @@ func InitMySQL() {
 		&database.TagPaper{},
 		&database.User{},
 		&database.UserFollow{},
+		&database.UserConcept{},
+		&database.WorkView{},
 	)
 	// 检查数据库连接是否存在, 好像没啥用
 	err = global.DB.DB().Ping()
 	if err != nil {
-		panic(fmt.Errorf("数据库出问题啦: %s \n", err))
+		panic(fmt.Errorf("数据库出问题啦: %s", err))
 	}
-	return
 }
 
 func CloseMySQL() {
 	err := global.DB.Close()
 	if err != nil {
-		panic(fmt.Errorf("数据库出问题啦: %s \n", err))
+		panic(fmt.Errorf("数据库出问题啦: %s", err))
 	}
 }

@@ -1,10 +1,19 @@
-.PHONY: filter clean
+.PHONY: filter clean indexs bulk
+
+# 创建测试文件
 filter:
-	cat /data/openalex/works/works_data_20.json > ./work.json
-	cat /data/openalex/authors/authors_data_20.json > ./author.json
-	cat /data/openalex/institutions/institutions_data_1.json > ./institution.json
-	cat /data/openalex/concepts/concepts_data_1.json > ./concept.json
-	cat /data/openalex/venues/venues_data_1.json > ./venue.json
+	bash create_testdata.sh
+
+# 创建index
+indexs:
+	bash create_indexs.sh
+
+reindex:
+	bash reindex.sh
+
+# 执行bulker
+bulk:
+	go run bulker.go > bulk.log 2>bulkproc.log
 
 clean:
 	rm -f *.json

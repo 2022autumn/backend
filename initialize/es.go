@@ -14,10 +14,9 @@ import (
 
 func InitElasticSearch() {
 	host := global.VP.GetString("es.host")
-	eslog, err := os.OpenFile(global.VP.GetString("es.logpath"), os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	eslog, err := os.OpenFile(global.VP.GetString("es.logpath"), os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
 		panic(fmt.Errorf("open es log file err: %v", err))
-		return
 	}
 	client, err := elastic.NewClient(
 		elastic.SetURL(host),

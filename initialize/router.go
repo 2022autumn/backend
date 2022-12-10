@@ -35,29 +35,27 @@ func SetupRouter(r *gin.Engine) {
 		baseGroup.POST("/user/headshot", v1.UploadHeadshot) //上传用户头像
 		baseGroup.Static("/media", "./media")
 	}
-
 	ApplicationRouter := baseGroup.Group("/application")
 	{
 		ApplicationRouter.POST("/create", v1.CreateApplication)
 		ApplicationRouter.POST("/handle", v1.HandleApplication)
 		ApplicationRouter.POST("/list", v1.UncheckedApplicationList)
 	}
-	// {
-	// 	baseGroup.Static("/media", "./media")
-	// }
 	SocialRouter := baseGroup.Group("/social")
 	{
-		SocialRouter.POST("/comment/create", v1.CreateComment)
+		SocialRouter.POST("/comment/create", v1.CreateComment, middleware.AuthRequired())
 		SocialRouter.POST("/comment/like", v1.LikeComment)
 		SocialRouter.POST("/comment/unlike", v1.UnLikeComment)
 		SocialRouter.POST("/comment/list", v1.ShowPaperCommentList)
-		SocialRouter.POST("/follow", v1.FollowAuthor)
-		SocialRouter.POST("/follow/list", v1.GetUserFollows)
+		//SocialRouter.POST("/follow", v1.FollowAuthor)
+		//SocialRouter.POST("/follow/list", v1.GetUserFollows)
 		SocialRouter.POST("/tag/create", v1.CreateTag)
 		SocialRouter.POST("/tag/collectPaper", v1.AddTagToPaper)
 		SocialRouter.POST("/tag/sublist", v1.ShowTagPaperList)
 		SocialRouter.POST("/tag/taglist", v1.ShowUserTagList)
 		SocialRouter.POST("/tag/delete", v1.DeleteTag)
+		SocialRouter.POST("/follow", v1.FollowAuthor, middleware.AuthRequired())
+		SocialRouter.POST("/follow/list", v1.GetUserFollows, middleware.AuthRequired())
 	}
 	esGroup := baseGroup.Group("/es")
 	{
@@ -68,12 +66,14 @@ func SetupRouter(r *gin.Engine) {
 		esGroup.POST("/search/advanced", v1.AdvancedSearch)
 		esGroup.GET("/getAuthorRelationNet", v1.GetAuthorRelationNet)
 		esGroup.GET("/getWorksOfAuthorByUrl", v1.GetWorksOfAuthorByUrl)
+		esGroup.POST("/prefix", v1.GetPrefixSuggestions)
 	}
-	// userGroup := baseGroup.Group("/user", middleware.AuthRequired())
-	// {
-	// 	userGroup.POST("/upload_avatar", v1.UploadAvatar)
-	// }
-
+	scholarGroup := baseGroup.Group("/scholar")
+	{
+		scholarGroup.POST("/concept", v1.AddUserConcept, middleware.AuthRequired())
+		scholarGroup.GET("/roll", v1.RollWorks)
+		scholarGroup.GET("/hot", v1.GetHotWorks)
+	}
 }
 
 func testGin(c *gin.Context) {

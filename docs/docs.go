@@ -157,7 +157,7 @@ const docTemplate = `{
         },
         "/es/get/": {
             "get": {
-                "description": "根据id获取对象，可以是author，work，institution,venue,concept",
+                "description": "根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759",
                 "tags": [
                     "esSearch"
                 ],
@@ -165,15 +165,21 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id",
+                        "description": "对象id",
                         "name": "id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户id",
+                        "name": "userid",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"status\":200,\"res\":{obeject}}",
+                        "description": "{\"status\":200,\"res\":{}}",
                         "schema": {
                             "type": "string"
                         }
@@ -216,13 +222,58 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"data\":{ \"Vertex_set\":[], \"Edge_set\":[]}}",
+                        "description": "{\"res\":{ \"Vertex_set\":[], \"Edge_set\":[]}}",
                         "schema": {
                             "$ref": "#/definitions/response.AuthorRelationNet"
                         }
                     },
                     "201": {
                         "description": "{\"msg\":\"Get Author Relation Net Error\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/es/prefix": {
+            "post": {
+                "description": "根据前缀得到搜索建议，返回results 字符串数组",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "hr",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Field 表示需要查询的字段名",
+                        "name": "Field",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Prefix 表示用户已经输入的前缀",
+                        "name": "Prefix",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\": true, \"msg\": \"获取成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"success\": false, \"msg\": 参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"success\": false, \"msg\": \"es服务出错\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -425,6 +476,117 @@ const docTemplate = `{
                 }
             }
         },
+        "/scholar/concept": {
+            "post": {
+                "description": "添加user的关注关键词",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.AddUserConceptQ"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"添加成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"用户不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"concept不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"msg\":\"添加失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "{\"msg\":\"删除失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/hot": {
+            "get": {
+                "description": "获取热门文章（根据访问量）",
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "txc",
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"获取失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/roll": {
+            "get": {
+                "description": "获取用户推荐的文章 请勿使用",
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "txc",
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/social/comment/create": {
             "post": {
                 "description": "用户可以在某一篇文献的评论区中发表自己的评论",
@@ -447,6 +609,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.CommentCreation"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -543,7 +712,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"data\":{\"comments\":[],\"paper_id\":\"string\"},\"message\":\"查找成功\",\"status\": 200, \"success\": true}",
+                        "description": "{\"data\":{\"comments\":[],\"paper_id\":\"string\"},\"message\":\"查找成功\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -554,8 +723,8 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
-                    "403": {
-                        "description": "{\"success\": false, \"status\":  403,\"message\": \"评论不存在\"}",
+                    "404": {
+                        "description": "{\"success\": false, \"status\":  403,\"message\": \"评论用户不存在\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -611,6 +780,11 @@ const docTemplate = `{
         },
         "/social/follow": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "关注学者 包括了关注和取消关注（通过重复调用来实现）",
                 "consumes": [
                     "application/json"
@@ -631,6 +805,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.FollowAuthorQ"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -671,6 +852,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.GetUserFollowsQ"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1162,6 +1350,21 @@ const docTemplate = `{
                 },
                 "tag_id": {
                     "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.AddUserConceptQ": {
+            "type": "object",
+            "required": [
+                "concept_id",
+                "user_id"
+            ],
+            "properties": {
+                "concept_id": {
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "integer"

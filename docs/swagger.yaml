@@ -12,6 +12,16 @@ definitions:
     - tag_id
     - user_id
     type: object
+  response.AddUserConceptQ:
+    properties:
+      concept_id:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - concept_id
+    - user_id
+    type: object
   response.AdvancedSearchQ:
     properties:
       asc:
@@ -341,16 +351,20 @@ paths:
       - 管理
   /es/get/:
     get:
-      description: 根据id获取对象，可以是author，work，institution,venue,concept
+      description: 根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759
       parameters:
-      - description: id
+      - description: 对象id
         in: query
         name: id
         required: true
         type: string
+      - description: 用户id
+        in: query
+        name: userid
+        type: string
       responses:
         "200":
-          description: '{"status":200,"res":{obeject}}'
+          description: '{"status":200,"res":{}}'
           schema:
             type: string
         "400":
@@ -382,11 +396,41 @@ paths:
         type: string
       responses:
         "200":
-          description: '{"data":{ "Vertex_set":[], "Edge_set":[]}}'
+          description: '{"res":{ "Vertex_set":[], "Edge_set":[]}}'
           schema:
             $ref: '#/definitions/response.AuthorRelationNet'
         "201":
           description: '{"msg":"Get Author Relation Net Error"}'
+          schema:
+            type: string
+      summary: hr
+      tags:
+      - esSearch
+  /es/prefix:
+    post:
+      description: 根据前缀得到搜索建议，返回results 字符串数组
+      parameters:
+      - description: Field 表示需要查询的字段名
+        in: query
+        name: Field
+        required: true
+        type: string
+      - description: Prefix 表示用户已经输入的前缀
+        in: query
+        name: Prefix
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"success": true, "msg": "获取成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"success": false, "msg": 参数错误"}'
+          schema:
+            type: string
+        "402":
+          description: '{"success": false, "msg": "es服务出错"}'
           schema:
             type: string
       summary: hr
@@ -532,6 +576,79 @@ paths:
       summary: ccf
       tags:
       - 用户
+  /scholar/concept:
+    post:
+      consumes:
+      - application/json
+      description: 添加user的关注关键词
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.AddUserConceptQ'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg":"添加成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"参数错误"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg":"用户不存在"}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg":"concept不存在"}'
+          schema:
+            type: string
+        "403":
+          description: '{"msg":"添加失败"}'
+          schema:
+            type: string
+        "404":
+          description: '{"msg":"删除失败"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - scholar
+  /scholar/hot:
+    get:
+      description: 获取热门文章（根据访问量）
+      responses:
+        "200":
+          description: '{"msg":"获取成功","data":{}}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"获取失败"}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - scholar
+  /scholar/roll:
+    get:
+      description: 获取用户推荐的文章 请勿使用
+      responses:
+        "200":
+          description: '{"msg":"获取成功","data":{}}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - scholar
   /social/comment/create:
     post:
       consumes:
@@ -544,6 +661,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.CommentCreation'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -608,16 +730,15 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"data":{"comments":[],"paper_id":"string"},"message":"查找成功","status":
-            200, "success": true}'
+          description: '{"data":{"comments":[],"paper_id":"string"},"message":"查找成功"}'
           schema:
             type: string
         "400":
           description: '{"status": 400, "msg": "用户ID不存在"}'
           schema:
             type: string
-        "403":
-          description: '{"success": false, "status":  403,"message": "评论不存在"}'
+        "404":
+          description: '{"success": false, "status":  403,"message": "评论用户不存在"}'
           schema:
             type: string
       summary: Vera
@@ -665,6 +786,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.FollowAuthorQ'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -676,6 +802,8 @@ paths:
           description: '{"err":err,"msg": "参数错误"}'
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: txc
       tags:
       - 社交
@@ -691,6 +819,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.GetUserFollowsQ'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
       produces:
       - application/json
       responses:

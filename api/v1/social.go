@@ -4,7 +4,6 @@ import (
 	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -15,7 +14,8 @@ import (
 // @Summary     Vera
 // @Description 用户可以在某一篇文献的评论区中发表自己的评论
 // @Tags        社交
-// @Param       data body     response.CommentCreation true "data"
+// @Param       data  body   response.CommentCreation true "data"
+// @Param       token header string                   true "token"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"success":true,"status":200,"msg":"评论创建成功","comment_id":string}"
@@ -32,6 +32,10 @@ func CreateComment(c *gin.Context) {
 	content := d.Content
 	userID := d.UserID
 	paper_id := d.PaperID
+	authuser, exist := c.Get("user")
+	if exist {
+		userID = authuser.(database.User).UserID
+	}
 	//userID, _ := strconv.ParseUint(user_id, 0, 64)
 	//验证用户是否存在
 	user, notFoundUserByID := service.QueryAUserByID(userID)
@@ -61,13 +65,13 @@ func CreateComment(c *gin.Context) {
 // LikeComment 点赞评论
 // @Summary     Vera
 // @Description 用户可以对某一评论进行点赞
-// @Tags 		社交
+// @Tags        社交
 // @Param       data body     response.CommentUser true "data"
-// @Success		200 {string} json "{"success": true,"status":200,"msg": "操作成功"}"
-// @Failure     400 {string} json "{"success": false,"status":400,"msg":"用户ID不存在"}"
-// @Failure 	402 {string} json "{"success": false,"status":402, "msg": "用户已赞过该评论"}"
-// @Failure 	403 {string} json "{"success": false,"status":403, "msg": "评论不存在"}"
-// @Router 		/social/comment/like [POST]
+// @Success     200  {string} json                 "{"success": true,"status":200,"msg": "操作成功"}"
+// @Failure     400  {string} json                 "{"success": false,"status":400,"msg":"用户ID不存在"}"
+// @Failure     402  {string} json                 "{"success": false,"status":402, "msg": "用户已赞过该评论"}"
+// @Failure     403  {string} json                 "{"success": false,"status":403, "msg": "评论不存在"}"
+// @Router      /social/comment/like [POST]
 func LikeComment(c *gin.Context) {
 	//user_id := c.Query("user_id")
 	//comment_id := c.Query("comment_id")
@@ -121,13 +125,13 @@ func LikeComment(c *gin.Context) {
 // UnLikeComment  取消点赞
 // @Summary     Vera
 // @Description 取消点赞
-// @Tags 		社交
-// @Param       data body	   response.CommentUser true "data"
-// @Success		200 {string} json "{"success": true,"status":200,"msg": "已取消点赞"}"
-// @Failure     400 {string} json "{"success": false,"status":400,"msg":"用户ID不存在"}"
-// @Failure 	402 {string} json "{"success": false,"status":402, "msg": "用户未点赞"}"
-// @Failure 	403 {string} json "{"success": false,"status":403, "msg": "评论不存在"}"
-// @Router 		/social/comment/unlike [POST]
+// @Tags        社交
+// @Param       data body     response.CommentUser true "data"
+// @Success     200  {string} json                 "{"success": true,"status":200,"msg": "已取消点赞"}"
+// @Failure     400  {string} json                 "{"success": false,"status":400,"msg":"用户ID不存在"}"
+// @Failure     402  {string} json                 "{"success": false,"status":402, "msg": "用户未点赞"}"
+// @Failure     403  {string} json                 "{"success": false,"status":403, "msg": "评论不存在"}"
+// @Router      /social/comment/unlike [POST]
 func UnLikeComment(c *gin.Context) {
 	//user_id := c.Query("user_id")
 	//comment_id := c.Query("comment_id")
@@ -187,24 +191,21 @@ func UnLikeComment(c *gin.Context) {
 // ShowPaperCommentList 取消点赞
 // @Summary     Vera
 // @Description 显示文献评论列表，时间倒序
-// @Tags 社交
-// @Param       data body     response.CommentListQuery true "data"
+// @Tags        社交
+// @Param       data body response.CommentListQuery true "data"
 // @Accept      json
 // @Produce     json
-// @Success 200 {string} string "{"data":{"comments":[],"paper_id":"string"},"message":"查找成功","status": 200, "success": true}"
-// @Failure 403 {string} string "{"success": false, "status":  403,"message": "评论不存在"}"
-// @Failure 400 {string} string "{"status": 400, "msg": "用户ID不存在"}"
-// @Router /social/comment/list [POST]
+// @Success     200 {string} string "{"data":{"comments":[],"paper_id":"string"},"message":"查找成功"}"
+// @Failure     404 {string} string "{"success": false, "status":  403,"message": "评论用户不存在"}"
+// @Failure     400 {string} string "{"status": 400, "msg": "用户ID不存在"}"
+// @Router      /social/comment/list [POST]
 func ShowPaperCommentList(c *gin.Context) {
-	//user_id := c.Query("user_id")
-	//paper_id := c.Query("paper_id")
 	var d response.CommentListQuery
 	if err := c.ShouldBind(&d); err != nil {
 		panic(err)
 	}
 	userID := d.UserID
 	paper_id := d.PaperID
-
 	//userID, _ := strconv.ParseUint(user_id, 0, 64)
 	//验证用户是否存在
 	_, notFoundUserByID := service.QueryAUserByID(userID)
@@ -215,29 +216,40 @@ func ShowPaperCommentList(c *gin.Context) {
 		})
 		return
 	}
-
 	comments := service.GetCommentsByPaperId(paper_id)
-	fmt.Println(comments)
-	if len(comments) == 0 {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"status":  403,
-			"message": "评论不存在",
-		})
-		return
-	}
-	err := false
-	var dataList []map[string]interface{}
+	//fmt.Println(comments)
+	//if len(comments) == 0 {
+	//	c.JSON(http.StatusOK, gin.H{
+	//		"success": false,
+	//		"status":  403,
+	//		"message": "评论不存在",
+	//	})
+	//	return
+	//}
+	var dataList = make([]map[string]interface{}, 0)
 	for _, comment := range comments {
 		var com = make(map[string]interface{})
-		com["id"] = comment.CommentID
-		com["like"] = comment.LikeNum
+		//com["id"] = comment.CommentID
+		//com["like"] = comment.LikeNum
 		//com["is_animating"] = false
-		com["is_like"] = false
-		if !err && service.GetLike_Rel(comment.CommentID, userID) {
-			com["is_like"] = true
-		}
+		//com["is_like"] = false
+		//if !err && service.GetLike_Rel(comment.CommentID, userID) {
+		//	com["is_like"] = true
+		//}
 		com["user_id"] = comment.UserID
+		//ccf-return Comment_User's username and headshot
+		user, notFoundUserByID := service.QueryAUserByID(comment.UserID)
+		if notFoundUserByID {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"status":  404,
+				"message": "评论用户不存在",
+			})
+			return
+		}
+		com["username"] = user.Username
+		com["headshot"] = user.HeadShot
+		com["userinfo"] = user.UserInfo
 		//com["username"] = comment.Username
 		com["content"] = comment.Content
 		com["time"] = comment.CommentTime
@@ -246,17 +258,11 @@ func ShowPaperCommentList(c *gin.Context) {
 		dataList = append(dataList, com)
 	}
 	// fmt.Println(dataList)
-
 	var data = make(map[string]interface{})
 	data["paper_id"] = paper_id
-
 	//data["paper_title"] = comments[0].PaperTitle
-
 	data["comments"] = dataList
-
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"status":  200,
 		"message": "查找成功",
 		"data":    data,
 	})
@@ -265,14 +271,17 @@ func ShowPaperCommentList(c *gin.Context) {
 // FollowAuthor 关注学者
 // @Summary     txc
 // @Description 关注学者 包括了关注和取消关注（通过重复调用来实现）
-// @Tags 社交
+// @Tags        社交
 // @Accept      json
 // @Produce     json
-// @Param       data body     response.FollowAuthorQ true "data"
-// @Success 200 {string} string "{"msg": "取消关注成功/关注成功"}"
-// @Failure 400 {string} string "{"err":err,"msg": "参数错误"}"
-// @Router /social/follow [POST]
+// @Param       data  body     response.FollowAuthorQ true "data"
+// @Param       token header   string                 true "token"
+// @Success     200   {string} string                 "{"msg": "取消关注成功/关注成功"}"
+// @Failure     400   {string} string                 "{"err":err,"msg": "参数错误"}"
+// @Router      /social/follow [POST]
+// @security    ApiKeyAuth
 func FollowAuthor(c *gin.Context) {
+	//authuser, _ := c.Get("user")
 	var d response.FollowAuthorQ
 	if err := c.ShouldBind(&d); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -316,14 +325,15 @@ func FollowAuthor(c *gin.Context) {
 // GetUserFollows
 // @Summary     txc
 // @Description 获取用户关注的学者
-// @Tags 社交
+// @Tags        社交
 // @Accept      json
 // @Produce     json
-// @Param       data body     response.GetUserFollowsQ true "data"
-// @Success 200 {string} string "{"msg": "查找成功","data":data,"count":count}"
-// @Failure 400 {string} string "{"err":err,"msg": "参数错误"}"
-// @Failure 401 {string} string "{"msg": "用户ID不存在"}"
-// @Router /social/follow/list [POST]
+// @Param       data  body     response.GetUserFollowsQ true "data"
+// @Param       token header   string                   true "token"
+// @Success     200   {string} string                   "{"msg": "查找成功","data":data,"count":count}"
+// @Failure     400   {string} string                   "{"err":err,"msg": "参数错误"}"
+// @Failure     401   {string} string                   "{"msg": "用户ID不存在"}"
+// @Router      /social/follow/list [POST]
 func GetUserFollows(c *gin.Context) {
 	var d response.GetUserFollowsQ
 	if err := c.ShouldBind(&d); err != nil {
