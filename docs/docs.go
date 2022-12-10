@@ -715,6 +715,12 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    "404": {
+                        "description": "{\"success\": false, \"status\":  403,\"message\": \"评论用户不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             }

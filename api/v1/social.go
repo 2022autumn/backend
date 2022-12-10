@@ -198,6 +198,7 @@ func UnLikeComment(c *gin.Context) {
 // @Produce     json
 // @Success     200 {string} string "{"data":{"comments":[],"paper_id":"string"},"message":"查找成功","status": 200, "success": true}"
 // @Failure     403 {string} string "{"success": false, "status":  403,"message": "评论不存在"}"
+// @Failure     404 {string} string "{"success": false, "status":  403,"message": "评论用户不存在"}"
 // @Failure     400 {string} string "{"status": 400, "msg": "用户ID不存在"}"
 // @Router      /social/comment/list [POST]
 func ShowPaperCommentList(c *gin.Context) {
@@ -243,6 +244,18 @@ func ShowPaperCommentList(c *gin.Context) {
 			com["is_like"] = true
 		}
 		com["user_id"] = comment.UserID
+		//ccf-return Comment_User's username and headshot
+		user, notFoundUserByID := service.QueryAUserByID(comment.UserID)
+		if notFoundUserByID {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"status":  404,
+				"message": "评论用户不存在",
+			})
+			return
+		}
+		com["username"] = user.Username
+		com["headshot"] = user.HeadShot
 		//com["username"] = comment.Username
 		com["content"] = comment.Content
 		com["time"] = comment.CommentTime

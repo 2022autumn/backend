@@ -695,6 +695,10 @@ paths:
           description: '{"success": false, "status":  403,"message": "评论不存在"}'
           schema:
             type: string
+        "404":
+          description: '{"success": false, "status":  403,"message": "评论用户不存在"}'
+          schema:
+            type: string
       summary: Vera
       tags:
       - 社交
