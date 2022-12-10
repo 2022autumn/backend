@@ -287,8 +287,9 @@ func GetStatistics() (map[string]int64, error) {
 
 // elasticsearch前缀查询,给出前缀prefix，返回前topN个搜索提示结果
 func PrefixSearch(index string, field string, prefix string, topN int) ([]string, error) {
-
 	query := elastic.NewMatchPhrasePrefixQuery(field, prefix)
+	// slop 参数告诉 match_phrase 查询词条相隔多远时仍然能将文档视为匹配 什么是相隔多远？ 意思是说为了让查询和文档匹配你需要移动词条多少次？
+	query = query.MaxExpansions(topN * 2).Slop(2) //最多扩展到topN*2个结果
 	searchResult, err := global.ES.Search().Index(index).Query(query).Size(topN).Do(context.Background())
 	if err != nil {
 		log.Println("PrefixSearch err: ", err)
