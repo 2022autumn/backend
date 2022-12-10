@@ -246,15 +246,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "name 表示需要查询的字段名",
-                        "name": "name",
+                        "description": "Field 表示需要查询的字段名",
+                        "name": "Field",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "prefix 表示用户已经输入的前缀",
-                        "name": "prefix",
+                        "description": "Prefix 表示用户已经输入的前缀",
+                        "name": "Prefix",
                         "in": "query",
                         "required": true
                     }
@@ -1538,7 +1538,6 @@ const docTemplate = `{
             ],
             "properties": {
                 "author_id": {
-                    "description": "Field           string ` + "`" + `json:\"field\" binding:\"required\"` + "`" + `",
                     "type": "string"
                 },
                 "author_name": {
