@@ -213,6 +213,8 @@ func BaseSearch(c *gin.Context) {
 	b2Query.Should(tiQuery, abQuery)
 	boolQuery.Must(b2Query)
 	var aggs = make(map[string]bool)
+	var fields = make([]string, 0)
+	fields = append(fields, "title", "abstract")
 	var aggList = [6]string{"types", "authors", "institutions", "publishers", "venues", "publication_years"}
 	for _, k := range aggList {
 		aggs[k] = true
@@ -223,7 +225,7 @@ func BaseSearch(c *gin.Context) {
 			boolQuery.Filter(elastic.NewMatchQuery(kk, v))
 		}
 	}
-	res, err := service.CommonWorkSearch(boolQuery, d.Page, d.Size, d.Sort, d.Asc, aggs)
+	res, err := service.CommonWorkSearch(boolQuery, d.Page, d.Size, d.Sort, d.Asc, aggs, fields)
 	if err != nil {
 		c.JSON(201, gin.H{
 			"status": 201,
@@ -262,7 +264,9 @@ func AdvancedSearch(c *gin.Context) {
 	}
 	boolQuery := elastic.NewBoolQuery()
 	subQuery := elastic.NewBoolQuery()
+	fields := make([]string, 0)
 	for _, i := range d.Query {
+		fields = append(fields, i["field"])
 		if i["logic"] == "and" {
 			if i["field"] == "publication_date" {
 				subQuery.Must(elastic.NewRangeQuery("publication_date").Gte(i["begin"]).Lte(i["end"]))
@@ -287,7 +291,7 @@ func AdvancedSearch(c *gin.Context) {
 			boolQuery.Filter(elastic.NewMatchQuery(kk, v))
 		}
 	}
-	res, err := service.CommonWorkSearch(boolQuery, d.Page, d.Size, d.Sort, d.Asc, aggs)
+	res, err := service.CommonWorkSearch(boolQuery, d.Page, d.Size, d.Sort, d.Asc, aggs, fields)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"status": 201,

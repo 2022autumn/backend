@@ -46,11 +46,12 @@ func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 
 // 通用搜索，针对works
 func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
-	sortType int, ascending bool, aggs map[string]bool) (res *elastic.SearchResult, err error) {
+	sortType int, ascending bool, aggs map[string]bool, fields []string) (res *elastic.SearchResult, err error) {
 	timeout := global.VP.GetString("es.timeout")
 	workIndex := "works_v1"
 	service := global.ES.Search().Index(workIndex).Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
 	addAggToSearch(service, aggs)
+	addHighlightToSearch(service, fields)
 	if sortType == 0 {
 		res, err = service.From((page - 1) * size).Do(context.Background())
 	} else if sortType == 1 {
@@ -61,7 +62,21 @@ func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
 	return res, err
 }
 
-//
+// 为搜索添加高亮
+func addHighlightToSearch(service *elastic.SearchService, fields []string) *elastic.SearchService {
+	// 定义highlight
+	highlight := elastic.NewHighlight()
+	// 指定需要高亮的字段
+	for _, field := range fields {
+		highlight = highlight.Fields(elastic.NewHighlighterField(field))
+	}
+	// 指定高亮的返回逻辑 <div style='color: red;'>...msg...</div>
+	highlight = highlight.PreTags("<div style='color: yellow;'>").PostTags("</div>")
+	service = service.Highlight(highlight)
+	return service
+}
+
+// 为搜索添加添加聚合
 func addAggToSearch(service *elastic.SearchService, aggNames map[string]bool) *elastic.SearchService {
 	if aggNames["types"] {
 		service = service.Aggregation("types",
