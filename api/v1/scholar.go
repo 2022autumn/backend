@@ -65,7 +65,6 @@ func AddUserConcept(c *gin.Context) {
 // @Summary     txc
 // @Description 获取用户推荐的文章 请勿使用
 // @Tags        scholar
-// @Param
 // @Success     200 {string} json "{"msg":"获取成功","data":{}}"
 // @Router      /scholar/roll [GET]
 func RollWorks(c *gin.Context) {
