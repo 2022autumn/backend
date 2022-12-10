@@ -6,10 +6,11 @@ import (
 	"IShare/service"
 	"IShare/utils"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/olivere/elastic/v7"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/olivere/elastic/v7"
 )
 
 func GetWorkCited(w json.RawMessage) string {
@@ -347,22 +348,27 @@ func GetStatistics(c *gin.Context) {
 	c.JSON(200, gin.H{"res": res})
 }
 
-// GetPrefixSuggestion
+// GetPrefixSuggestion doc
 // @Summary     hr
-// @Description 根据前缀串，获取智能联想
-// @Tags        esSearch
-// @Param		prefix	query	string	true	"prefix"
-// @Success     200 {string} json "{"res":{}}"
-// @Failure     301 {string} json "{"PrefixSearch Service err":{}}"
-// @Router      /es/prefix [GET]
-func GetPrefixSuggestions(c *gin.Context) {
-	prefix := c.Query("prefix")
-	res, err := service.PrefixSearch(prefix, 10)
-	if err != nil {
-		c.JSON(301, gin.H{"PrefixSearch Service err": err})
-		return
+// @description 根据前缀得到搜索建议，返回results 字符串数组
+// @Tags esSearch
+// @Param name query string true "name 表示需要查询的字段名"
+// @Param prefix query string true "prefix 表示用户已经输入的前缀"
+// @Success 200 {string} string "{"success": true, "msg": "获取成功"}"
+// @Failure 400 {string} string "{"success": false, "msg": 参数错误"}"
+// @Failure 402 {string} string "{"success": false, "msg": "es服务出错"}"
+// @Router /es/prefix [POST]
+func GetPrefixSuggestion(c *gin.Context) {
+	var d response.PrefixSuggestionQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "msg": "参数错误"})
+		panic(err)
 	}
-	c.JSON(200, gin.H{
-		"res": res,
-	})
+	index, field, prefix, topN := "work_v1", d.Prefix, d.Field, 10
+	prefixResult, err := service.PrefixSearch(index, field, prefix, topN)
+	if err != nil {
+		c.JSON(402, gin.H{"success": false, "msg": "es服务出错"})
+		panic(err)
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "msg": "成功", "res": prefixResult})
 }
