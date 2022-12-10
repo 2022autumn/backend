@@ -1,11 +1,17 @@
 package v1
 
 import (
+	"IShare/global"
 	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
 	"IShare/utils"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"path"
+	"strings"
+	"time"
 )
 
 // AddUserConcept
@@ -86,4 +92,43 @@ func GetHotWorks(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"msg": "获取成功", "data": works})
+}
+
+// UploadAuthorHeadshot
+// @Summary     txc
+// @Description 上传作者头像
+// @Tags        scholar
+// @Param       author_id formData string true "用户ID"
+// @Param       Headshot  formData file   true "新头像"
+// @Router      /scholar/author/headshot [POST]
+func UploadAuthorHeadshot(c *gin.Context) {
+	authorID := c.Request.FormValue("author_id")
+	author, notFound := service.GetAuthor(authorID)
+	if notFound {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "学者未被认领"})
+		return
+	}
+	file, err := c.FormFile("Headshot")
+	if err != nil {
+		c.JSON(401, gin.H{"msg": "头像文件获取失败"})
+		return
+	}
+	raw := fmt.Sprintf("%d", authorID) + time.Now().String() + file.Filename
+	md5 := utils.GetMd5(raw)
+	suffix := strings.Split(file.Filename, ".")[1]
+	saveDir := "./media/headshot/"
+	saveName := md5 + "." + suffix
+	savePath := path.Join(saveDir, saveName)
+	if err = c.SaveUploadedFile(file, savePath); err != nil {
+		c.JSON(402, gin.H{"msg": "文件保存失败"})
+		return
+	}
+	author.HeadShot = saveName
+	err = global.DB.Save(author).Error
+	if err != nil {
+		c.JSON(403, gin.H{"msg": "保存文件路径到数据库中失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": author})
+	return
 }

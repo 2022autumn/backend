@@ -38,3 +38,7 @@ func GetHotWorks(size int) (works []database.WorkView, err error) {
 	err = global.DB.Order("views desc").Limit(size).Find(&works).Error
 	return works, err
 }
+func GetAuthor(author_id string) (author database.Author, notFound bool) {
+	notFound = global.DB.Where("author_id = ?", author_id).First(&author).RecordNotFound()
+	return author, notFound
+}
