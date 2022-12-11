@@ -465,7 +465,7 @@ func TopWork(c *gin.Context) {
 // @Summary     上传作者头像 txc
 // @Description 上传作者头像
 // @Tags        scholar
-// @Param       author_id formData string true "用户ID"
+// @Param       author_id formData string true "学者ID"
 // @Param       Headshot  formData file   true "新头像"
 // @Router      /scholar/author/headshot [POST]
 func UploadAuthorHeadshot(c *gin.Context) {

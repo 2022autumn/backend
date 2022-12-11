@@ -6,6 +6,7 @@ import (
 	"IShare/service"
 	"IShare/utils"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -90,6 +91,31 @@ func TransRefs2Intro(refs []interface{}) []map[string]interface{} {
 	}
 	return newReferencedWorks
 }
+func GenAuthorDefaultIntro(a map[string]interface{}) string {
+	var intro = fmt.Sprintf("I’m %s. ", a["display_name"].(string))
+	if a["last_known_institution"] != nil {
+		institution := a["last_known_institution"].(map[string]interface{})
+		intro += fmt.Sprintf("I’m currently working at %s. ", institution["display_name"].(string))
+	}
+	if a["most_cited_work"] != nil {
+		intro += fmt.Sprintf("I've post \"%s\", which is my most-cited work. ", a["most_cited_work"].(string))
+	}
+	if a["x_concepts"] != nil {
+		x_concepts := a["x_concepts"].([]interface{})
+		intro += fmt.Sprintf("I’m interested in ")
+		for i, v := range x_concepts {
+			if i > 3 {
+				break
+			}
+			if i != 0 {
+				intro += ", "
+			}
+			intro += v.(map[string]interface{})["display_name"].(string)
+		}
+		intro += ". "
+	}
+	return intro
+}
 
 // GetObject
 // @Summary     根据id获取对象 txc
@@ -166,6 +192,37 @@ func GetObject(c *gin.Context) {
 				println("save work view err")
 			}
 		}
+	}
+	if idx == "authors" {
+		var info = make(map[string]interface{})
+		if userid != "" {
+			userid, _ := strconv.ParseUint(userid, 0, 64)
+			user, notFound := service.GetUserByID(userid)
+			if notFound {
+				panic("user not found")
+			}
+			info["is_mine"] = user.AuthorID == id
+		}
+		author, notFound := service.GetAuthor(id)
+		if notFound {
+			info["verified"] = false
+			info["headshot"] = "author_default.jpg"
+			info["intro"] = GenAuthorDefaultIntro(tmp)
+		} else {
+			info["verified"] = true
+			info["headshot"] = author.HeadShot
+			if author.Intro == "" {
+				info["intro"] = GenAuthorDefaultIntro(tmp)
+			} else {
+				info["intro"] = author.Intro
+			}
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"data":   tmp,
+			"info":   info,
+			"status": 200,
+		})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"data":   tmp,

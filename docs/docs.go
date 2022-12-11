@@ -486,7 +486,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "用户ID",
+                        "description": "学者ID",
                         "name": "author_id",
                         "in": "formData",
                         "required": true

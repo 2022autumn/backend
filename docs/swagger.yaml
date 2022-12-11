@@ -625,7 +625,7 @@ paths:
     post:
       description: 上传作者头像
       parameters:
-      - description: 用户ID
+      - description: 学者ID
         in: formData
         name: author_id
         required: true
