@@ -9,6 +9,7 @@ type GetPersonalWorksQ struct {
 	AuthorID string `json:"author_id" binding:"required"`
 	Page     int    `json:"page" binding:"required"`
 	PageSize int    `json:"page_size" binding:"required"`
+	Display  int    `json:"display"`
 }
 
 type IgnoreWorkQ struct {

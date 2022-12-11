@@ -218,6 +218,7 @@ func GetHotWorks(c *gin.Context) {
 // @Description
 // @Description - page_size 分页的大小
 // @Description
+// @Description - display 是否显示已删除的论文 -1不显示 1显示
 // @Description 返回值说明
 // @Description - msg 返回信息
 // @Description
@@ -227,7 +228,7 @@ func GetHotWorks(c *gin.Context) {
 // @Tags       	学者主页的论文获取、管理
 // @Accept      json
 // @Produce     json
-// @Param		data body response.GetPersonalWorksQ true "data 是请求参数,包括author_id ,page ,page_size"
+// @Param		data body response.GetPersonalWorksQ true "data 是请求参数,包括author_id ,page ,page_size, display"
 // @Success     200 {string} json "{"msg":"获取成功","res":{}, "pages":{}}"
 // @Failure     400 {string} json "{"msg":"参数错误"}"
 // @Failure     401 {string} json "{"msg":"作者不存在"}"
@@ -241,7 +242,7 @@ func GetPersonalWorks(c *gin.Context) {
 		c.JSON(400, gin.H{"msg": "参数错误"})
 		return
 	}
-	author_id, page, page_size := d.AuthorID, d.Page, d.PageSize
+	author_id, page, page_size, display := d.AuthorID, d.Page, d.PageSize, d.Display
 	if author_id == "" {
 		c.JSON(400, gin.H{"msg": "author_id 为空，参数错误"})
 		return
@@ -251,7 +252,13 @@ func GetPersonalWorks(c *gin.Context) {
 		c.JSON(401, gin.H{"msg": "作者不存在"})
 		return
 	}
-	works, notFound := service.GetScholarWorks(author_id)
+	var works []database.PersonalWorks
+	var notFound bool
+	if display == -1 {
+		works, notFound = service.GetScholarDisplayWorks(author_id)
+	} else {
+		works, notFound = service.GetScholarAllWorks(author_id)
+	}
 	if !notFound && len(works) != 0 { // 能找到则从数据库中获取
 		// 按照place排序 从小到大
 		sort.Slice(works, func(i, j int) bool {

@@ -623,7 +623,7 @@ const docTemplate = `{
         },
         "/scholar/works/get": {
             "post": {
-                "description": "获取学者的论文\n\n参数说明\n- author_id 作者的id\n\n- page 获取第几页的数据\n\n- page_size 分页的大小\n\n返回值说明\n- msg 返回信息\n\n- res 返回该页的works对象数组\n\n- pages 分页总数",
+                "description": "获取学者的论文\n\n参数说明\n- author_id 作者的id\n\n- page 获取第几页的数据\n\n- page_size 分页的大小\n\n- display 是否显示已删除的论文 -1不显示 1显示\n返回值说明\n- msg 返回信息\n\n- res 返回该页的works对象数组\n\n- pages 分页总数",
                 "consumes": [
                     "application/json"
                 ],
@@ -636,7 +636,7 @@ const docTemplate = `{
                 "summary": "获取学者的论文 hr",
                 "parameters": [
                     {
-                        "description": "data 是请求参数,包括author_id ,page ,page_size",
+                        "description": "data 是请求参数,包括author_id ,page ,page_size, display",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -691,7 +691,7 @@ const docTemplate = `{
                 "tags": [
                     "学者主页的论文获取、管理"
                 ],
-                "summary": "学者管理主页--忽略论文 hr 未测试",
+                "summary": "学者管理主页--忽略论文 hr",
                 "parameters": [
                     {
                         "description": "data 是请求参数,包括author_id ,work_id",
@@ -737,7 +737,7 @@ const docTemplate = `{
                 "tags": [
                     "学者主页的论文获取、管理"
                 ],
-                "summary": "学者管理主页--修改论文顺序 hr 未测试",
+                "summary": "学者管理主页--修改论文顺序 hr",
                 "parameters": [
                     {
                         "description": "data 是请求参数,包括author_id ,work_id ,direction",
@@ -801,7 +801,7 @@ const docTemplate = `{
                 "tags": [
                     "学者主页的论文获取、管理"
                 ],
-                "summary": "学者管理主页--置顶论文 hr 未测试",
+                "summary": "学者管理主页--置顶论文 hr",
                 "parameters": [
                     {
                         "description": "data 是请求参数,包括author_id ,work_id",
@@ -1813,6 +1813,9 @@ const docTemplate = `{
             "properties": {
                 "author_id": {
                     "type": "string"
+                },
+                "display": {
+                    "type": "integer"
                 },
                 "page": {
                     "type": "integer"
