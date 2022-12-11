@@ -37,11 +37,13 @@ import (
 // @Failure     404   {string} json                     "{"msg":"删除失败"}"
 // @Router      /scholar/concept [POST]
 func AddUserConcept(c *gin.Context) {
+	user := c.MustGet("user").(database.User)
 	var d response.AddUserConceptQ
 	if err := c.ShouldBind(&d); err != nil {
 		c.JSON(400, gin.H{"msg": "参数错误"})
+		return
 	}
-	if _, notFound := service.GetUserByID(d.UserID); notFound {
+	if _, notFound := service.GetUserByID(user.UserID); notFound {
 		c.JSON(401, gin.H{"msg": "用户不存在"})
 		return
 	}
@@ -54,7 +56,7 @@ func AddUserConcept(c *gin.Context) {
 	//	c.JSON(402, gin.H{"msg": "concept不存在"})
 	//	return
 	//}
-	userConcept, notFound := service.GetUserConcept(d.UserID, d.ConceptID)
+	userConcept, notFound := service.GetUserConcept(user.UserID, d.ConceptID)
 	if notFound {
 		res, err := service.GetObject("concepts", d.ConceptID)
 		if err != nil {
@@ -64,7 +66,7 @@ func AddUserConcept(c *gin.Context) {
 		var tmp map[string]interface{}
 		_ = json.Unmarshal(res.Source, &tmp)
 		userConcept = database.UserConcept{
-			UserID:      d.UserID,
+			UserID:      user.UserID,
 			ConceptID:   d.ConceptID,
 			ConceptName: tmp["display_name"].(string),
 		}

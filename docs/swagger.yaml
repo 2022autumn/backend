@@ -16,11 +16,8 @@ definitions:
     properties:
       concept_id:
         type: string
-      user_id:
-        type: integer
     required:
     - concept_id
-    - user_id
     type: object
   response.AdvancedSearchQ:
     properties:

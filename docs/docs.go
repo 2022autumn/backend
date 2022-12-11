@@ -1613,15 +1613,11 @@ const docTemplate = `{
         "response.AddUserConceptQ": {
             "type": "object",
             "required": [
-                "concept_id",
-                "user_id"
+                "concept_id"
             ],
             "properties": {
                 "concept_id": {
                     "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
                 }
             }
         },
