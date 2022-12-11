@@ -5,6 +5,7 @@ import (
 	"IShare/model/database"
 	"errors"
 	"fmt"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -84,7 +85,7 @@ func DeleteUserFollow(uf *database.UserFollow) (err error) {
 	err = global.DB.Delete(uf).Error
 	return err
 }
-func GetUserFollows(userID uint64) (userFollows []database.UserFollow) {
-	global.DB.Where("user_id = ?", userID).Find(&userFollows)
-	return userFollows
+func GetUserFollows(userID uint64) (userFollows []database.UserFollow, err error) {
+	err = global.DB.Where("user_id = ?", userID).Find(&userFollows).Error
+	return
 }

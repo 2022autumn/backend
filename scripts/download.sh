@@ -28,6 +28,10 @@ if [ -z $target_dir ]; then
     echo "Target directory can not be a empty string"
     exit 1
 fi
+if [ $2 -ne 0 ] && [ $2 -ne 1 ]; then
+    echo "Continue can only be 0 or 1"
+    exit 1
+fi
 # if continue is 0, restart from the first file
 if [ $2 -eq 0 ]; then
     echo "Restart from the first file"

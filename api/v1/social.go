@@ -4,6 +4,7 @@ import (
 	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 )
 
 // CreateComment 创建评论
-// @Summary     Vera
+// @Summary     用户可以在某一篇文献的评论区中发表自己的评论 Vera
 // @Description 用户可以在某一篇文献的评论区中发表自己的评论
 // @Tags        社交
 // @Param       data  body   response.CommentCreation true "data"
@@ -63,7 +64,7 @@ func CreateComment(c *gin.Context) {
 }
 
 // LikeComment 点赞评论
-// @Summary     Vera
+// @Summary     用户可以对某一评论进行点赞 Vera
 // @Description 用户可以对某一评论进行点赞
 // @Tags        社交
 // @Param       data body     response.CommentUser true "data"
@@ -123,7 +124,7 @@ func LikeComment(c *gin.Context) {
 }
 
 // UnLikeComment  取消点赞
-// @Summary     Vera
+// @Summary     取消点赞 Vera
 // @Description 取消点赞
 // @Tags        社交
 // @Param       data body     response.CommentUser true "data"
@@ -189,7 +190,7 @@ func UnLikeComment(c *gin.Context) {
 }
 
 // ShowPaperCommentList 取消点赞
-// @Summary     Vera
+// @Summary     显示文献评论列表，时间倒序 Vera
 // @Description 显示文献评论列表，时间倒序
 // @Tags        社交
 // @Param       data body response.CommentListQuery true "data"
@@ -269,7 +270,7 @@ func ShowPaperCommentList(c *gin.Context) {
 }
 
 // FollowAuthor 关注学者
-// @Summary     txc
+// @Summary     关注学者 包括了关注和取消关注（通过重复调用来实现） txc
 // @Description 关注学者 包括了关注和取消关注（通过重复调用来实现）
 // @Tags        社交
 // @Accept      json
@@ -295,16 +296,19 @@ func FollowAuthor(c *gin.Context) {
 		c.JSON(401, gin.H{"msg": "用户ID不存在"})
 		return
 	}
-	_, err := service.GetObject("authors", d.AuthorID)
+	author, err := service.GetObject("authors", d.AuthorID)
 	if err != nil {
 		c.JSON(402, gin.H{"msg": "学者不存在"})
 		return
 	}
 	uf, notFound := service.GetUserFollow(d.UserID, d.AuthorID)
 	if notFound {
+		var tmp map[string]interface{}
+		_ = json.Unmarshal(author.Source, &tmp)
 		uf = database.UserFollow{
-			UserID:   d.UserID,
-			AuthorID: d.AuthorID,
+			UserID:     d.UserID,
+			AuthorID:   d.AuthorID,
+			AuthorName: tmp["display_name"].(string),
 		}
 		err := service.CreateUserFollow(&uf)
 		if err != nil {
@@ -323,7 +327,7 @@ func FollowAuthor(c *gin.Context) {
 }
 
 // GetUserFollows
-// @Summary     txc
+// @Summary     获取用户关注的学者 txc
 // @Description 获取用户关注的学者
 // @Tags        社交
 // @Accept      json
@@ -345,7 +349,7 @@ func GetUserFollows(c *gin.Context) {
 		c.JSON(401, gin.H{"msg": "用户ID不存在"})
 		return
 	}
-	ufs := service.GetUserFollows(d.UserID)
+	ufs, _ := service.GetUserFollows(d.UserID)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "查找成功",
 		"data":    ufs,

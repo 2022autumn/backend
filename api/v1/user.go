@@ -7,17 +7,18 @@ import (
 	"IShare/service"
 	"IShare/utils"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"path"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Register 注册
-// @Summary     ccf
+// @Summary     注册 ccf
 // @Description 注册
 // @Description 填入用户名和密码注册
 // @Tags        用户
@@ -67,7 +68,7 @@ func Register(c *gin.Context) {
 }
 
 // Login 登录
-// @Summary     ccf
+// @Summary     登录 ccf
 // @Description 登录
 // @Description 填入用户名和密码
 // @Tags        用户
@@ -112,7 +113,7 @@ func Login(c *gin.Context) {
 }
 
 // UserInfo 查看用户个人信息
-// @Summary     ccf
+// @Summary     查看用户个人信息 ccf
 // @Description 查看用户个人信息
 // @Tags        用户
 // @Param       user_id query string true "user_id"
@@ -141,7 +142,7 @@ func UserInfo(c *gin.Context) {
 }
 
 // ModifyUser 编辑用户信息
-// @Summary     ccf
+// @Summary     编辑用户信息 ccf
 // @Description 编辑用户信息
 // @Tags        用户
 // @Param       data body response.ModifyQ true "data"
@@ -208,8 +209,8 @@ func ModifyUser(c *gin.Context) {
 }
 
 // ModifyPassword 编辑用户密码
-// @Summary     ccf
-// @Description 编辑用户信息
+// @Summary     编辑用户密码 ccf
+// @Description 编辑用户密码
 // @Tags        用户
 // @Param       data body response.PwdModifyQ true "data"
 // @Accept      json
@@ -271,7 +272,7 @@ func ModifyPassword(c *gin.Context) {
 }
 
 // UploadHeadshot 上传用户头像
-// @Summary     ccf
+// @Summary     上传用户头像 ccf
 // @Description 上传用户头像
 // @Tags        用户
 // @Param       user_id  formData string true "用户ID"

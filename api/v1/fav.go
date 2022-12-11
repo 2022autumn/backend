@@ -7,13 +7,14 @@ import (
 	"IShare/utils"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateTag 创建收藏夹
-// @Summary     Vera
+// @Summary     用户可以按照需要建立收藏夹 Vera
 // @Description 用户可以按照需要建立收藏夹
 // @Tags        社交
 // @Param       data body     response.TagCreation true "data"
@@ -71,7 +72,7 @@ func CreateTag(c *gin.Context) {
 }
 
 // AddTagToPaper 收藏文献
-// @Summary     Vera
+// @Summary     将某篇文献加入到某一收藏夹下 Vera
 // @Description 将某篇文献加入到某一收藏夹下
 // @Tags        社交
 // @Param       data body     response.AddTagToPaper true "data"
@@ -125,7 +126,7 @@ func AddTagToPaper(c *gin.Context) {
 }
 
 // ShowTagPaperList 查看收藏夹内的文献列表
-// @Summary     Vera
+// @Summary     返回某一收藏夹内的文献信息 Vera
 // @Description 返回某一收藏夹内的文献信息
 // @Tags        社交
 // @Param       data body     response.TagPaperListQ true "data"
@@ -208,7 +209,7 @@ func ShowTagPaperList(c *gin.Context) {
 }
 
 // ShowUserTagList 用户收藏夹列表
-// @Summary     Vera
+// @Summary     显示用户建立的所有收藏夹 Vera
 // @Description 显示用户建立的所有收藏夹
 // @Tags        社交
 // @Param       data body     response.UserInfo true "data"

@@ -119,7 +119,15 @@ func NormalizationSearchResult(res *elastic.SearchResult) (hits int64, result []
 	result = make([]json.RawMessage, 0)
 	if res.Hits.Hits != nil {
 		for _, hit := range res.Hits.Hits {
-			result = append(result, hit.Source)
+			tmp := make(map[string]interface{})
+			_ = json.Unmarshal(hit.Source, &tmp)
+			// tmp["highlight"] = hit.Highlight
+			for k, v := range hit.Highlight {
+				tmp[k] = v[0]
+				log.Println(tmp[k])
+			}
+			by, _ := json.Marshal(tmp)
+			result = append(result, by)
 		}
 	}
 	aggs = make(map[string]interface{})
