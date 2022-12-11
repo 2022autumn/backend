@@ -109,6 +109,7 @@ func Login(c *gin.Context) {
 		"msg":    "登录成功",
 		"token":  token,
 		"ID":     user.UserID,
+		"user":   user,
 	})
 }
 

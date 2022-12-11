@@ -92,17 +92,17 @@ func TransRefs2Intro(refs []interface{}) []map[string]interface{} {
 	return newReferencedWorks
 }
 func GenAuthorDefaultIntro(a map[string]interface{}) string {
-	var intro = fmt.Sprintf("I’m %s. ", a["display_name"].(string))
+	var intro = fmt.Sprintf("I'm %s. ", a["display_name"].(string))
 	if a["last_known_institution"] != nil {
 		institution := a["last_known_institution"].(map[string]interface{})
-		intro += fmt.Sprintf("I’m currently working at %s. ", institution["display_name"].(string))
+		intro += fmt.Sprintf("I'm currently working at %s. ", institution["display_name"].(string))
 	}
 	if a["most_cited_work"] != nil {
 		intro += fmt.Sprintf("I've post \"%s\", which is my most-cited work. ", a["most_cited_work"].(string))
 	}
 	if a["x_concepts"] != nil {
 		x_concepts := a["x_concepts"].([]interface{})
-		intro += fmt.Sprintf("I’m interested in ")
+		intro += fmt.Sprintf("I'm interested in ")
 		for i, v := range x_concepts {
 			if i > 3 {
 				break
@@ -203,6 +203,8 @@ func GetObject(c *gin.Context) {
 				panic("user not found")
 			}
 			info["is_mine"] = user.AuthorID == id
+			_, notFound = service.GetUserFollow(userid, id)
+			info["isfollow"] = notFound == false
 		}
 		author, notFound := service.GetAuthor(id)
 		if notFound {
