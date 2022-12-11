@@ -43,7 +43,7 @@ func SetupRouter(r *gin.Engine) {
 	}
 	SocialRouter := baseGroup.Group("/social")
 	{
-		SocialRouter.POST("/comment/create", v1.CreateComment, middleware.AuthRequired())
+		SocialRouter.POST("/comment/create", middleware.AuthRequired(), v1.CreateComment)
 		SocialRouter.POST("/comment/like", v1.LikeComment)
 		SocialRouter.POST("/comment/unlike", v1.UnLikeComment)
 		SocialRouter.POST("/comment/list", v1.ShowPaperCommentList)
@@ -56,8 +56,8 @@ func SetupRouter(r *gin.Engine) {
 		SocialRouter.POST("/tag/delete", v1.DeleteTag)
 		SocialRouter.POST("/tag/cancelCollectPaper", v1.RemovePaperTag)
 		SocialRouter.POST("/tag/rename", v1.RenameTag)
-		SocialRouter.POST("/follow", v1.FollowAuthor, middleware.AuthRequired())
-		SocialRouter.POST("/follow/list", v1.GetUserFollows, middleware.AuthRequired())
+		SocialRouter.POST("/follow", middleware.AuthRequired(), v1.FollowAuthor)
+		SocialRouter.POST("/follow/list", middleware.AuthRequired(), v1.GetUserFollows)
 	}
 	esGroup := baseGroup.Group("/es")
 	{
@@ -72,7 +72,7 @@ func SetupRouter(r *gin.Engine) {
 	}
 	scholarGroup := baseGroup.Group("/scholar")
 	{
-		scholarGroup.POST("/concept", v1.AddUserConcept, middleware.AuthRequired())
+		scholarGroup.POST("/concept", middleware.AuthRequired(), v1.AddUserConcept)
 		scholarGroup.GET("/roll", v1.RollWorks)
 		scholarGroup.GET("/hot", v1.GetHotWorks)
 		scholarGroup.POST("/author/headshot", v1.UploadAuthorHeadshot)
