@@ -110,12 +110,16 @@ func GetUserConcepts(c *gin.Context) {
 // @Failure     401        {string} json   "{"msg":"openalex获取失败"}"
 // @Router      /scholar/roll [GET]
 func RollWorks(c *gin.Context) {
-	ret := make([]json.RawMessage, 0)
+	ret := make([]map[string]interface{}, 0)
 	retSize := 6
 	rand.Seed(time.Now().UnixNano())
 	conceptID := c.Query("concept_id")
 	var pages = rand.Perm(5)
 	if conceptID != "" {
+		if conceptID[0] != 'C' {
+			c.JSON(400, gin.H{"msg": "concept_id参数错误"})
+			return
+		}
 		url := "https://api.openalex.org/works?filter=concepts.id:" + conceptID
 		page := 1
 		for true {
@@ -134,7 +138,9 @@ func RollWorks(c *gin.Context) {
 			if err == nil {
 				for _, work := range res.Docs {
 					if work.Found {
-						ret = append(ret, work.Source)
+						ret = append(ret, map[string]interface{}{
+							"work": work.Source,
+						})
 						if len(ret) == retSize {
 							c.JSON(200, gin.H{"msg": "获取成功", "data": ret})
 							return
@@ -161,7 +167,9 @@ func RollWorks(c *gin.Context) {
 		res, err := service.GetObjects("works_v1", workids)
 		if err == nil {
 			for _, work := range res.Docs {
-				ret = append(ret, work.Source)
+				ret = append(ret, map[string]interface{}{
+					"work": work.Source,
+				})
 			}
 		}
 	}
