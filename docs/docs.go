@@ -549,6 +549,36 @@ const docTemplate = `{
             }
         },
         "/scholar/concept": {
+            "get": {
+                "description": "获取用户关注的关键词",
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "获取用户关注的关键词 txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"数据库获取失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "添加user的关注关键词",
                 "consumes": [
@@ -652,14 +682,20 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "userid",
-                        "name": "userid",
+                        "description": "concept_id",
+                        "name": "concept_id",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "{\"msg\":\"获取成功\",\"data\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"openalex获取失败\"}",
                         "schema": {
                             "type": "string"
                         }

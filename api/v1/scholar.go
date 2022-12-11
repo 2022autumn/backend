@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"path"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -84,97 +83,77 @@ func AddUserConcept(c *gin.Context) {
 	c.JSON(200, gin.H{"msg": "删除成功"})
 }
 
+// GetUserConcepts
+// @Summary     获取用户关注的关键词 txc
+// @Description 获取用户关注的关键词
+// @Tags        scholar
+// @Param       token header   string true "token"
+// @Success     200   {string} json   "{"msg":"获取成功","data":{}}"
+// @Failure     401   {string} json   "{"msg":"数据库获取失败"}"
+// @Router      /scholar/concept [GET]
+func GetUserConcepts(c *gin.Context) {
+	user := c.MustGet("user").(database.User)
+	concepts, err := service.GetUserConcepts(user.UserID)
+	if err != nil {
+		c.JSON(401, gin.H{"msg": "数据库获取失败"})
+		return
+	}
+	c.JSON(200, gin.H{"msg": "获取成功", "data": concepts})
+}
+
 // RollWorks
 // @Summary     获取用户推荐的论文 请勿使用 txc
 // @Description 获取用户推荐的论文 请勿使用
 // @Tags        scholar
-// @Param       userid query    string false "userid"
-// @Success     200    {string} json   "{"msg":"获取成功","data":{}}"
+// @Param       concept_id query    string false "concept_id"
+// @Success     200        {string} json   "{"msg":"获取成功","data":{}}"
+// @Failure     401        {string} json   "{"msg":"openalex获取失败"}"
 // @Router      /scholar/roll [GET]
 func RollWorks(c *gin.Context) {
-	userID := c.Query("userid")
-	ret := make([]map[string]interface{}, 0)
+	ret := make([]json.RawMessage, 0)
+	retSize := 6
 	rand.Seed(time.Now().UnixNano())
-	filter := utils.InitWorksfilter()
-	if userID != "" {
-		userID, _ := strconv.ParseUint(userID, 10, 64)
-		ucs, _ := service.GetUserConcepts(userID)
-		ufs, _ := service.GetUserFollows(userID)
-		if len(ucs) != 0 {
-			uc := ucs[rand.Intn(len(ucs))]
-			url := "https://api.openalex.org/works?filter=concepts.id:" + uc.ConceptID
+	conceptID := c.Query("concept_id")
+	var pages = rand.Perm(5)
+	if conceptID != "" {
+		url := "https://api.openalex.org/works?filter=concepts.id:" + conceptID
+		page := 1
+		for true {
 			works := make([]map[string]interface{}, 0)
-			_, err := service.GetWorksByUrl(url, 1, &works)
+			total_pages, err := service.GetWorksByUrl(url, pages[page]+1, &works)
 			if err != nil {
-				c.JSON(400, gin.H{"msg": "获取失败"})
+				c.JSON(401, gin.H{"msg": "openalex获取失败"})
 				return
 			}
 			workids := make([]string, 0)
-			for i, work := range works {
+			for _, work := range works {
 				workids = append(workids, utils.RemovePrefix(work["id"].(string)))
-				if i > 8 {
-					break
-				}
 			}
 			rand.Shuffle(len(workids), func(i, j int) { workids[i], workids[j] = workids[j], workids[i] })
 			res, err := service.GetObjects("works_v1", workids)
 			if err == nil {
 				for _, work := range res.Docs {
 					if work.Found {
-						var tmp map[string]interface{}
-						_ = json.Unmarshal(work.Source, &tmp)
-						utils.FilterData(&tmp, &filter)
-						ret = append(ret, map[string]interface{}{
-							"work":   tmp,
-							"source": "concept",
-							"name":   uc.ConceptName,
-						})
-						break
+						ret = append(ret, work.Source)
+						if len(ret) == retSize {
+							c.JSON(200, gin.H{"msg": "获取成功", "data": ret})
+							return
+						}
 					}
 				}
 			}
-		}
-		if len(ufs) != 0 {
-			uf := ufs[rand.Intn(len(ufs))]
-			url := "https://api.openalex.org/works?filter=author.id:" + uf.AuthorID
-			works := make([]map[string]interface{}, 0)
-			_, err := service.GetWorksByUrl(url, 1, &works)
-			if err != nil {
-				c.JSON(400, gin.H{"msg": "获取失败"})
-				return
-			}
-			workids := make([]string, 0)
-			for i, work := range works {
-				workids = append(workids, utils.RemovePrefix(work["id"].(string)))
-				if i > 8 {
-					break
-				}
-			}
-			rand.Shuffle(len(workids), func(i, j int) { workids[i], workids[j] = workids[j], workids[i] })
-			res, err := service.GetObjects("works_v1", workids)
-			if err == nil {
-				for _, work := range res.Docs {
-					if work.Found {
-						var tmp map[string]interface{}
-						_ = json.Unmarshal(work.Source, &tmp)
-						utils.FilterData(&tmp, &filter)
-						ret = append(ret, map[string]interface{}{
-							"work":   tmp,
-							"source": "author",
-							"name":   uf.AuthorName,
-						})
-						break
-					}
-				}
+			page++
+			if page == total_pages {
+				break
 			}
 		}
 	}
-	if len(ret) < 6 {
+	if len(ret) < retSize {
 		var count int
 		global.DB.Table("work_views").Count(&count)
 		ids := rand.Perm(count)
 		workids := make([]string, 0)
-		for i := len(ret); i < 6; i++ {
+		for i := len(ret); i < retSize; i++ {
 			var work database.WorkView
 			global.DB.Table("work_views").Offset(ids[i]).First(&work)
 			workids = append(workids, work.WorkID)
@@ -182,11 +161,7 @@ func RollWorks(c *gin.Context) {
 		res, err := service.GetObjects("works_v1", workids)
 		if err == nil {
 			for _, work := range res.Docs {
-				ret = append(ret, map[string]interface{}{
-					"work":   work.Source,
-					"source": "random",
-					"name":   "",
-				})
+				ret = append(ret, work.Source)
 			}
 		}
 	}

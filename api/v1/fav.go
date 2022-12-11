@@ -126,10 +126,10 @@ func AddTagToPaper(c *gin.Context) {
 }
 
 // RemovePaperTag 将某篇文献取消收藏
-// @Summary Vera
+// @Summary     Vera
 // @Description 将某篇文献从收藏夹中移除
 // @Tags        社交
-// @Param       data body     response.AddTagToPaper true "data"
+// @Param       data body response.AddTagToPaper true "data"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status": 200, "msg": "取消收藏成功"}"
@@ -265,8 +265,8 @@ func ShowTagPaperList(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"success": true, "status":  200, "msg": "查看收藏夹列表成功", "data":tags}"
-// @Failure		400 {string} json "{"success": false,"status": 400, "msg":"用户ID不存在"}"
-// @Failure		403 {string} json "{"success": false,"status": 403, "msg":"未查询到结果"}"
+// @Failure     400 {string} json "{"success": false,"status": 400, "msg":"用户ID不存在"}"
+// @Failure     403 {string} json "{"success": false,"status": 403, "msg":"未查询到结果"}"
 // @Router      /social/tag/taglist [POST]
 func ShowUserTagList(c *gin.Context) {
 	var d response.UserInfo
@@ -300,14 +300,14 @@ func ShowUserTagList(c *gin.Context) {
 
 // DeleteTag 删除标签
 // @description 删除标签
-// @Tags 社交
-// @Param data body     response.TagPaperListQ true "data"
+// @Tags        社交
+// @Param       data body response.TagPaperListQ true "data"
 // @Accept      json
 // @Produce     json
-// @Success 200 {string} string "{"success": true,"status":200, "msg": "标签删除成功"}"
-// @Failure 400 {string} string "{"success": false,"status":400, "msg": "用户ID不存在"}"
-// @Failure 403 {string} string "{"success": false,"status":403, "msg": "标签不存在"}"
-// @Router /social/tag/delete [POST]
+// @Success     200 {string} string "{"success": true,"status":200, "msg": "标签删除成功"}"
+// @Failure     400 {string} string "{"success": false,"status":400, "msg": "用户ID不存在"}"
+// @Failure     403 {string} string "{"success": false,"status":403, "msg": "标签不存在"}"
+// @Router      /social/tag/delete [POST]
 func DeleteTag(c *gin.Context) {
 	var d response.TagPaperListQ
 	if err := c.ShouldBind(&d); err != nil {
@@ -349,16 +349,16 @@ func DeleteTag(c *gin.Context) {
 
 // RenameTag 收藏夹重命名
 // @description 对原有的收藏夹重命名
-// @Tags 社交
-// @Param data body     response.RenameTagQ true "data"
+// @Tags        社交
+// @Param       data body response.RenameTagQ true "data"
 // @Accept      json
 // @Produce     json
-// @Success		200 {string} json "{"status":200,"msg":"修改成功"}"
-// @Failure		400 {string} json "{"status": 400, "msg": "用户ID不存在"}"
+// @Success     200 {string} json "{"status":200,"msg":"修改成功"}"
+// @Failure     400 {string} json "{"status": 400, "msg": "用户ID不存在"}"
 // @Failure     401 {string} json "{"status": 401, "msg": "用户无此收藏夹"}"
 // @Failure     402 {string} json "{"status": 402, "msg": "名称已存在，换个名字吧～"}"
 // @Failure     403 {string} json "{"status":403,"msg":"修改失败"}"
-// @Router /social/tag/rename [POST]
+// @Router      /social/tag/rename [POST]
 func RenameTag(c *gin.Context) {
 	var d response.RenameTagQ
 	if err := c.ShouldBind(&d); err != nil {
