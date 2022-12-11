@@ -127,3 +127,9 @@ func RenameTag(new_name string, tag database.Tag) (err error) {
 	}
 	return nil
 }
+
+func GetPaperStarNum(paper_id string) (num int, relate []database.TagPaper) {
+	relate = make([]database.TagPaper, 0)
+	global.DB.Where("paper_id = ? ", paper_id).Find(&relate)
+	return len(relate), relate
+}

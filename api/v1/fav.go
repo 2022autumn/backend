@@ -251,6 +251,7 @@ func ShowTagPaperList(c *gin.Context) {
 		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := tmp["related_works"].([]interface{})
 		tmp["related_works"] = TransRefs2Intro(related_works)
+		tmp["star_num"], _ = service.GetPaperStarNum(id)
 		paper_list = append(paper_list, tmp)
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "status": 200, "num": len(paper_ids), "paper_list": paper_list, "msg": "查询成功"})
