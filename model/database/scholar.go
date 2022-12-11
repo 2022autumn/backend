@@ -62,8 +62,8 @@ type WorkView struct {
 }
 
 type PersonalWorks struct {
-	WorkID   string `gorm:"primary_key;not null;" json:"work_id"`
 	AuthorID string `gorm:"not null;" json:"author_id"`
+	WorkID   string `gorm:"not null;" json:"work_id"`
 	Place    int    `gorm:"not null;" json:"place"`
 	Ignore   bool   `gorm:"not null;default:false" json:"ignore"`
 }

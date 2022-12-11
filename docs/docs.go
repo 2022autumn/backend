@@ -596,9 +596,34 @@ const docTemplate = `{
                 }
             }
         },
-        "/scholar/ignore": {
+        "/scholar/roll": {
+            "get": {
+                "description": "获取用户推荐的论文 请勿使用",
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "获取用户推荐的论文 请勿使用 txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "userid",
+                        "name": "userid",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/works/get": {
             "post": {
-                "description": "学者管理主页--忽略论文 通过重复调用该接口可以完成论文的忽略与取消忽略",
+                "description": "获取学者的论文\n\n参数说明\n- author_id 作者的id\n\n- page 获取第几页的数据\n\n- page_size 分页的大小\n\n返回值说明\n- msg 返回信息\n\n- res 返回该页的works对象数组\n\n- pages 分页总数",
                 "consumes": [
                     "application/json"
                 ],
@@ -606,41 +631,23 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "scholar"
+                    "学者主页的论文获取、管理"
                 ],
-                "summary": "学者管理主页--忽略论文 hr 未测试",
+                "summary": "获取学者的论文 hr",
                 "parameters": [
                     {
-                        "description": "author_id 是作者的id",
-                        "name": "author_id",
+                        "description": "data 是请求参数,包括author_id ,page ,page_size",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "work_id 是论文的id",
-                        "name": "work_id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "ignore 是当前论文的忽略状态",
-                        "name": "ignore",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "boolean"
+                            "$ref": "#/definitions/response.GetPersonalWorksQ"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"msg\":\"忽略成功\"}",
+                        "description": "{\"msg\":\"获取成功\",\"res\":{}, \"pages\":{}}",
                         "schema": {
                             "type": "string"
                         }
@@ -652,7 +659,19 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "{\"msg\":\"忽略失败\"}",
+                        "description": "{\"msg\":\"作者不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"page超出范围\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"msg\":\"该作者没有论文\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -660,9 +679,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/scholar/modify": {
+        "/scholar/works/ignore": {
             "post": {
-                "description": "学者管理主页--修改论文顺序",
+                "description": "学者管理主页--忽略论文 通过重复调用该接口可以完成论文的忽略与取消忽略\n\n参数说明\n- author_id 作者的id\n\n- work_id 论文的id",
                 "consumes": [
                     "application/json"
                 ],
@@ -670,35 +689,63 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "scholar"
+                    "学者主页的论文获取、管理"
+                ],
+                "summary": "学者管理主页--忽略论文 hr 未测试",
+                "parameters": [
+                    {
+                        "description": "data 是请求参数,包括author_id ,work_id",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.IgnoreWorkQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"修改忽略属性成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"修改忽略属性失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/works/modify": {
+            "post": {
+                "description": "学者管理主页--修改论文顺序\n\n参数说明\n- author_id 作者的id\n\n- work_id 论文的id\n\n- direction 论文的移动方向，1为向上，-1为向下",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "学者主页的论文获取、管理"
                 ],
                 "summary": "学者管理主页--修改论文顺序 hr 未测试",
                 "parameters": [
                     {
-                        "description": "author_id 是作者的id",
-                        "name": "author_id",
+                        "description": "data 是请求参数,包括author_id ,work_id ,direction",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "work_id 是论文的id",
-                        "name": "work_id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "direction 是论文的移动方向，1为向上，-1为向下",
-                        "name": "direction",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
+                            "$ref": "#/definitions/response.ModifyPlaceQ"
                         }
                     }
                 ],
@@ -742,34 +789,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/scholar/roll": {
-            "get": {
-                "description": "获取用户推荐的论文 请勿使用",
-                "tags": [
-                    "scholar"
-                ],
-                "summary": "获取用户推荐的论文 请勿使用 txc",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "userid",
-                        "name": "userid",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/scholar/top": {
+        "/scholar/works/top": {
             "post": {
-                "description": "学者管理主页--置顶论文 通过重复调用而取消置顶",
+                "description": "学者管理主页--置顶论文 通过重复调用而取消置顶\n\n参数说明\n- author_id 作者的id\n\n- work_id 论文的id",
                 "consumes": [
                     "application/json"
                 ],
@@ -777,26 +799,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "scholar"
+                    "学者主页的论文获取、管理"
                 ],
                 "summary": "学者管理主页--置顶论文 hr 未测试",
                 "parameters": [
                     {
-                        "description": "author_id 是作者的id",
-                        "name": "author_id",
+                        "description": "data 是请求参数,包括author_id ,work_id",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "work_id 是论文的id",
-                        "name": "work_id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.TopWorkQ"
                         }
                     }
                 ],
@@ -821,76 +834,6 @@ const docTemplate = `{
                     },
                     "402": {
                         "description": "{\"msg\":\"修改失败\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/scholar/works": {
-            "get": {
-                "description": "获取学者的论文",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "scholar"
-                ],
-                "summary": "获取学者的论文 hr 未测试",
-                "parameters": [
-                    {
-                        "description": "author_id 是作者的id",
-                        "name": "author_id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "page 获取第几页的数据",
-                        "name": "page",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "page_size 是分页的大小",
-                        "name": "page_size",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"msg\":\"获取成功\",\"data\":{}}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "{\"msg\":\"参数错误\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "{\"msg\":\"作者不存在\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "402": {
-                        "description": "{\"msg\":\"该作者没有论文\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -1860,6 +1803,25 @@ const docTemplate = `{
                 }
             }
         },
+        "response.GetPersonalWorksQ": {
+            "type": "object",
+            "required": [
+                "author_id",
+                "page",
+                "page_size"
+            ],
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.GetUserFollowsQ": {
             "type": "object",
             "required": [
@@ -1896,6 +1858,21 @@ const docTemplate = `{
                 }
             }
         },
+        "response.IgnoreWorkQ": {
+            "type": "object",
+            "required": [
+                "author_id",
+                "work_id"
+            ],
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "work_id": {
+                    "type": "string"
+                }
+            }
+        },
         "response.LoginQ": {
             "type": "object",
             "required": [
@@ -1907,6 +1884,25 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ModifyPlaceQ": {
+            "type": "object",
+            "required": [
+                "author_id",
+                "direction",
+                "work_id"
+            ],
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "direction": {
+                    "type": "integer"
+                },
+                "work_id": {
                     "type": "string"
                 }
             }
@@ -2008,6 +2004,21 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "response.TopWorkQ": {
+            "type": "object",
+            "required": [
+                "author_id",
+                "work_id"
+            ],
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "work_id": {
+                    "type": "string"
                 }
             }
         },

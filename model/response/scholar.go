@@ -14,7 +14,6 @@ type GetPersonalWorksQ struct {
 type IgnoreWorkQ struct {
 	AuthorID string `json:"author_id" binding:"required"`
 	WorkID   string `json:"work_id" binding:"required"`
-	Ignore   bool   `json:"ignore_status" binding:"required"`
 }
 
 type ModifyPlaceQ struct {

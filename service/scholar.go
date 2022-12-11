@@ -3,6 +3,7 @@ package service
 import (
 	"IShare/global"
 	"IShare/model/database"
+	"log"
 
 	"github.com/jinzhu/gorm"
 )
@@ -49,7 +50,7 @@ func AddScholarWork(work *database.PersonalWorks) (err error) {
 
 // 查询学者的作品
 func GetScholarWorks(author_id string) (works []database.PersonalWorks, notFound bool) {
-	notFound = global.DB.Where("scholar_id = ?", author_id).Find(&works).RecordNotFound()
+	notFound = global.DB.Where("author_id = ?", author_id).Find(&works).RecordNotFound()
 	return
 }
 
@@ -93,12 +94,15 @@ func SwapWorkPlace(author_id string, work_id1 string, work_id2 string) (err erro
 		tx.Rollback()
 		return err
 	}
-	err = tx.Model(&work1).Update("place", work2.Place).Error
+	p1 := work1.Place
+	p2 := work2.Place
+	log.Println(p1, p2)
+	err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id1).Update("place", p2).Error
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	err = tx.Model(&work2).Update("place", work1.Place).Error
+	err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id2).Update("place", p1).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -122,12 +126,17 @@ func TopWork(author_id string, work_id string) (err error) {
 		tx.Rollback()
 		return err
 	}
-	err = tx.Model(&work).Update("place", 0).Error
+	// err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id).Update("place", 0).Error
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
+	err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND place < ?", author_id, work.Place).Update("place", gorm.Expr("place + 1")).Error
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND place < ?", author_id, work.Place).Update("place", gorm.Expr("place + 1")).Error
+	err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id).Update("place", 0).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -139,4 +148,39 @@ func TopWork(author_id string, work_id string) (err error) {
 func GetAuthor(author_id string) (author database.Author, notFound bool) {
 	notFound = global.DB.Where("author_id = ?", author_id).First(&author).RecordNotFound()
 	return author, notFound
+}
+
+// 批量创建作者的作品, 加锁
+func CreateWorks(works []database.PersonalWorks) (err error) {
+	tx := global.DB.Begin()
+	for _, work := range works {
+		err = tx.Create(&work).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	tx.Commit()
+	return err
+}
+
+// 修改作品ignore属性 加锁
+func IgnoreWork(author_id string, work_id string) (err error) {
+	tx := global.DB.Begin()
+	var work database.PersonalWorks
+	err = tx.Where("author_id = ? AND work_id = ?", author_id, work_id).First(&work).Error
+	if err != nil {
+		tx.Rollback()
+		log.Println("work not found", author_id, work_id, err)
+		return err
+	}
+	preIgnore := work.Ignore
+	err = tx.Model(&work).Update("ignore", !preIgnore).Error
+	if err != nil {
+		tx.Rollback()
+		log.Println("update ignore failed", author_id, work_id, err)
+		return err
+	}
+	tx.Commit()
+	return nil
 }

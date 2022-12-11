@@ -2,6 +2,7 @@ package service
 
 import (
 	"IShare/global"
+	"IShare/model/database"
 	"IShare/utils"
 	"context"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/olivere/elastic/v7"
 )
@@ -230,8 +232,11 @@ exit:
 
 // GetWorksByUrl 获取作者的作品，分页获取并返回总页数
 func GetWorksByUrl(works_api_url string, page int, works *[]map[string]interface{}) (total_pages int, err error) {
+	start_time := time.Now()
 	request_url := works_api_url + "&page=" + strconv.Itoa(page)
+	req_st_time := time.Now()
 	resp, err := http.Get(request_url)
+	log.Println("- single get works_api_url time: ", time.Since(req_st_time))
 	if err != nil {
 		log.Println(err)
 		return 0, err
@@ -254,11 +259,41 @@ func GetWorksByUrl(works_api_url string, page int, works *[]map[string]interface
 		work_min["authorships"] = work.(map[string]interface{})["authorships"]
 		*works = append(*works, work_min)
 	}
+	log.Println("-- single GetWorksByUrl time: ", time.Since(start_time))
 	return
 }
 
-// getAllWorksByUrl 获取作者的所有作品的列表
+// GetAllPersonalWorksByUrl 获取作者的所有作品的列表
+func GetAllPersonalWorksByUrl(works_api_url string, works *[]database.PersonalWorks, author_id string) (err error) {
+	start_time := time.Now()
+	data := make([]map[string]interface{}, 0)
+	total_pages, err := GetWorksByUrl(works_api_url, 1, &data)
+	if err != nil {
+		log.Println("GetWorksByUrl err: ", err)
+		return err
+	}
+	for i := 2; i <= total_pages; i++ {
+		_, err := GetWorksByUrl(works_api_url, i, &data)
+		if err != nil {
+			log.Println("GetWorksByUrl err: ", err)
+			return err
+		}
+	}
+	for i, work := range data {
+		presonal_work := database.PersonalWorks{
+			AuthorID: author_id,
+			WorkID:   utils.RemovePrefix(work["id"].(string)),
+			Place:    i,
+		}
+		(*works) = append(*works, presonal_work)
+	}
+	log.Println("Total: GetAllWorksByUrl time: ", time.Since(start_time))
+	return nil
+}
+
+// GetAllWorksByUrl 获取作者的所有作品的列表
 func GetAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (err error) {
+	start_time := time.Now()
 	total_pages, err := GetWorksByUrl(works_api_url, 1, works)
 	if err != nil {
 		log.Println("GetWorksByUrl err: ", err)
@@ -275,6 +310,7 @@ func GetAllWorksByUrl(works_api_url string, works *[]map[string]interface{}) (er
 	for _, work := range *works {
 		utils.FilterData(&work, &filter)
 	}
+	log.Println("Total: GetAllWorksByUrl time: ", time.Since(start_time))
 	return nil
 }
 
