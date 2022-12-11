@@ -114,6 +114,7 @@ func GenAuthorDefaultIntro(a map[string]interface{}) string {
 		}
 		intro += ". "
 	}
+	intro += "I'm looking for highly motivate students..."
 	return intro
 }
 
