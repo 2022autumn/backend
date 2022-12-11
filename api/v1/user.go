@@ -310,7 +310,8 @@ func UploadHeadshot(c *gin.Context) {
 		return
 	}
 	//3、将文件对应路径更新到数据库中
-	user.HeadShot = "http://116.204.107.117:8000/api/media/headshot/" + saveName
+	//user.HeadShot = "http://116.204.107.117:8000/api/media/headshot/" + saveName
+	user.HeadShot = saveName
 	err = global.DB.Save(user).Error
 	if err != nil {
 		c.JSON(403, gin.H{"msg": "保存文件路径到数据库中失败"})
