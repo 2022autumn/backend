@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic/v7"
@@ -37,7 +38,88 @@ func GetWorkCited(w json.RawMessage) string {
 	cited += "," + strconv.Itoa(int(work["publication_year"].(float64))) + "."
 	return cited
 }
-
+func GetWorkAuthorNames(w map[string]interface{}) (names []string) {
+	for _, v := range w["authorships"].([]interface{}) {
+		authorship := v.(map[string]interface{})
+		author := authorship["author"].(map[string]interface{})
+		names = append(names, author["display_name"].(string))
+	}
+	return
+}
+func GenAPACited(work map[string]interface{}) string {
+	var authorNames = GetWorkAuthorNames(work)
+	var cited string
+	if len(authorNames) > 6 {
+		cited += authorNames[0] + " et al."
+	} else {
+		for i, v := range authorNames {
+			if i == len(authorNames)-2 {
+				cited += v + ", & "
+			} else if i == len(authorNames)-1 {
+				cited += v
+			} else {
+				cited += v + ", "
+			}
+		}
+	}
+	cited += " (" + strconv.Itoa(int(work["publication_year"].(float64))) + "). "
+	cited += work["title"].(string) + ". "
+	if work["host_venue"] != nil {
+		if work["host_venue"].(map[string]interface{})["display_name"] != nil {
+			cited += work["host_venue"].(map[string]interface{})["display_name"].(string) + ". "
+		}
+	}
+	return cited
+}
+func GenMLACited(work map[string]interface{}) string {
+	var authorNames = GetWorkAuthorNames(work)
+	var cited string
+	if len(authorNames) > 3 {
+		cited += authorNames[0] + " et al."
+	} else {
+		cited += strings.Join(authorNames, ", ")
+	}
+	cited += ". \"" + work["title"].(string) + ".\" "
+	if work["host_venue"] != nil {
+		if work["host_venue"].(map[string]interface{})["display_name"] != nil {
+			cited += work["host_venue"].(map[string]interface{})["display_name"].(string) + ", "
+		}
+	}
+	cited += strconv.Itoa(int(work["publication_year"].(float64))) + ", "
+	return cited
+}
+func GenGBCited(work map[string]interface{}) string {
+	var authorNames = GetWorkAuthorNames(work)
+	var cited string
+	if len(authorNames) > 3 {
+		cited += authorNames[0] + ", " + authorNames[1] + ", " + authorNames[2] + ", et al."
+	} else {
+		cited += strings.Join(authorNames, ", ")
+	}
+	cited += ". " + work["title"].(string) + ". "
+	if work["type"] != nil {
+		if strings.Index(work["type"].(string), "journal") != -1 {
+			cited += "[J]. "
+			if work["host_venue"] != nil {
+				if work["host_venue"].(map[string]interface{})["display_name"] != nil {
+					cited += work["host_venue"].(map[string]interface{})["display_name"].(string) + ", "
+				}
+				cited += strconv.Itoa(int(work["publication_year"].(float64))) + "."
+			}
+		} else if strings.Index(work["type"].(string), "conference") != -1 {
+			cited += "[C]. "
+		} else if strings.Index(work["type"].(string), "book") != -1 {
+			cited += "[M]. "
+			if work["host_venue"] != nil {
+				if work["host_venue"].(map[string]interface{})["publisher"] != nil {
+					cited += work["host_venue"].(map[string]interface{})["publisher"].(string) + ", "
+				}
+				cited += strconv.Itoa(int(work["publication_year"].(float64))) + "."
+			}
+		}
+	}
+	return cited
+}
 func TransRefs2Cited(refs []interface{}) []map[string]string {
 	var newReferencedWorks = make([]map[string]string, 0)
 	var ids []string
@@ -175,6 +257,11 @@ func GetObject(c *gin.Context) {
 		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := tmp["related_works"].([]interface{})
 		tmp["related_works"] = TransRefs2Intro(related_works)
+		tmp["cited_string"] = map[string]interface{}{
+			"mla": GenMLACited(tmp),
+			"apa": GenAPACited(tmp),
+			"gb":  GenGBCited(tmp),
+		}
 		wv, notFound := service.GetWorkView(id)
 		if notFound {
 			wv = database.WorkView{
