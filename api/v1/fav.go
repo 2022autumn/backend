@@ -187,6 +187,7 @@ func ShowTagPaperList(c *gin.Context) {
 		}
 		//res, err := service.GetObject("works", id)
 		res, err := service.GetObject(idx, id)
+		fmt.Println(res)
 		if err != nil {
 			c.JSON(404, gin.H{
 				"success": false,
@@ -197,6 +198,10 @@ func ShowTagPaperList(c *gin.Context) {
 		}
 		var tmp = make(map[string]interface{})
 		_ = json.Unmarshal(res.Source, &tmp)
+		referenced_works := tmp["referenced_works"].([]interface{})
+		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
+		related_works := tmp["related_works"].([]interface{})
+		tmp["related_works"] = TransRefs2Intro(related_works)
 		paper_list = append(paper_list, tmp)
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "status": 200, "num": len(paper_ids), "paper_list": paper_list, "msg": "查询成功"})
