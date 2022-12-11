@@ -17,7 +17,7 @@ import (
 // @Summary     用户可以按照需要建立收藏夹 Vera
 // @Description 用户可以按照需要建立收藏夹
 // @Tags        社交
-// @Param       data body     response.TagCreation true "data"
+// @Param       data body response.TagCreation true "data"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status": 200, "msg": "收藏夹创建成功", "tag_id": tag.TagID}"
@@ -75,7 +75,7 @@ func CreateTag(c *gin.Context) {
 // @Summary     将某篇文献加入到某一收藏夹下 Vera
 // @Description 将某篇文献加入到某一收藏夹下
 // @Tags        社交
-// @Param       data body     response.AddTagToPaper true "data"
+// @Param       data body response.AddTagToPaper true "data"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status": 200, "msg": "收藏成功"}"
@@ -129,11 +129,11 @@ func AddTagToPaper(c *gin.Context) {
 // @Summary     返回某一收藏夹内的文献信息 Vera
 // @Description 返回某一收藏夹内的文献信息
 // @Tags        社交
-// @Param       data body     response.TagPaperListQ true "data"
+// @Param       data body response.TagPaperListQ true "data"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"success": true, "status": 200,"num":int, "paper_list": paper_list,"msg": "查询成功"}"
-// @Success		210 {string} json "{"success": true, "status": 402,"num":0, "msg": "标签下没有文章"}"
+// @Success     210 {string} json "{"success": true, "status": 402,"num":0, "msg": "标签下没有文章"}"
 // @Failure     400 {string} json "{"success": false,"status": 400, "msg":"用户ID不存在"}"
 // @Failure     401 {string} json "{"success": false,"status": 401, "msg": "用户无此收藏夹"}"
 // @Failure     404 {string} json "{"success": false, "status": 404, "msg":"查询失败"}"
@@ -212,12 +212,12 @@ func ShowTagPaperList(c *gin.Context) {
 // @Summary     显示用户建立的所有收藏夹 Vera
 // @Description 显示用户建立的所有收藏夹
 // @Tags        社交
-// @Param       data body     response.UserInfo true "data"
+// @Param       data body response.UserInfo true "data"
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"success": true, "status":  200, "message": "查看收藏夹列表成功", "data":tags}"
-// @Failure		400 {string} json "{"success": false,"status": 400, "msg":"用户ID不存在"}"
-// @Failure		403 {string} json "{"success": false,"status": 403, "msg":"未查询到结果"}"
+// @Failure     400 {string} json "{"success": false,"status": 400, "msg":"用户ID不存在"}"
+// @Failure     403 {string} json "{"success": false,"status": 403, "msg":"未查询到结果"}"
 // @Router      /social/tag/taglist [POST]
 func ShowUserTagList(c *gin.Context) {
 	var d response.UserInfo
@@ -251,12 +251,12 @@ func ShowUserTagList(c *gin.Context) {
 
 // DeleteTag 删除标签
 // @description 删除标签
-// @Tags 社交
-// @Param data body     response.TagPaperListQ true "data"
-// @Success 200 {string} string "{"success": true,"status":200, "message": "标签删除成功"}"
-// @Failure 400 {string} string "{"success": false,"status":400, "message": "用户ID不存在"}"
-// @Failure 403 {string} string "{"success": false,"status":403, "message": "标签不存在"}"
-// @Router /social/tag/delete [POST]
+// @Tags        社交
+// @Param       data body     response.TagPaperListQ true "data"
+// @Success     200  {string} string                 "{"success": true,"status":200, "message": "标签删除成功"}"
+// @Failure     400  {string} string                 "{"success": false,"status":400, "message": "用户ID不存在"}"
+// @Failure     403  {string} string                 "{"success": false,"status":403, "message": "标签不存在"}"
+// @Router      /social/tag/delete [POST]
 func DeleteTag(c *gin.Context) {
 	var d response.TagPaperListQ
 	if err := c.ShouldBind(&d); err != nil {

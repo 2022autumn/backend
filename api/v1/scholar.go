@@ -227,15 +227,15 @@ func GetHotWorks(c *gin.Context) {
 // @Description - res 返回该页的works对象数组
 // @Description
 // @Description - pages 分页总数
-// @Tags       	学者主页的论文获取、管理
+// @Tags        学者主页的论文获取、管理
 // @Accept      json
 // @Produce     json
-// @Param		data body response.GetPersonalWorksQ true "data 是请求参数,包括author_id ,page ,page_size, display"
-// @Success     200 {string} json "{"msg":"获取成功","res":{}, "pages":{}}"
-// @Failure     400 {string} json "{"msg":"参数错误"}"
-// @Failure     401 {string} json "{"msg":"作者不存在"}"
-// @Failure     402 {string} json "{"msg":"page超出范围"}"
-// @Failure     403 {string} json "{"msg":"该作者没有论文"}"
+// @Param       data body     response.GetPersonalWorksQ true "data 是请求参数,包括author_id ,page ,page_size, display"
+// @Success     200  {string} json                       "{"msg":"获取成功","res":{}, "pages":{}}"
+// @Failure     400  {string} json                       "{"msg":"参数错误"}"
+// @Failure     401  {string} json                       "{"msg":"作者不存在"}"
+// @Failure     402  {string} json                       "{"msg":"page超出范围"}"
+// @Failure     403  {string} json                       "{"msg":"该作者没有论文"}"
 // @Router      /scholar/works/get [POST]
 func GetPersonalWorks(c *gin.Context) {
 	var d response.GetPersonalWorksQ
@@ -330,10 +330,10 @@ func GetPersonalWorks(c *gin.Context) {
 // @Tags        学者主页的论文获取、管理
 // @Accept      json
 // @Produce     json
-// @Param		data body response.IgnoreWorkQ true "data 是请求参数,包括author_id ,work_id"
-// @Success     200 {string} json "{"msg":"修改忽略属性成功"}"
-// @Failure     400 {string} json "{"msg":"参数错误"}"
-// @Failure     401 {string} json "{"msg":"修改忽略属性失败"}"
+// @Param       data body     response.IgnoreWorkQ true "data 是请求参数,包括author_id ,work_id"
+// @Success     200  {string} json                 "{"msg":"修改忽略属性成功"}"
+// @Failure     400  {string} json                 "{"msg":"参数错误"}"
+// @Failure     401  {string} json                 "{"msg":"修改忽略属性失败"}"
 // @Router      /scholar/works/ignore [POST]
 func IgnoreWork(c *gin.Context) {
 	var d response.IgnoreWorkQ
@@ -364,13 +364,13 @@ func IgnoreWork(c *gin.Context) {
 // @Tags        学者主页的论文获取、管理
 // @Accept      json
 // @Produce     json
-// @Param		data body response.ModifyPlaceQ true "data 是请求参数,包括author_id ,work_id ,direction"
-// @Success     200 {string} json "{"msg":"修改成功"}"
-// @Failure     400 {string} json "{"msg":"参数错误"}"
-// @Failure     401 {string} json "{"msg":"未找到该论文"}"
-// @Failure     402 {string} json "{"msg":"论文已经在顶部"}"
-// @Failure     403 {string} json "{"msg":"论文已经在底部"}"
-// @Failure     404 {string} json "{"msg":"修改失败"}"
+// @Param       data body     response.ModifyPlaceQ true "data 是请求参数,包括author_id ,work_id ,direction"
+// @Success     200  {string} json                  "{"msg":"修改成功"}"
+// @Failure     400  {string} json                  "{"msg":"参数错误"}"
+// @Failure     401  {string} json                  "{"msg":"未找到该论文"}"
+// @Failure     402  {string} json                  "{"msg":"论文已经在顶部"}"
+// @Failure     403  {string} json                  "{"msg":"论文已经在底部"}"
+// @Failure     404  {string} json                  "{"msg":"修改失败"}"
 // @Router      /scholar/works/modify [POST]
 func ModifyPlace(c *gin.Context) {
 	var d response.ModifyPlaceQ
@@ -433,11 +433,11 @@ func ModifyPlace(c *gin.Context) {
 // @Tags        学者主页的论文获取、管理
 // @Accept      json
 // @Produce     json
-// @Param		data body response.TopWorkQ true "data 是请求参数,包括author_id ,work_id"
-// @Success     200 {string} json "{"msg":"置顶成功"}"
-// @Failure     400 {string} json "{"msg":"参数错误"}"
-// @Failure     401 {string} json "{"msg":"未找到该论文"}"
-// @Failure     402 {string} json "{"msg":"修改失败"}"
+// @Param       data body     response.TopWorkQ true "data 是请求参数,包括author_id ,work_id"
+// @Success     200  {string} json              "{"msg":"置顶成功"}"
+// @Failure     400  {string} json              "{"msg":"参数错误"}"
+// @Failure     401  {string} json              "{"msg":"未找到该论文"}"
+// @Failure     402  {string} json              "{"msg":"修改失败"}"
 // @Router      /scholar/works/top [POST]
 func TopWork(c *gin.Context) {
 	var d response.TopWorkQ
@@ -498,4 +498,35 @@ func UploadAuthorHeadshot(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": author})
 	return
+}
+
+// ModifyAuthorIntro
+// @Summary     txc
+// @Description 修改作者简介
+// @Tags        scholar
+// @Accept      json
+// @Produce     json
+// @Param       data body     response.ModifyAuthorIntroQ true "data"
+// @Success     200  {string} json                        "{"msg":"修改成功"}"
+// @Failure     400  {string} json                        "{"msg":"参数错误"}"
+// @Failure     401  {string} json                        "{"msg":"学者未被认领"}"
+// @Router      /scholar/author/intro [POST]
+func ModifyAuthorIntro(c *gin.Context) {
+	var d response.ModifyAuthorIntroQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(400, gin.H{"msg": "参数错误"})
+		return
+	}
+	author, notFound := service.GetAuthor(d.AuthorID)
+	if notFound {
+		c.JSON(401, gin.H{"msg": "学者未被认领"})
+		return
+	}
+	author.Intro = d.Intro
+	err := global.DB.Save(author).Error
+	if err != nil {
+		c.JSON(402, gin.H{"msg": "数据库修改失败"})
+		return
+	}
+	c.JSON(200, gin.H{"msg": "修改成功"})
 }

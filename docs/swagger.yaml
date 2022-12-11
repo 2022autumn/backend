@@ -199,6 +199,15 @@ definitions:
     - password
     - username
     type: object
+  response.ModifyAuthorIntroQ:
+    properties:
+      author_id:
+        type: string
+      intro:
+        type: string
+    required:
+    - author_id
+    type: object
   response.ModifyPlaceQ:
     properties:
       author_id:
@@ -637,6 +646,36 @@ paths:
         type: file
       responses: {}
       summary: 上传作者头像 txc
+      tags:
+      - scholar
+  /scholar/author/intro:
+    post:
+      consumes:
+      - application/json
+      description: 修改作者简介
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.ModifyAuthorIntroQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg":"修改成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"参数错误"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg":"学者未被认领"}'
+          schema:
+            type: string
+      summary: txc
       tags:
       - scholar
   /scholar/concept:

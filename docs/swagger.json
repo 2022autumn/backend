@@ -490,6 +490,52 @@
                 "responses": {}
             }
         },
+        "/scholar/author/intro": {
+            "post": {
+                "description": "修改作者简介",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scholar"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.ModifyAuthorIntroQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"修改成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"学者未被认领\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/scholar/concept": {
             "post": {
                 "description": "添加user的关注关键词",
@@ -1871,6 +1917,20 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ModifyAuthorIntroQ": {
+            "type": "object",
+            "required": [
+                "author_id"
+            ],
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "intro": {
                     "type": "string"
                 }
             }

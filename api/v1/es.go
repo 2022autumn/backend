@@ -447,13 +447,13 @@ func GetStatistics(c *gin.Context) {
 // GetPrefixSuggestion doc
 // @Summary     根据前缀得到搜索建议，返回results 字符串数组 hr
 // @description 根据前缀得到搜索建议，返回results 字符串数组
-// @Tags esSearch
-// @Param Field query string true "Field 表示需要查询的字段名"
-// @Param Prefix query string true "Prefix 表示用户已经输入的前缀"
-// @Success 200 {string} string "{"success": true, "msg": "获取成功"}"
-// @Failure 400 {string} string "{"success": false, "msg": 参数错误"}"
-// @Failure 402 {string} string "{"success": false, "msg": "es服务出错"}"
-// @Router /es/prefix [POST]
+// @Tags        esSearch
+// @Param       Field  query    string true "Field 表示需要查询的字段名"
+// @Param       Prefix query    string true "Prefix 表示用户已经输入的前缀"
+// @Success     200    {string} string "{"success": true, "msg": "获取成功"}"
+// @Failure     400    {string} string "{"success": false, "msg": 参数错误"}"
+// @Failure     402    {string} string "{"success": false, "msg": "es服务出错"}"
+// @Router      /es/prefix [POST]
 func GetPrefixSuggestions(c *gin.Context) {
 	var d response.PrefixSuggestionQ
 	if err := c.ShouldBind(&d); err != nil {

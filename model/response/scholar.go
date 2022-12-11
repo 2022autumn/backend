@@ -3,6 +3,10 @@ package response
 type AddUserConceptQ struct {
 	ConceptID string `json:"concept_id" binding:"required"`
 }
+type ModifyAuthorIntroQ struct {
+	AuthorID string `json:"author_id" binding:"required"`
+	Intro    string `json:"intro"`
+}
 
 type GetPersonalWorksQ struct {
 	AuthorID string `json:"author_id" binding:"required"`
