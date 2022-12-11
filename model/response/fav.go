@@ -18,3 +18,9 @@ type TagPaperListQ struct {
 type UserInfo struct {
 	UserID uint64 `json:"user_id" binding:"required"`
 }
+
+type RenameTagQ struct {
+	UserID     uint64 `json:"user_id" binding:"required"`
+	TagID      uint64 `json:"tag_id" binding:"required"`
+	NewTagName string `json:"new_tag_name" binding:"required"`
+}

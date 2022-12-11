@@ -21,8 +21,8 @@ import (
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status": 200, "msg": "收藏夹创建成功", "tag_id": tag.TagID}"
-// @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
-// @Failure     401 {string} json "{"status": 401, "msg":    "收藏夹已存在，换个名字吧～"}"
+// @Failure     400 {string} json "{"status": 400, "msg":"用户ID不存在"}"
+// @Failure     401 {string} json "{"status": 401, "msg":"收藏夹已存在，换个名字吧～"}"
 // @Failure     402 {string} json "{"status": 402, "msg": "创建失败"}"
 // @Router      /social/tag/create [POST]
 func CreateTag(c *gin.Context) {
@@ -55,8 +55,8 @@ func CreateTag(c *gin.Context) {
 	if !notFoundTag {
 		c.JSON(http.StatusOK, gin.H{
 			//"success": false,
-			"status":  401,
-			"message": "收藏夹已存在，换个名字吧～",
+			"status": 401,
+			"msg":    "收藏夹已存在，换个名字吧～",
 		})
 		return
 	}
@@ -79,7 +79,7 @@ func CreateTag(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Success     200 {string} json "{"status": 200, "msg": "收藏成功"}"
-// @Failure     400 {string} json "{"status": 400,"msg":"用户ID不存在"}"
+// @Failure     400 {string} json "{"status": 400, "msg":"用户ID不存在"}"
 // @Failure     401 {string} json "{"status": 401, "msg": "用户无此收藏夹"}"
 // @Failure     402 {string} json "{"status": 402, "msg": "文章已在此收藏夹下"}"
 // @Failure     403 {string} json "{"status": 403, "msg": "收藏失败"}"
@@ -122,6 +122,54 @@ func AddTagToPaper(c *gin.Context) {
 		}
 		c.JSON(http.StatusOK, gin.H{"status": 200, "msg": "收藏成功"})
 		return
+	}
+}
+
+// RemovePaperTag 将某篇文献取消收藏
+// @Summary Vera
+// @Description 将某篇文献从收藏夹中移除
+// @Tags        社交
+// @Param       data body     response.AddTagToPaper true "data"
+// @Accept      json
+// @Produce     json
+// @Success     200 {string} json "{"status": 200, "msg": "取消收藏成功"}"
+// @Failure     400 {string} json "{"status": 400,"msg":"用户ID不存在"}"
+// @Failure     401 {string} json "{"status": 401, "msg": "用户无此收藏夹"}"
+// @Failure     402 {string} json "{"status": 402, "msg": "文章不在此收藏夹下"}"
+// @Failure     403 {string} json "{"status": 403, "msg": "取消收藏失败"}"
+// @Router      /social/tag/cancelCollectPaper [POST]
+func RemovePaperTag(c *gin.Context) {
+	var d response.AddTagToPaper
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	user_id := d.UserID
+	paper_id := d.PaperID
+	tag_id := d.TagID
+	_, notFoundUserByID := service.QueryAUserByID(user_id)
+	if notFoundUserByID {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": 400,
+			"msg":    "用户ID不存在",
+		})
+		return
+	}
+	_, notFound := service.QueryTagUser(tag_id, user_id)
+	if notFound {
+		c.JSON(http.StatusOK, gin.H{"status": 401, "msg": "用户无此收藏夹"})
+		return
+	}
+	_, notFound = service.QueryPaperTag(tag_id, paper_id)
+	if notFound {
+		c.JSON(http.StatusOK, gin.H{"status": 402, "msg": "文章不在此收藏夹下"})
+		return
+	} else {
+		err := service.DeleteTagPaper(tag_id, paper_id)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"status": 403, "msg": "取消收藏失败"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": 200, "msg": "取消收藏成功"})
 	}
 }
 
@@ -215,7 +263,7 @@ func ShowTagPaperList(c *gin.Context) {
 // @Param       data body     response.UserInfo true "data"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"success": true, "status":  200, "message": "查看收藏夹列表成功", "data":tags}"
+// @Success     200 {string} json "{"success": true, "status":  200, "msg": "查看收藏夹列表成功", "data":tags}"
 // @Failure		400 {string} json "{"success": false,"status": 400, "msg":"用户ID不存在"}"
 // @Failure		403 {string} json "{"success": false,"status": 403, "msg":"未查询到结果"}"
 // @Router      /social/tag/taglist [POST]
@@ -240,12 +288,12 @@ func ShowUserTagList(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"status":  403,
-			"message": "未查询到结果",
+			"msg":     "未查询到结果",
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"success": true, "status": 200, "message": "查看收藏夹列表成功", "data": tags,
+		"success": true, "status": 200, "msg": "查看收藏夹列表成功", "data": tags,
 	})
 }
 
@@ -253,9 +301,11 @@ func ShowUserTagList(c *gin.Context) {
 // @description 删除标签
 // @Tags 社交
 // @Param data body     response.TagPaperListQ true "data"
-// @Success 200 {string} string "{"success": true,"status":200, "message": "标签删除成功"}"
-// @Failure 400 {string} string "{"success": false,"status":400, "message": "用户ID不存在"}"
-// @Failure 403 {string} string "{"success": false,"status":403, "message": "标签不存在"}"
+// @Accept      json
+// @Produce     json
+// @Success 200 {string} string "{"success": true,"status":200, "msg": "标签删除成功"}"
+// @Failure 400 {string} string "{"success": false,"status":400, "msg": "用户ID不存在"}"
+// @Failure 403 {string} string "{"success": false,"status":403, "msg": "标签不存在"}"
 // @Router /social/tag/delete [POST]
 func DeleteTag(c *gin.Context) {
 	var d response.TagPaperListQ
@@ -278,7 +328,7 @@ func DeleteTag(c *gin.Context) {
 	tag, notFoundTag := service.GetTagById(tag_id)
 
 	if notFoundTag {
-		c.JSON(http.StatusOK, gin.H{"success": false, "status": 403, "message": "标签不存在"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "status": 403, "msg": "标签不存在"})
 		return
 	}
 	//tagPapers := service.QueryTagPaper(tag.TagID)
@@ -293,5 +343,57 @@ func DeleteTag(c *gin.Context) {
 	//	}
 	//	service.DeleteTagPaper(paper.ID)
 	//}
-	c.JSON(http.StatusOK, gin.H{"success": true, "status": 200, "message": "标签删除成功"})
+	c.JSON(http.StatusOK, gin.H{"success": true, "status": 200, "msg": "标签删除成功"})
+}
+
+// RenameTag 收藏夹重命名
+// @description 对原有的收藏夹重命名
+// @Tags 社交
+// @Param data body     response.RenameTagQ true "data"
+// @Accept      json
+// @Produce     json
+// @Success		200 {string} json "{"status":200,"msg":"修改成功"}"
+// @Failure		400 {string} json "{"status": 400, "msg": "用户ID不存在"}"
+// @Failure     401 {string} json "{"status": 401, "msg": "用户无此收藏夹"}"
+// @Failure     402 {string} json "{"status": 402, "msg": "名称已存在，换个名字吧～"}"
+// @Failure     403 {string} json "{"status":403,"msg":"修改失败"}"
+// @Router /social/tag/rename [POST]
+func RenameTag(c *gin.Context) {
+	var d response.RenameTagQ
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	user_id := d.UserID
+	tag_id := d.TagID
+	new_name := d.NewTagName
+
+	//验证用户是否存在
+	_, notFoundUserByID := service.QueryAUserByID(user_id)
+	if notFoundUserByID {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": 400,
+			"msg":    "用户ID不存在",
+		})
+		return
+	}
+	tag, notFound := service.QueryTagUser(tag_id, user_id)
+	if notFound {
+		c.JSON(http.StatusOK, gin.H{"status": 401, "msg": "用户无此收藏夹"})
+		return
+	}
+	same_name_tag, notFoundTag := service.QueryATag(user_id, new_name)
+	if !notFoundTag && same_name_tag != tag {
+		c.JSON(http.StatusOK, gin.H{
+			//"success": false,
+			"status": 402,
+			"msg":    "名称已存在，换个名字吧～",
+		})
+		return
+	}
+	err := service.RenameTag(new_name, tag)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 403, "msg": "修改失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": 200, "msg": "修改成功"})
 }

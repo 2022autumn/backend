@@ -4,6 +4,7 @@ import (
 	"IShare/global"
 	"IShare/model/database"
 	"errors"
+	"fmt"
 	"github.com/jinzhu/gorm"
 )
 
@@ -67,6 +68,15 @@ func CreateTagPaper(tagpaper *database.TagPaper) (err error) {
 	}
 	return nil
 }
+
+// 删除文章-标签收藏关系
+func DeleteTagPaper(tag_id uint64, paper_id string) (err error) {
+	if err = global.DB.Where("tag_id = ? AND paper_id = ?", tag_id, paper_id).Delete(database.TagPaper{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func QueryTagPaper(tagID uint64) (papers []database.TagPaper) {
 	papers = make([]database.TagPaper, 0)
 	global.DB.Where("tag_id=?", tagID).Order("create_time desc").Find(&papers)
@@ -100,6 +110,19 @@ func DeleteTag(tagID uint64) (err error) {
 		return err
 	}
 	if err = global.DB.Where("tag_id = ?", tagID).Delete(database.TagPaper{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func RenameTag(new_name string, tag database.Tag) (err error) {
+	old_name := tag.TagName
+	if old_name == new_name {
+		return nil
+	}
+	tag.TagName = new_name
+	if err = global.DB.Save(tag).Error; err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil

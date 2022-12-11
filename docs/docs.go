@@ -1137,6 +1137,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/social/tag/cancelCollectPaper": {
+            "post": {
+                "description": "将某篇文献从收藏夹中移除",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "summary": "Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.AddTagToPaper"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": 200, \"msg\": \"取消收藏成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\": 400,\"msg\":\"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\": 401, \"msg\": \"用户无此收藏夹\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"status\": 402, \"msg\": \"文章不在此收藏夹下\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"status\": 403, \"msg\": \"取消收藏失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/social/tag/collectPaper": {
             "post": {
                 "description": "将某篇文献加入到某一收藏夹下",
@@ -1169,7 +1227,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "{\"status\": 400,\"msg\":\"用户ID不存在\"}",
+                        "description": "{\"status\": 400, \"msg\":\"用户ID不存在\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -1227,13 +1285,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "{\"status\":400,\"msg\":\"用户ID不存在\"}",
+                        "description": "{\"status\": 400, \"msg\":\"用户ID不存在\"}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "401": {
-                        "description": "{\"status\": 401, \"msg\":    \"收藏夹已存在，换个名字吧～\"}",
+                        "description": "{\"status\": 401, \"msg\":\"收藏夹已存在，换个名字吧～\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -1250,6 +1308,12 @@ const docTemplate = `{
         "/social/tag/delete": {
             "post": {
                 "description": "删除标签",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "社交"
                 ],
@@ -1266,19 +1330,76 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"success\": true,\"status\":200, \"message\": \"标签删除成功\"}",
+                        "description": "{\"success\": true,\"status\":200, \"msg\": \"标签删除成功\"}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
-                        "description": "{\"success\": false,\"status\":400, \"message\": \"用户ID不存在\"}",
+                        "description": "{\"success\": false,\"status\":400, \"msg\": \"用户ID不存在\"}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "403": {
-                        "description": "{\"success\": false,\"status\":403, \"message\": \"标签不存在\"}",
+                        "description": "{\"success\": false,\"status\":403, \"msg\": \"标签不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/social/tag/rename": {
+            "post": {
+                "description": "对原有的收藏夹重命名",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.RenameTagQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"msg\":\"修改成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\": 400, \"msg\": \"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\": 401, \"msg\": \"用户无此收藏夹\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"status\": 402, \"msg\": \"名称已存在，换个名字吧～\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"status\":403,\"msg\":\"修改失败\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -1376,7 +1497,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"success\": true, \"status\":  200, \"message\": \"查看收藏夹列表成功\", \"data\":tags}",
+                        "description": "{\"success\": true, \"status\":  200, \"msg\": \"查看收藏夹列表成功\", \"data\":tags}",
                         "schema": {
                             "type": "string"
                         }
@@ -1977,6 +2098,25 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 100,
                     "minLength": 3
+                }
+            }
+        },
+        "response.RenameTagQ": {
+            "type": "object",
+            "required": [
+                "new_tag_name",
+                "tag_id",
+                "user_id"
+            ],
+            "properties": {
+                "new_tag_name": {
+                    "type": "string"
+                },
+                "tag_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },

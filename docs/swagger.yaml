@@ -265,6 +265,19 @@ definitions:
     - password
     - username
     type: object
+  response.RenameTagQ:
+    properties:
+      new_tag_name:
+        type: string
+      tag_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - new_tag_name
+    - tag_id
+    - user_id
+    type: object
   response.TagCreation:
     properties:
       tag_name:
@@ -1093,6 +1106,44 @@ paths:
       summary: 获取用户关注的学者 txc
       tags:
       - 社交
+  /social/tag/cancelCollectPaper:
+    post:
+      consumes:
+      - application/json
+      description: 将某篇文献从收藏夹中移除
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.AddTagToPaper'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status": 200, "msg": "取消收藏成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"status": 400,"msg":"用户ID不存在"}'
+          schema:
+            type: string
+        "401":
+          description: '{"status": 401, "msg": "用户无此收藏夹"}'
+          schema:
+            type: string
+        "402":
+          description: '{"status": 402, "msg": "文章不在此收藏夹下"}'
+          schema:
+            type: string
+        "403":
+          description: '{"status": 403, "msg": "取消收藏失败"}'
+          schema:
+            type: string
+      summary: Vera
+      tags:
+      - 社交
   /social/tag/collectPaper:
     post:
       consumes:
@@ -1113,7 +1164,7 @@ paths:
           schema:
             type: string
         "400":
-          description: '{"status": 400,"msg":"用户ID不存在"}'
+          description: '{"status": 400, "msg":"用户ID不存在"}'
           schema:
             type: string
         "401":
@@ -1151,11 +1202,11 @@ paths:
           schema:
             type: string
         "400":
-          description: '{"status":400,"msg":"用户ID不存在"}'
+          description: '{"status": 400, "msg":"用户ID不存在"}'
           schema:
             type: string
         "401":
-          description: '{"status": 401, "msg":    "收藏夹已存在，换个名字吧～"}'
+          description: '{"status": 401, "msg":"收藏夹已存在，换个名字吧～"}'
           schema:
             type: string
         "402":
@@ -1167,6 +1218,8 @@ paths:
       - 社交
   /social/tag/delete:
     post:
+      consumes:
+      - application/json
       description: 删除标签
       parameters:
       - description: data
@@ -1175,17 +1228,56 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/response.TagPaperListQ'
+      produces:
+      - application/json
       responses:
         "200":
-          description: '{"success": true,"status":200, "message": "标签删除成功"}'
+          description: '{"success": true,"status":200, "msg": "标签删除成功"}'
           schema:
             type: string
         "400":
-          description: '{"success": false,"status":400, "message": "用户ID不存在"}'
+          description: '{"success": false,"status":400, "msg": "用户ID不存在"}'
           schema:
             type: string
         "403":
-          description: '{"success": false,"status":403, "message": "标签不存在"}'
+          description: '{"success": false,"status":403, "msg": "标签不存在"}'
+          schema:
+            type: string
+      tags:
+      - 社交
+  /social/tag/rename:
+    post:
+      consumes:
+      - application/json
+      description: 对原有的收藏夹重命名
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.RenameTagQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status":200,"msg":"修改成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"status": 400, "msg": "用户ID不存在"}'
+          schema:
+            type: string
+        "401":
+          description: '{"status": 401, "msg": "用户无此收藏夹"}'
+          schema:
+            type: string
+        "402":
+          description: '{"status": 402, "msg": "名称已存在，换个名字吧～"}'
+          schema:
+            type: string
+        "403":
+          description: '{"status":403,"msg":"修改失败"}'
           schema:
             type: string
       tags:
@@ -1249,8 +1341,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"success": true, "status":  200, "message": "查看收藏夹列表成功",
-            "data":tags}'
+          description: '{"success": true, "status":  200, "msg": "查看收藏夹列表成功", "data":tags}'
           schema:
             type: string
         "400":
