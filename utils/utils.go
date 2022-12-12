@@ -13,6 +13,7 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic/v7"
@@ -226,8 +227,10 @@ func GetByUrl(urlstring string) (map[string]interface{}, error) {
 	u, _ := url.Parse(urlstring)
 	q := u.Query()
 	u.RawQuery = q.Encode() //urlencode
-	println(u.String())
+	log.Println(u.String())
+	req_st_time := time.Now()
 	resp, err := http.Get(u.String())
+	log.Println("- single get works_api_url time: ", time.Since(req_st_time))
 	if err != nil {
 		return nil, err
 	}

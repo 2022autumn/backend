@@ -141,12 +141,10 @@ definitions:
     type: object
   response.GetPaperPDFQ:
     properties:
-      author_id:
-        type: string
       work_id:
+        description: AuthorID string `json:"author_id" binding:"required"`
         type: string
     required:
-    - author_id
     - work_id
     type: object
   response.GetPersonalWorksQ:
@@ -427,6 +425,35 @@ paths:
       tags:
       - 管理
   /es/get/:
+    get:
+      description: 根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759
+      parameters:
+      - description: 对象id
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: 用户id
+        in: query
+        name: userid
+        type: string
+      responses:
+        "200":
+          description: '{"status":200,"res":{}}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400,"msg":"id type error"}'
+          schema:
+            type: string
+        "404":
+          description: '{"status":201,"msg":"es get err or not found"}'
+          schema:
+            type: string
+      summary: 根据id获取对象 txc
+      tags:
+      - esSearch
+  /es/get2/:
     get:
       description: 根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759
       parameters:
@@ -946,14 +973,12 @@ paths:
         获取学者上传的文章PDF地址
 
         参数说明
-        - author_id 作者的id
-
         - work_id 论文的id
 
         返回说明
         - pdf地址,直接使用即可，无需拼接
       parameters:
-      - description: data 是请求参数,包括author_id ,work_id
+      - description: data 是请求参数work_id
         in: body
         name: data
         required: true
