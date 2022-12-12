@@ -213,6 +213,7 @@ func GenAuthorDefaultIntro(a map[string]interface{}) string {
 func GetObject(c *gin.Context) {
 	id := c.Query("id")
 	userid := c.Query("userid")
+	id = utils.RemovePrefix(id)
 	idx, err := utils.TransObjPrefix(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "id type error"})
@@ -639,10 +640,18 @@ func AuthorSearch2(c *gin.Context) {
 		})
 		return
 	}
-	//authors := data["data"].([]interface{})
-	//for _,v:= authors {
-	//	id := authors["id"].(string)
-	//}
+	authors := data["results"].([]interface{})
+	for _, v := range authors {
+		author := v.(map[string]interface{})
+		id := author["id"].(string)
+		id = utils.RemovePrefix(id)
+		au, notFound := service.GetAuthor(id)
+		if notFound {
+			author["headshot"] = "author_default.jpg"
+		} else {
+			author["headshot"] = au.HeadShot
+		}
+	}
 	c.JSON(200, gin.H{
 		"msg": "Author Search Success",
 		"res": map[string]interface{}{
