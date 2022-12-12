@@ -736,7 +736,7 @@ paths:
         required: true
         type: file
       responses: {}
-      summary: 上传作者头像 txc
+      summary: 上传作品PDF hr
       tags:
       - scholar
   /scholar/author/intro:
@@ -886,12 +886,15 @@ paths:
         - page_size 分页的大小, 不能为0
 
         - display 是否显示已删除的论文 -1不显示 1显示
+
         返回值说明
         - msg 返回信息
 
-        - res 返回该页的works对象数组
+        - data 返回该页的works对象数组
 
         - pages 分页总数，一共有多少页
+
+        - total 论文总数
       parameters:
       - description: data 是请求参数,包括author_id ,page ,page_size, display
         in: body
@@ -903,7 +906,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"msg":"获取成功","data":{}, "pages":{}}'
+          description: '{"msg":"获取成功","data":{}, "pages":{}, "total":{}}'
           schema:
             type: string
         "400":
