@@ -199,22 +199,25 @@ func GetHotWorks(c *gin.Context) {
 // @Description 参数说明
 // @Description - author_id 作者的id
 // @Description
-// @Description - page 获取第几页的数据
+// @Description - page 获取第几页的数据, START FROM 1
 // @Description
-// @Description - page_size 分页的大小
+// @Description - page_size 分页的大小, 不能为0
 // @Description
 // @Description - display 是否显示已删除的论文 -1不显示 1显示
+// @Description
 // @Description 返回值说明
 // @Description - msg 返回信息
 // @Description
-// @Description - res 返回该页的works对象数组
+// @Description - data 返回该页的works对象数组
 // @Description
-// @Description - pages 分页总数
+// @Description - pages 分页总数，一共有多少页
+// @Description
+// @Description - total 论文总数
 // @Tags        学者主页的论文获取、管理
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.GetPersonalWorksQ true "data 是请求参数,包括author_id ,page ,page_size, display"
-// @Success     200  {string} json                       "{"msg":"获取成功","res":{}, "pages":{}}"
+// @Success     200  {string} json                       "{"msg":"获取成功","data":{}, "pages":{}, "total":{}}"
 // @Failure     400  {string} json                       "{"msg":"参数错误"}"
 // @Failure     401  {string} json                       "{"msg":"作者不存在"}"
 // @Failure     402  {string} json                       "{"msg":"page超出范围"}"
@@ -266,7 +269,18 @@ func GetPersonalWorks(c *gin.Context) {
 		for _, work := range works {
 			data = append(data, work.WorkID)
 		}
-		c.JSON(200, gin.H{"msg": "获取成功", "res": data, "pages": pages})
+		objects, err := service.GetObjects("works_v1", data)
+		if err != nil {
+			c.JSON(500, gin.H{"msg": "获取objects失败"})
+			return
+		}
+		// 获取论文总数
+		total, err := service.GetScholarWorksCount(author_id)
+		if err != nil {
+			c.JSON(404, gin.H{"msg": "查询论文总数出错，修改失败"})
+			return
+		}
+		c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages, "total": total})
 		return
 	}
 	// 不能找到则从openalex api中获取
@@ -288,6 +302,7 @@ func GetPersonalWorks(c *gin.Context) {
 		c.JSON(402, gin.H{"msg": "page超出范围"})
 		return
 	}
+	total := len(works)
 	go service.CreateWorks(works)
 	// 页数从1开始
 	if page == pages { // 最后一页
@@ -299,7 +314,12 @@ func GetPersonalWorks(c *gin.Context) {
 	for _, work := range works {
 		data = append(data, work.WorkID)
 	}
-	c.JSON(200, gin.H{"msg": "获取成功", "res": data, "pages": pages})
+	objects, err := service.GetObjects("works_v1", data)
+	if err != nil {
+		c.JSON(500, gin.H{"msg": "获取objects失败"})
+		return
+	}
+	c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages, "total": total})
 }
 
 // IgnoreWork 忽略论文
@@ -418,8 +438,8 @@ func ModifyPlace(c *gin.Context) {
 // @Produce     json
 // @Param       data body     response.TopWorkQ true "data 是请求参数,包括author_id ,work_id"
 // @Success     200  {string} json              "{"msg":"置顶成功"}"
-// @Failure     400  {string} json              "{"msg":"参数错误"}"
-// @Failure     401  {string} json              "{"msg":"未找到该论文"}"
+// @Failure     400  {string} json                  "{"msg":"参数错误"}"
+// @Failure     401  {string} json                  "{"msg":"未找到该论文"}"
 // @Failure     402  {string} json              "{"msg":"修改失败"}"
 // @Router      /scholar/works/top [POST]
 func TopWork(c *gin.Context) {
@@ -480,7 +500,6 @@ func UploadAuthorHeadshot(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": author})
-	return
 }
 
 // ModifyAuthorIntro
@@ -512,4 +531,96 @@ func ModifyAuthorIntro(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"msg": "修改成功"})
+}
+
+// 上传作品PDF
+// @Summary     学者管理主页--上传作品PDF hr
+// @Description 学者管理主页--上传作品PDF
+// @Description
+// @Description 参数说明
+// @Description - author_id 作者的id
+// @Description
+// @Description - work_id 论文的id
+// @Description
+// @Description - PDF 上传的PDF文件
+// @Tags        学者主页的论文获取、管理
+// @Param       author_id formData string true "学者ID"
+// @Param       work_id   formData string true "论文ID"
+// @Param       PDF       formData file   true "PDF"
+// @Router      /scholar/works/upload [POST]
+func UploadPaperPDF(c *gin.Context) {
+	authorID := c.Request.FormValue("author_id")
+	workID := c.Request.FormValue("work_id")
+	_, notFound := service.GetPersonalWork(authorID, workID)
+	if notFound {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "论文不存在"})
+		return
+	}
+	pdf, err := c.FormFile("PDF")
+	if err != nil {
+		c.JSON(401, gin.H{"msg": "文件上传失败"})
+		return
+	}
+	raw := fmt.Sprintf("%d", authorID) + time.Now().String() + pdf.Filename
+	md5 := utils.GetMd5(raw)
+	suffix := strings.Split(pdf.Filename, ".")[1]
+	saveDir := "./media/pdf/"
+	saveName := md5 + "." + suffix
+	log.Printf("saveName: %s", saveName)
+	savePath := path.Join(saveDir, saveName)
+	if err = c.SaveUploadedFile(pdf, savePath); err != nil {
+		c.JSON(402, gin.H{"msg": "文件保存失败"})
+		return
+	}
+	err = service.UpdateWorkPdf(authorID, workID, saveName)
+	if err != nil {
+		c.JSON(403, gin.H{"msg": "保存文件路径到数据库中失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "上传成功", "data": saveName})
+}
+
+// 获取论文PDF地址
+// @Summary     获取学者上传的文章PDF地址 hr
+// @Description 获取学者上传的文章PDF地址
+// @Description
+// @Description 参数说明
+// @Description - work_id 论文的id
+// @Description
+// @Description 返回说明
+// @Description - pdf地址,直接使用即可，无需拼接
+// @Tags        学者主页的论文获取、管理
+// @Accept      json
+// @Produce     json
+// @Param       data body     response.GetPaperPDFQ true "data 是请求参数work_id"
+// @Success     200  {string} json                  "{"msg":"获取成功", "data": "pdf地址"}"
+// @Failure     400  {string} json              "{"msg":"参数错误"}"
+// @Failure     401  {string} json              "{"msg":"未找到该论文"}"
+// @Failure     402  {string} json                  "{"msg":"未上传PDF"}"
+// @Router      /scholar/works/getpdf [POST]
+func GetPaperPDF(c *gin.Context) {
+	var d response.GetPaperPDFQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(400, gin.H{"msg": "参数错误"})
+		return
+	}
+	works, err := service.GetWorksByWorkID(d.WorkID)
+	if err != nil {
+		c.JSON(401, gin.H{"msg": "出现err,未找到该论文", "err": err})
+		return
+	}
+	if len(works) == 0 {
+		c.JSON(401, gin.H{"msg": "未找到该论文"})
+		return
+	}
+	// log.Println(works)
+	for _, work := range works {
+		// log.Println(work)
+		if work.PDF != "" {
+			url := "http://ishare.horik.cn:8000/api/media/pdf/" + work.PDF
+			c.JSON(200, gin.H{"msg": "获取成功", "data": url})
+			return
+		}
+	}
+	c.JSON(402, gin.H{"msg": "未上传PDF"})
 }

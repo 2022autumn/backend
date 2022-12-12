@@ -257,6 +257,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/es/get2/": {
+            "get": {
+                "description": "根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "根据id获取对象 txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "对象id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户id",
+                        "name": "userid",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"res\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"id type error\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "{\"status\":201,\"msg\":\"es get err or not found\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/es/getAuthorRelationNet": {
             "get": {
                 "description": "根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我\n\n目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低\n",
@@ -364,6 +408,122 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
+            }
+        },
+        "/es/search/author": {
+            "get": {
+                "description": "根据作者名字搜索作者,模糊搜索",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "query_word",
+                        "name": "query_word",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "size",
+                        "name": "size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "sort",
+                        "name": "sort",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "asc",
+                        "name": "asc",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"res\":{},\"msg\": \"Author Search Success\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\": \"Author Search Error\",\"err\":err}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/es/search/author2": {
+            "get": {
+                "description": "根据作者名字搜索作者 via openalex",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "query_word",
+                        "name": "query_word",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "sort=cited_by_count|...:_|desc|asc",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"res\":{},\"msg\": \"Author Search Success\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\": \"openalex Search Error\",\"err\":err}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\": \"openalex Search Error\",\"err\":err}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/es/search/base": {
@@ -763,7 +923,7 @@ const docTemplate = `{
         },
         "/scholar/works/get": {
             "post": {
-                "description": "获取学者的论文\n\n参数说明\n- author_id 作者的id\n\n- page 获取第几页的数据\n\n- page_size 分页的大小\n\n- display 是否显示已删除的论文 -1不显示 1显示\n返回值说明\n- msg 返回信息\n\n- res 返回该页的works对象数组\n\n- pages 分页总数",
+                "description": "获取学者的论文\n\n参数说明\n- author_id 作者的id\n\n- page 获取第几页的数据, START FROM 1\n\n- page_size 分页的大小, 不能为0\n\n- display 是否显示已删除的论文 -1不显示 1显示\n\n返回值说明\n- msg 返回信息\n\n- data 返回该页的works对象数组\n\n- pages 分页总数，一共有多少页\n\n- total 论文总数",
                 "consumes": [
                     "application/json"
                 ],
@@ -787,7 +947,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"msg\":\"获取成功\",\"res\":{}, \"pages\":{}}",
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}, \"pages\":{}, \"total\":{}}",
                         "schema": {
                             "type": "string"
                         }
@@ -812,6 +972,58 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "{\"msg\":\"该作者没有论文\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/works/getpdf": {
+            "post": {
+                "description": "获取学者上传的文章PDF地址\n\n参数说明\n- work_id 论文的id\n\n返回说明\n- pdf地址,直接使用即可，无需拼接",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "学者主页的论文获取、管理"
+                ],
+                "summary": "获取学者上传的文章PDF地址 hr",
+                "parameters": [
+                    {
+                        "description": "data 是请求参数work_id",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.GetPaperPDFQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"获取成功\", \"data\": \"pdf地址\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"未找到该论文\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"未上传PDF\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -979,6 +1191,39 @@ const docTemplate = `{
                         }
                     }
                 }
+            }
+        },
+        "/scholar/works/upload": {
+            "post": {
+                "description": "学者管理主页--上传作品PDF\n\n参数说明\n- author_id 作者的id\n\n- work_id 论文的id\n\n- PDF 上传的PDF文件",
+                "tags": [
+                    "学者主页的论文获取、管理"
+                ],
+                "summary": "学者管理主页--上传作品PDF hr",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "学者ID",
+                        "name": "author_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "论文ID",
+                        "name": "work_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "PDF",
+                        "name": "PDF",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {}
             }
         },
         "/social/comment/create": {
@@ -2057,6 +2302,18 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "response.GetPaperPDFQ": {
+            "type": "object",
+            "required": [
+                "work_id"
+            ],
+            "properties": {
+                "work_id": {
+                    "description": "AuthorID string ` + "`" + `json:\"author_id\" binding:\"required\"` + "`" + `",
+                    "type": "string"
                 }
             }
         },

@@ -6,7 +6,7 @@ type LoginQ struct {
 }
 
 type RegisterQ struct {
-	Username string `json:"username" binding:"min=3,max=100,required"`
+	Username string `json:"username" binding:"min=1,required"`
 	Password string `json:"password" binding:"gte=6,required"`
 }
 

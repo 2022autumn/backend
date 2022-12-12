@@ -82,7 +82,7 @@ func CreateUserFollow(uf *database.UserFollow) (err error) {
 	return err
 }
 func DeleteUserFollow(uf *database.UserFollow) (err error) {
-	err = global.DB.Delete(uf).Error
+	err = global.DB.Delete(uf, "user_id = ? AND author_id = ?", uf.UserID, uf.AuthorID).Error
 	return err
 }
 func GetUserFollows(userID uint64) (userFollows []database.UserFollow, err error) {

@@ -213,6 +213,7 @@ func GenAuthorDefaultIntro(a map[string]interface{}) string {
 func GetObject(c *gin.Context) {
 	id := c.Query("id")
 	userid := c.Query("userid")
+	id = utils.RemovePrefix(id)
 	idx, err := utils.TransObjPrefix(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "id type error"})
@@ -220,7 +221,7 @@ func GetObject(c *gin.Context) {
 	}
 	res, err := service.GetObject(idx, id)
 	if err != nil {
-		c.JSON(404, gin.H{"msg": "es get err or not found"})
+		c.JSON(http.StatusNotFound, gin.H{"msg": "es & openalex not found"})
 		return
 	}
 	var tmp = make(map[string]interface{})
@@ -534,7 +535,7 @@ func GetStatistics(c *gin.Context) {
 	c.JSON(200, gin.H{"res": res})
 }
 
-// GetPrefixSuggestion doc
+// GetPrefixSuggestions doc
 // @Summary     根据前缀得到搜索建议，返回results 字符串数组 hr
 // @description 根据前缀得到搜索建议，返回results 字符串数组
 // @Tags        esSearch
@@ -558,4 +559,104 @@ func GetPrefixSuggestions(c *gin.Context) {
 		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "msg": "获取成功", "res": prefixResult})
+}
+
+// AuthorSearch
+// @Summary     txc
+// @Description 根据作者名字搜索作者,模糊搜索
+// @Tags        esSearch
+// @Param       query_word query    string true "query_word"
+// @Param       page       query    int    true "page"
+// @Param       size       query    int    true "size"
+// @Param       sort       query    int    true "sort"
+// @Param       asc        query    bool   true "asc"
+// @Success     200        {string} json   "{"res":{},"msg": "Author Search Success"}"
+// @Failure     401        {string} json   "{"msg": "Author Search Error","err":err}"
+// @Router      /es/search/author [GET]
+func AuthorSearch(c *gin.Context) {
+	queryWord := c.Query("query_word")
+	page, _ := strconv.Atoi(c.Query("page"))
+	size, _ := strconv.Atoi(c.Query("size"))
+	sort, _ := strconv.Atoi(c.Query("sort"))
+	asc, _ := strconv.ParseBool(c.Query("asc"))
+	res, err := service.AuthorSearch(queryWord, page, size, sort, asc)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"msg": "Author Search Error",
+			"err": err,
+		})
+		return
+	}
+	var data = response.BaseSearchA{}
+	data.Hits, data.Works, data.Aggs, _ = utils.NormalizationSearchResult(res)
+	c.JSON(200, gin.H{
+		"msg": "Author Search Success",
+		"res": data,
+	})
+}
+
+// AuthorSearch2
+// @Summary     txc
+// @Description 根据作者名字搜索作者 via openalex
+// @Tags        esSearch
+// @Param       query_word query    string true  "query_word"
+// @Param       page       query    int    false "page"
+// @Param       size       query    int    false "size"
+// @Param       sort       query    string false "sort=cited_by_count|...:_|desc|asc"
+// @Success     200        {string} json   "{"res":{},"msg": "Author Search Success"}"
+// @Failure     401        {string} json   "{"msg": "openalex Search Error","err":err}"
+// @Failure     402        {string} json   "{"msg": "openalex Search Error","err":err}"
+// @Router      /es/search/author2 [GET]
+func AuthorSearch2(c *gin.Context) {
+	//https://api.openalex.org/authors?search=kaiming%20he&page=2&per_page=10&sort=cited_by_count:desc
+	//https://api.openalex.org/authors?search=kaiming%20he&group_by=last_known_institution.id
+	search := c.Query("query_word")
+	page := c.Query("page")
+	per_page := c.Query("size")
+	sort := c.Query("sort")
+	url := "https://api.openalex.org/authors?"
+	url += "search=" + search
+	if page != "" {
+		url += "&page=" + page
+	}
+	if per_page != "" {
+		url += "&per_page=" + per_page
+	}
+	if sort != "" {
+		url += "&sort=" + sort
+	}
+	data, err := utils.GetByUrl(url)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"msg": "openalex Search Error",
+			"err": data,
+		})
+		return
+	}
+	if data["meta"] == nil {
+		c.JSON(402, gin.H{
+			"msg": "openalex Search Error",
+			"err": data,
+		})
+		return
+	}
+	authors := data["results"].([]interface{})
+	for _, v := range authors {
+		author := v.(map[string]interface{})
+		id := author["id"].(string)
+		id = utils.RemovePrefix(id)
+		au, notFound := service.GetAuthor(id)
+		if notFound {
+			author["headshot"] = "author_default.jpg"
+		} else {
+			author["headshot"] = au.HeadShot
+		}
+	}
+	c.JSON(200, gin.H{
+		"msg": "Author Search Success",
+		"res": map[string]interface{}{
+			"hits":  data["meta"].(map[string]interface{})["count"],
+			"works": data["results"],
+		},
+	})
 }

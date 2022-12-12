@@ -139,6 +139,14 @@ definitions:
     - author_id
     - user_id
     type: object
+  response.GetPaperPDFQ:
+    properties:
+      work_id:
+        description: AuthorID string `json:"author_id" binding:"required"`
+        type: string
+    required:
+    - work_id
+    type: object
   response.GetPersonalWorksQ:
     properties:
       author_id:
@@ -493,6 +501,35 @@ paths:
       summary: 根据id获取对象 txc
       tags:
       - esSearch
+  /es/get2/:
+    get:
+      description: 根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759
+      parameters:
+      - description: 对象id
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: 用户id
+        in: query
+        name: userid
+        type: string
+      responses:
+        "200":
+          description: '{"status":200,"res":{}}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400,"msg":"id type error"}'
+          schema:
+            type: string
+        "404":
+          description: '{"status":201,"msg":"es get err or not found"}'
+          schema:
+            type: string
+      summary: 根据id获取对象 txc
+      tags:
+      - esSearch
   /es/getAuthorRelationNet:
     get:
       description: |
@@ -574,6 +611,84 @@ paths:
       - application/json
       responses: {}
       summary: 高级搜索 txc
+      tags:
+      - esSearch
+  /es/search/author:
+    get:
+      description: 根据作者名字搜索作者,模糊搜索
+      parameters:
+      - description: query_word
+        in: query
+        name: query_word
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: size
+        in: query
+        name: size
+        required: true
+        type: integer
+      - description: sort
+        in: query
+        name: sort
+        required: true
+        type: integer
+      - description: asc
+        in: query
+        name: asc
+        required: true
+        type: boolean
+      responses:
+        "200":
+          description: '{"res":{},"msg": "Author Search Success"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg": "Author Search Error","err":err}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - esSearch
+  /es/search/author2:
+    get:
+      description: 根据作者名字搜索作者 via openalex
+      parameters:
+      - description: query_word
+        in: query
+        name: query_word
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: size
+        in: query
+        name: size
+        type: integer
+      - description: sort=cited_by_count|...:_|desc|asc
+        in: query
+        name: sort
+        type: string
+      responses:
+        "200":
+          description: '{"res":{},"msg": "Author Search Success"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg": "openalex Search Error","err":err}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg": "openalex Search Error","err":err}'
+          schema:
+            type: string
+      summary: txc
       tags:
       - esSearch
   /es/search/base:
@@ -851,17 +966,20 @@ paths:
         参数说明
         - author_id 作者的id
 
-        - page 获取第几页的数据
+        - page 获取第几页的数据, START FROM 1
 
-        - page_size 分页的大小
+        - page_size 分页的大小, 不能为0
 
         - display 是否显示已删除的论文 -1不显示 1显示
+
         返回值说明
         - msg 返回信息
 
-        - res 返回该页的works对象数组
+        - data 返回该页的works对象数组
 
-        - pages 分页总数
+        - pages 分页总数，一共有多少页
+
+        - total 论文总数
       parameters:
       - description: data 是请求参数,包括author_id ,page ,page_size, display
         in: body
@@ -873,7 +991,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"msg":"获取成功","res":{}, "pages":{}}'
+          description: '{"msg":"获取成功","data":{}, "pages":{}, "total":{}}'
           schema:
             type: string
         "400":
@@ -893,6 +1011,47 @@ paths:
           schema:
             type: string
       summary: 获取学者的论文 hr
+      tags:
+      - 学者主页的论文获取、管理
+  /scholar/works/getpdf:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        获取学者上传的文章PDF地址
+
+        参数说明
+        - work_id 论文的id
+
+        返回说明
+        - pdf地址,直接使用即可，无需拼接
+      parameters:
+      - description: data 是请求参数work_id
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.GetPaperPDFQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg":"获取成功", "data": "pdf地址"}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"参数错误"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg":"未找到该论文"}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg":"未上传PDF"}'
+          schema:
+            type: string
+      summary: 获取学者上传的文章PDF地址 hr
       tags:
       - 学者主页的论文获取、管理
   /scholar/works/ignore:
@@ -1019,6 +1178,37 @@ paths:
           schema:
             type: string
       summary: 学者管理主页--置顶论文 hr
+      tags:
+      - 学者主页的论文获取、管理
+  /scholar/works/upload:
+    post:
+      description: |-
+        学者管理主页--上传作品PDF
+
+        参数说明
+        - author_id 作者的id
+
+        - work_id 论文的id
+
+        - PDF 上传的PDF文件
+      parameters:
+      - description: 学者ID
+        in: formData
+        name: author_id
+        required: true
+        type: string
+      - description: 论文ID
+        in: formData
+        name: work_id
+        required: true
+        type: string
+      - description: PDF
+        in: formData
+        name: PDF
+        required: true
+        type: file
+      responses: {}
+      summary: 学者管理主页--上传作品PDF hr
       tags:
       - 学者主页的论文获取、管理
   /social/comment/create:

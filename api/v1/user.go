@@ -36,7 +36,7 @@ func Register(c *gin.Context) {
 	}
 	// 用户的用户名已经注册过的情况
 	if _, notFound := service.GetUserByUsername(d.Username); !notFound {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"status": 400,
 			"msg":    "用户名已存在",
 		})
@@ -50,6 +50,7 @@ func Register(c *gin.Context) {
 	user := database.User{
 		Username: d.Username,
 		Password: string(hashedPassword),
+		UserInfo: "这个用户很懒什么都没有留下",
 	}
 	// 成功创建用户
 	if err := service.CreateUser(&user); err != nil {
@@ -87,7 +88,7 @@ func Login(c *gin.Context) {
 	// 用户不存在
 	user, notFound := service.GetUserByUsername(d.Username)
 	if notFound {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(400, gin.H{
 			"status": 400,
 			"msg":    "用户名不存在",
 		})
@@ -95,7 +96,7 @@ func Login(c *gin.Context) {
 	}
 	// 密码错误的情况
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(d.Password)); err != nil {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(401, gin.H{
 			"status": 401,
 			"msg":    "密码错误",
 		})
@@ -103,7 +104,8 @@ func Login(c *gin.Context) {
 	}
 	// 成功返回响应
 	//token := 666
-	token := utils.GenerateToken(user.UserID)
+	//token := utils.GenerateToken(user.UserID)
+	token := user.UserID
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
 		"msg":    "登录成功",
@@ -319,5 +321,4 @@ func UploadHeadshot(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": user})
-	return
 }

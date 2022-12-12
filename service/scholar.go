@@ -22,7 +22,7 @@ func GetUserConcepts(user_id uint64) (ucs []database.UserConcept, err error) {
 	return ucs, err
 }
 func DeleteUserConcept(uc *database.UserConcept) (err error) {
-	err = global.DB.Delete(uc).Error
+	err = global.DB.Delete(uc, "user_id = ? AND concept_id = ?", uc.UserID, uc.ConceptID).Error
 	return err
 }
 func GetWorkView(work_id string) (work database.WorkView, notFound bool) {
@@ -52,6 +52,12 @@ func AddScholarWork(work *database.PersonalWorks) (err error) {
 func GetScholarAllWorks(author_id string) (works []database.PersonalWorks, notFound bool) {
 	notFound = global.DB.Where("author_id = ?", author_id).Find(&works).RecordNotFound()
 	return
+}
+
+// 查询作品ID对应的作品列表
+func GetWorksByWorkID(work_id string) (works []database.PersonalWorks, err error) {
+	err = global.DB.Where("work_id = ?", work_id).Find(&works).Error
+	return works, err
 }
 
 // 查询学者的可展示作品, ignore为false
@@ -189,4 +195,16 @@ func IgnoreWork(author_id string, work_id string) (err error) {
 	}
 	tx.Commit()
 	return nil
+}
+
+// 获取特定学者的特定作品
+func GetPersonalWork(author_id string, work_id string) (work database.PersonalWorks, notFound bool) {
+	notFound = global.DB.Where("author_id = ? AND work_id = ?", author_id, work_id).First(&work).RecordNotFound()
+	return work, notFound
+}
+
+// 修改特定作品的pdf
+func UpdateWorkPdf(author_id string, work_id string, pdf string) (err error) {
+	err = global.DB.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id).Update("pdf", pdf).Error
+	return err
 }
