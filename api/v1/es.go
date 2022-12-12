@@ -213,6 +213,7 @@ func GenAuthorDefaultIntro(a map[string]interface{}) string {
 func GetObject(c *gin.Context) {
 	id := c.Query("id")
 	userid := c.Query("userid")
+	id = utils.RemovePrefix(id)
 	idx, err := utils.TransObjPrefix(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "id type error"})
