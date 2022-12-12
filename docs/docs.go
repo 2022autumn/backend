@@ -368,6 +368,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/es/search/author2": {
+            "get": {
+                "description": "根据作者名字搜索作者 via openalex",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "query_word",
+                        "name": "query_word",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "sort=cited_by_count|...:_|desc|asc",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"res\":{},\"msg\": \"Author Search Success\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\": \"openalex Search Error\",\"err\":err}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\": \"openalex Search Error\",\"err\":err}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/es/search/base": {
             "post": {
                 "description": "基本搜索，Cond里面填筛选条件，key仅包含[\"type\", \"author\", \"institution\", \"publisher\", \"venue\", \"publication_year\"]",

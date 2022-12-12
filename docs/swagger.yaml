@@ -569,6 +569,43 @@ paths:
       summary: txc
       tags:
       - esSearch
+  /es/search/author2:
+    get:
+      description: 根据作者名字搜索作者 via openalex
+      parameters:
+      - description: query_word
+        in: query
+        name: query_word
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: size
+        in: query
+        name: size
+        type: integer
+      - description: sort=cited_by_count|...:_|desc|asc
+        in: query
+        name: sort
+        type: string
+      responses:
+        "200":
+          description: '{"res":{},"msg": "Author Search Success"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg": "openalex Search Error","err":err}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg": "openalex Search Error","err":err}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - esSearch
   /es/search/base:
     post:
       consumes:
