@@ -22,7 +22,7 @@ func GetUserConcepts(user_id uint64) (ucs []database.UserConcept, err error) {
 	return ucs, err
 }
 func DeleteUserConcept(uc *database.UserConcept) (err error) {
-	err = global.DB.Delete(uc).Error
+	err = global.DB.Delete(uc, "user_id = ? AND concept_id = ?", uc.UserID, uc.ConceptID).Error
 	return err
 }
 func GetWorkView(work_id string) (work database.WorkView, notFound bool) {
