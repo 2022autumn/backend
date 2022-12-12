@@ -604,12 +604,18 @@ func GetPaperPDF(c *gin.Context) {
 		c.JSON(400, gin.H{"msg": "参数错误"})
 		return
 	}
-	works, notFound := service.GetScholarAllWorks(d.WorkID)
-	if notFound {
+	works, err := service.GetWorksByWorkID(d.WorkID)
+	if err != nil {
+		c.JSON(401, gin.H{"msg": "出现err,未找到该论文", "err": err})
+		return
+	}
+	if len(works) == 0 {
 		c.JSON(401, gin.H{"msg": "未找到该论文"})
 		return
 	}
+	// log.Println(works)
 	for _, work := range works {
+		// log.Println(work)
 		if work.PDF != "" {
 			url := "http://ishare.horik.cn:8000/api/media/pdf/" + work.PDF
 			c.JSON(200, gin.H{"msg": "获取成功", "data": url})

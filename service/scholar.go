@@ -54,6 +54,12 @@ func GetScholarAllWorks(author_id string) (works []database.PersonalWorks, notFo
 	return
 }
 
+// 查询作品ID对应的作品列表
+func GetWorksByWorkID(work_id string) (works []database.PersonalWorks, err error) {
+	err = global.DB.Where("work_id = ?", work_id).Find(&works).Error
+	return works, err
+}
+
 // 查询学者的可展示作品, ignore为false
 func GetScholarDisplayWorks(author_id string) (works []database.PersonalWorks, notFound bool) {
 	notFound = global.DB.Where("author_id = ? AND !`ignore`", author_id).Find(&works).RecordNotFound()
