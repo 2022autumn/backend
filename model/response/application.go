@@ -16,3 +16,7 @@ type HandleApplicationQ struct {
 	Status        int    `json:"status" binding:"required"`  //是否通过
 	Content       string `json:"content"`                    //审批意见
 }
+type GetVerifyCodeQ struct {
+	Email  string `json:"email" binding:"required"`
+	UserID uint64 `json:"user_id" binding:"required"`
+}

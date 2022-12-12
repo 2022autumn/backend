@@ -40,6 +40,7 @@ func SetupRouter(r *gin.Engine) {
 		ApplicationRouter.POST("/create", v1.CreateApplication)
 		ApplicationRouter.POST("/handle", v1.HandleApplication)
 		ApplicationRouter.GET("/list", v1.UncheckedApplicationList)
+		ApplicationRouter.POST("/code", v1.SendVerifyEmail)
 	}
 	SocialRouter := baseGroup.Group("/social")
 	{

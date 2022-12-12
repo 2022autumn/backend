@@ -16,6 +16,64 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/application/code": {
+            "post": {
+                "description": "用户点击\"获取验证码\"按钮，系统向用户提供的邮箱发送6位验证码，用户需要在申请表单中填入验证码才可以成功完成身份验证，否则不应该可以提交申请。验证码时限为10分钟，超时无效",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理"
+                ],
+                "summary": "获取申请验证码 Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.GetVerifyCodeQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\": \"邮件发送成功\",\"status\": 200}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\": \"数据格式错误\", \"status\": 400}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\": \"没有该用户\", \"status\": 401}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\": \"验证码存储失败\",\"status\": 402}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"msg\": \"发送邮件失败\",\"status\": 403}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/application/create": {
             "post": {
                 "description": "用户可以申请认领自己的学者门户",
@@ -42,7 +100,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"msg\": \"申请成功\", \"status\": 200,\"application\": application,}",
+                        "description": "{\"msg\": \"申请成功\", \"status\": 200,\"application\": application}",
                         "schema": {
                             "type": "string"
                         }
@@ -2030,6 +2088,21 @@ const docTemplate = `{
                 "user_id"
             ],
             "properties": {
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.GetVerifyCodeQ": {
+            "type": "object",
+            "required": [
+                "email",
+                "user_id"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "user_id": {
                     "type": "integer"
                 }

@@ -4,7 +4,12 @@ import (
 	"IShare/global"
 	"IShare/model/database"
 	"errors"
+	"fmt"
 	"github.com/jinzhu/gorm"
+	"gopkg.in/gomail.v2"
+	"log"
+	"strconv"
+	"time"
 )
 
 //func QueryApplicationByAuthor(author_id string) (submit database.Application, notFound bool) {
@@ -56,21 +61,21 @@ import (
 //	}
 //}
 
-//func QueryAllSubmit() (application []database.Application) {
-//	global.DB.Find(&application)
-//	return application
-//}
-//
-//func QueryUncheckedSubmit() (applications []database.Application, notFound bool) {
-//	err := global.DB.Where("status = ?", 0).Find(&applications).Error
-//	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-//		return applications, true
-//	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-//		panic(err)
-//	} else {
-//		return applications, false
+//	func QueryAllSubmit() (application []database.Application) {
+//		global.DB.Find(&application)
+//		return application
 //	}
-//}
+//
+//	func QueryUncheckedSubmit() (applications []database.Application, notFound bool) {
+//		err := global.DB.Where("status = ?", 0).Find(&applications).Error
+//		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+//			return applications, true
+//		} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+//			panic(err)
+//		} else {
+//			return applications, false
+//		}
+//	}
 func GetAppsByUserID(userID uint64, status int) (applications []database.Application, err error) {
 	err = global.DB.Where("user_id = ? AND status = ?", userID, status).Find(&applications).Error
 	return
@@ -88,4 +93,85 @@ func GetAppByID(appID uint64) (application database.Application, notFound bool) 
 func GetApps(status int) (applications []database.Application, err error) {
 	err = global.DB.Where("status = ?", status).Find(&applications).Error
 	return
+}
+
+func SendMail(mailTo []string, subject string, body string) error {
+	//定义邮箱服务器连接信息，如果是网易邮箱 pass填密码，qq邮箱填授权码
+	// 具体信息可在secret.go 中填写
+	//mailConn := map[string]string{
+	//  "user": "xxx@163.com",
+	//  "pass": "your password",
+	//  "host": "smtp.163.com",
+	//  "port": "465",
+	//}
+
+	mailConn := map[string]string{
+		"user": EMAIL_USER,
+		"pass": EMAIL_PASSWORD,
+		"host": EMAIL_HOST,
+		"port": EMAIL_PORT,
+	}
+
+	port, _ := strconv.Atoi(mailConn["port"]) //转换端口类型为int
+
+	m := gomail.NewMessage()
+
+	m.SetHeader("From", m.FormatAddress(mailConn["user"], "ishare")) //这种方式可以添加别名，即“XX官方”
+	//说明：如果是用网易邮箱账号发送，以下方法别名可以是中文，如果是qq企业邮箱，以下方法用中文别名，会报错，需要用上面此方法转码
+	//m.SetHeader("From", "FB Sample"+"<"+mailConn["user"]+">") //这种方式可以添加别名，即“FB Sample”， 也可以直接用<code>m.SetHeader("From",mailConn["user"])</code> 读者可以自行实验下效果
+	//m.SetHeader("From", mailConn["user"])
+	m.SetHeader("To", mailTo...)    //发送给多个用户
+	m.SetHeader("Subject", subject) //设置邮件主题
+	m.SetBody("text/html", body)    //设置邮件正文
+
+	d := gomail.NewDialer(mailConn["host"], port, mailConn["user"], mailConn["pass"])
+
+	err := d.DialAndSend(m)
+	return err
+
+}
+
+func SendVerifyCode(email string, code int) (err error) {
+	subject := "来自ishare的申请验证码"
+	// 邮件正文
+	mailTo := []string{
+		email,
+	}
+	body := "尊敬的用户您好，欢迎使用ishare学术交流平台，您的申请验证码是:\n"
+	body += strconv.Itoa(code) + "\n"
+
+	err = SendMail(mailTo, subject, body)
+	if err != nil {
+		log.Println(err)
+		fmt.Println("send code fail")
+		//panic(err)
+		return err
+	}
+	fmt.Println("send code successfully")
+	return nil
+}
+
+func CreateVerifyCodeRecode(userID uint64, code int, email string) (err error) {
+	rec := database.VerifyCode{
+		Code:    code,
+		UserID:  userID,
+		Email:   email,
+		GenTime: time.Now(),
+	}
+	if err = global.DB.Create(&rec).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func CheckVerifyCode(userID uint64, code int, email string) (rec database.VerifyCode, notFound bool) {
+	rec = database.VerifyCode{}
+	err := global.DB.Where("user_id = ? AND code = ? AND email = ?", userID, code, email).First(&rec).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return rec, true
+	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		panic(err)
+	} else {
+		return rec, false
+	}
 }
