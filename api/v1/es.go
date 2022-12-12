@@ -126,7 +126,7 @@ func TransRefs2Cited(refs []interface{}) []map[string]string {
 	for _, v := range refs {
 		ids = append(ids, v.(string))
 	}
-	works, _ := service.GetObjects("works_v1", ids)
+	works, _ := service.GetObjects("works", ids)
 	if works != nil {
 		for i, v := range works.Docs {
 			if v.Found == true {
@@ -147,7 +147,7 @@ func TransRefs2Intro(refs []interface{}) []map[string]interface{} {
 	for _, v := range refs {
 		ids = append(ids, v.(string))
 	}
-	works, _ := service.GetObjects("works_v1", ids)
+	works, _ := service.GetObjects("works", ids)
 	if works != nil {
 		for i, v := range works.Docs {
 			if v.Found == true {
@@ -253,7 +253,7 @@ func GetObject(c *gin.Context) {
 			}
 		}
 	}
-	if idx == "works_v1" {
+	if idx == "works" {
 		referenced_works := tmp["referenced_works"].([]interface{})
 		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := tmp["related_works"].([]interface{})
@@ -509,16 +509,6 @@ func GetAuthorRelationNet(c *gin.Context) {
 	})
 }
 
-func GetWorksOfAuthorByUrl(c *gin.Context) {
-	var d response.BaseSearchQ
-	if err := c.ShouldBind(&d); err != nil {
-		panic(err)
-	}
-	c.JSON(200, gin.H{
-		"status": 200,
-	})
-}
-
 // GetStatistics
 // @Summary     获取统计信息 txc
 // @Description 获取统计信息
@@ -551,7 +541,7 @@ func GetPrefixSuggestions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "msg": "参数错误"})
 		panic(err)
 	}
-	index, field, prefix, topN := "works_v1", d.Field, d.Prefix, 5
+	index, field, prefix, topN := "works", d.Field, d.Prefix, 5
 	log.Println("index:", index, "field:", field, "prefix:", prefix, "topN:", topN)
 	prefixResult, err := service.PrefixSearch(index, field, prefix, topN)
 	if err != nil {

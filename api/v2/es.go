@@ -5,9 +5,10 @@ import (
 	"IShare/model/database"
 	"IShare/service"
 	"IShare/utils"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetWorkCited(work map[string]interface{}) string {
@@ -36,7 +37,7 @@ func TransRefs2Cited(refs []interface{}) []map[string]interface{} {
 	for _, v := range refs {
 		ids = append(ids, v.(string))
 	}
-	works, _ := service.GetObjects2("works_v1", ids)
+	works, _ := service.GetObjects2("works", ids)
 	if works != nil && works["results"] != nil {
 		works := works["results"].([]interface{})
 		for _, v := range works {
@@ -55,7 +56,7 @@ func TransRefs2Intro(refs []interface{}) []map[string]interface{} {
 	for _, v := range refs {
 		ids = append(ids, v.(string))
 	}
-	works, _ := service.GetObjects2("works_v1", ids)
+	works, _ := service.GetObjects2("works", ids)
 	if works != nil && works["results"] != nil {
 		works := works["results"].([]interface{})
 		for _, v := range works {
@@ -128,7 +129,7 @@ func GetObject2(c *gin.Context) {
 			}
 		}
 	}
-	if idx == "works_v1" {
+	if idx == "works" {
 		referenced_works := res["referenced_works"].([]interface{})
 		res["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := res["related_works"].([]interface{})

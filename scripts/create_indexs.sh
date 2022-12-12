@@ -1,10 +1,10 @@
 #!/bin/bash
 # create works index
 # mapping modify: copy_to: <full> and del <raw_affiliations>
-curl -XPUT localhost:9200/works_v1 -uelastic -p -H 'Content-Type: application/json' -d '{
+curl -XPUT localhost:9200/works -uelastic -p -H 'Content-Type: application/json' -d '{
     "settings": {
         "index": {
-            "number_of_shards": 8,
+            "number_of_shards": 1,
             "number_of_replicas": 0
         }
     },

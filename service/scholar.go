@@ -166,6 +166,12 @@ func GetAuthor(author_id string) (author database.Author, notFound bool) {
 func CreateWorks(works []database.PersonalWorks) (err error) {
 	tx := global.DB.Begin()
 	for _, work := range works {
+		// 如果已经存在，就不创建
+		var tmp database.PersonalWorks
+		tx.Where("author_id = ? AND work_id = ?", work.AuthorID, work.WorkID).First(&tmp)
+		if tmp.WorkID != "" {
+			continue
+		}
 		err = tx.Create(&work).Error
 		if err != nil {
 			tx.Rollback()

@@ -291,9 +291,6 @@ func processFile(dir_path string, fileName string, filter map[string]interface{}
 			return
 		}
 		filterData(&data, &filter)
-		if index == "works" {
-			index = "works_v1" // 测试用
-		}
 		req := elastic.NewBulkIndexRequest().Index(index).Id(data["id"].(string)).Doc(data)
 		bulkRequest = bulkRequest.Add(req)
 		// 每BULK_SIZE条数据提交一次

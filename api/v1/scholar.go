@@ -134,7 +134,7 @@ func RollWorks(c *gin.Context) {
 				workids = append(workids, utils.RemovePrefix(work["id"].(string)))
 			}
 			rand.Shuffle(len(workids), func(i, j int) { workids[i], workids[j] = workids[j], workids[i] })
-			res, err := service.GetObjects("works_v1", workids)
+			res, err := service.GetObjects("works", workids)
 			if err == nil {
 				for _, work := range res.Docs {
 					if work.Found {
@@ -164,7 +164,7 @@ func RollWorks(c *gin.Context) {
 			global.DB.Table("work_views").Offset(ids[i]).First(&work)
 			workids = append(workids, work.WorkID)
 		}
-		res, err := service.GetObjects("works_v1", workids)
+		res, err := service.GetObjects("works", workids)
 		if err == nil {
 			for _, work := range res.Docs {
 				ret = append(ret, map[string]interface{}{
@@ -269,7 +269,7 @@ func GetPersonalWorks(c *gin.Context) {
 		for _, work := range works {
 			data = append(data, work.WorkID)
 		}
-		objects, err := service.GetObjects("works_v1", data)
+		objects, err := service.GetObjects("works", data)
 		if err != nil {
 			c.JSON(500, gin.H{"msg": "获取objects失败"})
 			return
@@ -314,7 +314,7 @@ func GetPersonalWorks(c *gin.Context) {
 	for _, work := range works {
 		data = append(data, work.WorkID)
 	}
-	objects, err := service.GetObjects("works_v1", data)
+	objects, err := service.GetObjects("works", data)
 	if err != nil {
 		c.JSON(500, gin.H{"msg": "获取objects失败"})
 		return
