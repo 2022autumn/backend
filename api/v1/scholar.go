@@ -471,7 +471,7 @@ func TopWork(c *gin.Context) {
 // @Param       author_id formData string true "学者ID"
 // @Param       Headshot  formData file   true "新头像"
 // @Router      /scholar/author/headshot [POST]
-func UploadPaperPDF(c *gin.Context) {
+func UploadAuthorHeadshot(c *gin.Context) {
 	authorID := c.Request.FormValue("author_id")
 	author, notFound := service.GetAuthor(authorID)
 	if notFound {
@@ -540,7 +540,7 @@ func ModifyAuthorIntro(c *gin.Context) {
 // @Param       author_id formData string true "学者ID"
 // @Param       Headshot  formData file   true "新头像"
 // @Router      /scholar/author/headshot [POST]
-func UploadAuthorHeadshot(c *gin.Context) {
+func UploadPaperPDF(c *gin.Context) {
 	authorID := c.Request.FormValue("author_id")
 	author, notFound := service.GetAuthor(authorID)
 	if notFound {

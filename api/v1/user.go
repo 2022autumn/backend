@@ -319,5 +319,4 @@ func UploadHeadshot(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": user})
-	return
 }
