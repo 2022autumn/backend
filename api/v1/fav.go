@@ -299,6 +299,7 @@ func ShowUserTagList(c *gin.Context) {
 }
 
 // DeleteTag 删除标签
+// @Summary     删除标签 Vera
 // @description 删除标签
 // @Tags        社交
 // @Param       data body response.TagPaperListQ true "data"
@@ -348,6 +349,7 @@ func DeleteTag(c *gin.Context) {
 }
 
 // RenameTag 收藏夹重命名
+// @Summary     收藏夹重命名 Vera
 // @description 对原有的收藏夹重命名
 // @Tags        社交
 // @Param       data body response.RenameTagQ true "data"
@@ -397,4 +399,57 @@ func RenameTag(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"status": 200, "msg": "修改成功"})
+}
+
+// PaperTagList 显示某篇文章从属的收藏夹信息
+// @Summary     查询文章所在的收藏夹 Vera
+// @description 返回用户所有的收藏夹列表，并一一标记文章是否从属于收藏夹
+// @Tags        社交
+// @Param       data body response.PaperBelongingQ true "data"
+// @Accept      json
+// @Produce     json
+// @Success     200 {string} json "{"status":200,"msg":"获取成功","data":data}"
+// @Failure     400 {string} json "{"status": 400, "msg": "用户ID不存在"}"
+// @Failure     401 {string} json "{"status": 401, "msg": "未查询到结果"}"
+// @Router      /social/tag/paperTagList [POST]
+func PaperTagList(c *gin.Context) {
+	var d response.PaperBelongingQ
+	if err := c.ShouldBind(&d); err != nil {
+		panic(err)
+	}
+	user_id := d.UserID
+	paper_id := d.PaperID
+
+	//验证用户是否存在
+	_, notFoundUserByID := service.QueryAUserByID(user_id)
+	if notFoundUserByID {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": 400,
+			"msg":    "用户ID不存在",
+		})
+		return
+	}
+	tags := service.QueryTagList(user_id)
+	if tags == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status": 401,
+			"msg":    "未查询到结果",
+		})
+		return
+	}
+
+	var tag_list []interface{}
+	for _, value := range tags {
+		tag_id := value.TagID
+		var tag_info = make(map[string]interface{})
+		//tag_info["create_time"]
+		tag_info["create_time"] = value.CreateTime
+		tag_info["tag_id"] = tag_id
+		tag_info["tag_name"] = value.TagName
+		tag_info["user_id"] = value.UserID
+		_, isCollect := service.QueryPaperIsCollect(paper_id, tag_id)
+		tag_info["isCollect"] = isCollect
+		tag_list = append(tag_list, tag_info)
+	}
+	c.JSON(http.StatusOK, gin.H{"status": 200, "msg": "获取成功", "data": tag_list})
 }

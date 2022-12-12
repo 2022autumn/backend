@@ -1690,6 +1690,7 @@
                 "tags": [
                     "社交"
                 ],
+                "summary": "删除标签 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -1723,6 +1724,52 @@
                 }
             }
         },
+        "/social/tag/paperTagList": {
+            "post": {
+                "description": "返回用户所有的收藏夹列表，并一一标记文章是否从属于收藏夹",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "社交"
+                ],
+                "summary": "查询文章所在的收藏夹 Vera",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.PaperBelongingQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"msg\":\"获取成功\",\"data\":data}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\": 400, \"msg\": \"用户ID不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"status\": 401, \"msg\": \"未查询到结果\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/social/tag/rename": {
             "post": {
                 "description": "对原有的收藏夹重命名",
@@ -1735,6 +1782,7 @@
                 "tags": [
                     "社交"
                 ],
+                "summary": "收藏夹重命名 Vera",
                 "parameters": [
                     {
                         "description": "data",
@@ -2472,6 +2520,21 @@
                 }
             }
         },
+        "response.PaperBelongingQ": {
+            "type": "object",
+            "required": [
+                "paper_id",
+                "user_id"
+            ],
+            "properties": {
+                "paper_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.PwdModifyQ": {
             "type": "object",
             "required": [
@@ -2506,8 +2569,7 @@
                 },
                 "username": {
                     "type": "string",
-                    "maxLength": 100,
-                    "minLength": 3
+                    "minLength": 1
                 }
             }
         },

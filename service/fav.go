@@ -133,3 +133,15 @@ func GetPaperStarNum(paper_id string) (num int, relate []database.TagPaper) {
 	global.DB.Where("paper_id = ? ", paper_id).Find(&relate)
 	return len(relate), relate
 }
+
+func QueryPaperIsCollect(paper_id string, tag_id uint64) (tag_paper database.TagPaper, isCollect bool) {
+	tag_paper = database.TagPaper{}
+	err := global.DB.Where("tag_id = ? AND paper_id = ?", tag_id, paper_id).First(&tag_paper).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return tag_paper, false
+	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		panic(err)
+	} else {
+		return tag_paper, true
+	}
+}
