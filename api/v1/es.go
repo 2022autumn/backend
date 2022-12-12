@@ -639,6 +639,10 @@ func AuthorSearch2(c *gin.Context) {
 		})
 		return
 	}
+	//authors := data["data"].([]interface{})
+	//for _,v:= authors {
+	//	id := authors["id"].(string)
+	//}
 	c.JSON(200, gin.H{
 		"msg": "Author Search Success",
 		"res": map[string]interface{}{
