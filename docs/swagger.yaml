@@ -844,9 +844,9 @@ paths:
         参数说明
         - author_id 作者的id
 
-        - page 获取第几页的数据
+        - page 获取第几页的数据, START FROM 1
 
-        - page_size 分页的大小
+        - page_size 分页的大小, 不能为0
 
         - display 是否显示已删除的论文 -1不显示 1显示
         返回值说明
@@ -854,7 +854,7 @@ paths:
 
         - res 返回该页的works对象数组
 
-        - pages 分页总数
+        - pages 分页总数，一共有多少页
       parameters:
       - description: data 是请求参数,包括author_id ,page ,page_size, display
         in: body
@@ -866,7 +866,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"msg":"获取成功","res":{}, "pages":{}}'
+          description: '{"msg":"获取成功","data":{}, "pages":{}}'
           schema:
             type: string
         "400":

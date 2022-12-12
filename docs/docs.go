@@ -765,7 +765,7 @@ const docTemplate = `{
         },
         "/scholar/works/get": {
             "post": {
-                "description": "获取学者的论文\n\n参数说明\n- author_id 作者的id\n\n- page 获取第几页的数据\n\n- page_size 分页的大小\n\n- display 是否显示已删除的论文 -1不显示 1显示\n返回值说明\n- msg 返回信息\n\n- res 返回该页的works对象数组\n\n- pages 分页总数",
+                "description": "获取学者的论文\n\n参数说明\n- author_id 作者的id\n\n- page 获取第几页的数据, START FROM 1\n\n- page_size 分页的大小, 不能为0\n\n- display 是否显示已删除的论文 -1不显示 1显示\n返回值说明\n- msg 返回信息\n\n- res 返回该页的works对象数组\n\n- pages 分页总数，一共有多少页",
                 "consumes": [
                     "application/json"
                 ],
@@ -789,7 +789,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"msg\":\"获取成功\",\"res\":{}, \"pages\":{}}",
+                        "description": "{\"msg\":\"获取成功\",\"data\":{}, \"pages\":{}}",
                         "schema": {
                             "type": "string"
                         }

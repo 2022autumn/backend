@@ -199,9 +199,9 @@ func GetHotWorks(c *gin.Context) {
 // @Description 参数说明
 // @Description - author_id 作者的id
 // @Description
-// @Description - page 获取第几页的数据
+// @Description - page 获取第几页的数据, START FROM 1
 // @Description
-// @Description - page_size 分页的大小
+// @Description - page_size 分页的大小, 不能为0
 // @Description
 // @Description - display 是否显示已删除的论文 -1不显示 1显示
 // @Description 返回值说明
@@ -209,12 +209,12 @@ func GetHotWorks(c *gin.Context) {
 // @Description
 // @Description - res 返回该页的works对象数组
 // @Description
-// @Description - pages 分页总数
+// @Description - pages 分页总数，一共有多少页
 // @Tags        学者主页的论文获取、管理
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.GetPersonalWorksQ true "data 是请求参数,包括author_id ,page ,page_size, display"
-// @Success     200  {string} json                       "{"msg":"获取成功","res":{}, "pages":{}}"
+// @Success     200  {string} json                       "{"msg":"获取成功","data":{}, "pages":{}}"
 // @Failure     400  {string} json                       "{"msg":"参数错误"}"
 // @Failure     401  {string} json                       "{"msg":"作者不存在"}"
 // @Failure     402  {string} json                       "{"msg":"page超出范围"}"
@@ -266,7 +266,12 @@ func GetPersonalWorks(c *gin.Context) {
 		for _, work := range works {
 			data = append(data, work.WorkID)
 		}
-		c.JSON(200, gin.H{"msg": "获取成功", "res": data, "pages": pages})
+		objects, err := service.GetObjects("works_v1", data)
+		if err != nil {
+			c.JSON(500, gin.H{"msg": "获取objects失败"})
+			return
+		}
+		c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages})
 		return
 	}
 	// 不能找到则从openalex api中获取
@@ -299,7 +304,12 @@ func GetPersonalWorks(c *gin.Context) {
 	for _, work := range works {
 		data = append(data, work.WorkID)
 	}
-	c.JSON(200, gin.H{"msg": "获取成功", "data": data, "pages": pages})
+	objects, err := service.GetObjects("works_v1", data)
+	if err != nil {
+		c.JSON(500, gin.H{"msg": "获取objects失败"})
+		return
+	}
+	c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages})
 }
 
 // IgnoreWork 忽略论文
