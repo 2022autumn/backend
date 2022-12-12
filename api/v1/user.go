@@ -87,7 +87,7 @@ func Login(c *gin.Context) {
 	// 用户不存在
 	user, notFound := service.GetUserByUsername(d.Username)
 	if notFound {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(400, gin.H{
 			"status": 400,
 			"msg":    "用户名不存在",
 		})
@@ -95,7 +95,7 @@ func Login(c *gin.Context) {
 	}
 	// 密码错误的情况
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(d.Password)); err != nil {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(401, gin.H{
 			"status": 401,
 			"msg":    "密码错误",
 		})
