@@ -50,6 +50,7 @@ func Register(c *gin.Context) {
 	user := database.User{
 		Username: d.Username,
 		Password: string(hashedPassword),
+		UserInfo: "这个用户很懒什么都没有留下",
 	}
 	// 成功创建用户
 	if err := service.CreateUser(&user); err != nil {
