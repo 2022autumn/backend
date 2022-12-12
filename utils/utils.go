@@ -5,7 +5,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"reflect"
 	"sort"
@@ -215,4 +218,28 @@ func FilterData(data *map[string]interface{}, filter *map[string]interface{}) {
 
 func RemovePrefix(s string) string {
 	return strings.Replace(s, "https://openalex.org/", "", -1)
+}
+
+//https://api.openalex.org/authors?search=kaiming%20he&page=2&per_page=10&sort=cited_by_count:desc
+//https://api.openalex.org/authors?search=kaiming%20he&group_by=last_known_institution.id
+func GetByUrl(urlstring string) (map[string]interface{}, error) {
+	u, _ := url.Parse(urlstring)
+	q := u.Query()
+	u.RawQuery = q.Encode() //urlencode
+	println(u.String())
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var result map[string]interface{}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

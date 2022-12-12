@@ -67,6 +67,7 @@ func SetupRouter(r *gin.Engine) {
 		esGroup.POST("/search/doi", v1.DoiSearch)
 		esGroup.POST("/search/advanced", v1.AdvancedSearch)
 		esGroup.GET("/search/author", v1.AuthorSearch)
+		esGroup.GET("/search/author2", v1.AuthorSearch2)
 		esGroup.GET("/getAuthorRelationNet", v1.GetAuthorRelationNet)
 		esGroup.GET("/getWorksOfAuthorByUrl", v1.GetWorksOfAuthorByUrl)
 		esGroup.POST("/prefix", v1.GetPrefixSuggestions)
