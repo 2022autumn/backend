@@ -36,7 +36,7 @@ func Register(c *gin.Context) {
 	}
 	// 用户的用户名已经注册过的情况
 	if _, notFound := service.GetUserByUsername(d.Username); !notFound {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"status": 400,
 			"msg":    "用户名已存在",
 		})
