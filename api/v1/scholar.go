@@ -299,7 +299,7 @@ func GetPersonalWorks(c *gin.Context) {
 	for _, work := range works {
 		data = append(data, work.WorkID)
 	}
-	c.JSON(200, gin.H{"msg": "获取成功", "res": data, "pages": pages})
+	c.JSON(200, gin.H{"msg": "获取成功", "data": data, "pages": pages})
 }
 
 // IgnoreWork 忽略论文
