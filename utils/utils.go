@@ -53,7 +53,7 @@ func TransObjPrefix(id string) (ty string, err error) {
 	}
 	switch id[0] {
 	case 'W':
-		return "works_v1", nil
+		return "works", nil
 	case 'A':
 		return "authors", nil
 	case 'I':

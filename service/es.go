@@ -21,16 +21,13 @@ import (
 var LIMITCOUNT = 10000000
 
 func GetWork(boolQuery *elastic.BoolQuery) (res *elastic.SearchResult, err error) {
-	return global.ES.Search().Index("works_v1").Query(boolQuery).Do(context.Background())
+	return global.ES.Search().Index("works").Query(boolQuery).Do(context.Background())
 }
 
 // 通过ids批量获取对象，multiGet
 func GetObjects(index string, ids []string) (res *elastic.MgetResponse, err error) {
 	mgetService := global.ES.MultiGet()
 	for _, id := range ids {
-		if index == "works" {
-			index = "works_v1"
-		}
 		mgetService.Add(elastic.NewMultiGetItem().Index(index).Id(id))
 	}
 	return mgetService.Do(context.Background())
@@ -40,9 +37,6 @@ func GetObjects(index string, ids []string) (res *elastic.MgetResponse, err erro
 func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 	//termQuery := elastic.NewMatchQuery("id", id)
 	//return global.ES.Search().Index(index).Query(termQuery).Do(context.Background())
-	if index == "works" {
-		index = "works_v1"
-	}
 	return global.ES.Get().Index(index).Id(id).Do(context.Background())
 }
 
@@ -50,7 +44,7 @@ func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
 	sortType int, ascending bool, aggs map[string]bool, fields []string) (res *elastic.SearchResult, err error) {
 	timeout := global.VP.GetString("es.timeout")
-	workIndex := "works_v1"
+	workIndex := "works"
 	service := global.ES.Search().Index(workIndex).Query(boolQuery).Size(size).TerminateAfter(LIMITCOUNT).Timeout(timeout)
 	addAggToSearch(service, aggs)
 	// addHighlightToSearch(service, fields)
