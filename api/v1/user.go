@@ -103,7 +103,8 @@ func Login(c *gin.Context) {
 	}
 	// 成功返回响应
 	//token := 666
-	token := utils.GenerateToken(user.UserID)
+	//token := utils.GenerateToken(user.UserID)
+	token := user.UserID
 	c.JSON(http.StatusOK, gin.H{
 		"status": 200,
 		"msg":    "登录成功",
