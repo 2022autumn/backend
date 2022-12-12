@@ -66,4 +66,5 @@ type PersonalWorks struct {
 	WorkID   string `gorm:"not null;" json:"work_id"`
 	Place    int    `gorm:"not null;" json:"place"`
 	Ignore   bool   `gorm:"not null;default:false" json:"ignore"`
+	PDF      string `gorm:"default:''" json:"pdf"`
 }

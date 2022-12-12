@@ -139,6 +139,16 @@ definitions:
     - author_id
     - user_id
     type: object
+  response.GetPaperPDFQ:
+    properties:
+      author_id:
+        type: string
+      work_id:
+        type: string
+    required:
+    - author_id
+    - work_id
+    type: object
   response.GetPersonalWorksQ:
     properties:
       author_id:
@@ -736,7 +746,7 @@ paths:
         required: true
         type: file
       responses: {}
-      summary: 上传作品PDF hr
+      summary: 上传作者头像 txc
       tags:
       - scholar
   /scholar/author/intro:
@@ -928,6 +938,49 @@ paths:
       summary: 获取学者的论文 hr
       tags:
       - 学者主页的论文获取、管理
+  /scholar/works/getpdf:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        获取学者上传的文章PDF地址
+
+        参数说明
+        - author_id 作者的id
+
+        - work_id 论文的id
+
+        返回说明
+        - pdf地址,直接使用即可，无需拼接
+      parameters:
+      - description: data 是请求参数,包括author_id ,work_id
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.GetPaperPDFQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg":"获取成功", "data": "pdf地址"}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"参数错误"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg":"未找到该论文"}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg":"未上传PDF"}'
+          schema:
+            type: string
+      summary: 获取学者上传的文章PDF地址 hr
+      tags:
+      - 学者主页的论文获取、管理
   /scholar/works/ignore:
     post:
       consumes:
@@ -1052,6 +1105,37 @@ paths:
           schema:
             type: string
       summary: 学者管理主页--置顶论文 hr
+      tags:
+      - 学者主页的论文获取、管理
+  /scholar/works/upload:
+    post:
+      description: |-
+        学者管理主页--上传作品PDF
+
+        参数说明
+        - author_id 作者的id
+
+        - work_id 论文的id
+
+        - PDF 上传的PDF文件
+      parameters:
+      - description: 学者ID
+        in: formData
+        name: author_id
+        required: true
+        type: string
+      - description: 论文ID
+        in: formData
+        name: work_id
+        required: true
+        type: string
+      - description: PDF
+        in: formData
+        name: PDF
+        required: true
+        type: file
+      responses: {}
+      summary: 学者管理主页--上传作品PDF hr
       tags:
       - 学者主页的论文获取、管理
   /social/comment/create:

@@ -533,40 +533,88 @@ func ModifyAuthorIntro(c *gin.Context) {
 	c.JSON(200, gin.H{"msg": "修改成功"})
 }
 
-// UploadAuthorHeadshot
-// @Summary     上传作品PDF hr
-// @Description 上传作者头像
-// @Tags        scholar
+// 上传作品PDF
+// @Summary     学者管理主页--上传作品PDF hr
+// @Description 学者管理主页--上传作品PDF
+// @Description
+// @Description 参数说明
+// @Description - author_id 作者的id
+// @Description
+// @Description - work_id 论文的id
+// @Description
+// @Description - PDF 上传的PDF文件
+// @Tags        学者主页的论文获取、管理
 // @Param       author_id formData string true "学者ID"
-// @Param       Headshot  formData file   true "新头像"
-// @Router      /scholar/author/headshot [POST]
+// @Param       work_id   formData string true "论文ID"
+// @Param       PDF  formData file   true "PDF"
+// @Router      /scholar/works/upload [POST]
 func UploadPaperPDF(c *gin.Context) {
 	authorID := c.Request.FormValue("author_id")
-	author, notFound := service.GetAuthor(authorID)
+	workID := c.Request.FormValue("work_id")
+	_, notFound := service.GetPersonalWork(authorID, workID)
 	if notFound {
-		c.JSON(http.StatusBadRequest, gin.H{"msg": "学者未被认领"})
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "论文不存在"})
 		return
 	}
-	file, err := c.FormFile("Headshot")
+	pdf, err := c.FormFile("PDF")
 	if err != nil {
-		c.JSON(401, gin.H{"msg": "头像文件获取失败"})
+		c.JSON(401, gin.H{"msg": "文件上传失败"})
 		return
 	}
-	raw := fmt.Sprintf("%d", authorID) + time.Now().String() + file.Filename
+	raw := fmt.Sprintf("%d", authorID) + time.Now().String() + pdf.Filename
 	md5 := utils.GetMd5(raw)
-	suffix := strings.Split(file.Filename, ".")[1]
-	saveDir := "./media/headshot/"
+	suffix := strings.Split(pdf.Filename, ".")[1]
+	saveDir := "./media/pdf/"
 	saveName := md5 + "." + suffix
+	log.Printf("saveName: %s", saveName)
 	savePath := path.Join(saveDir, saveName)
-	if err = c.SaveUploadedFile(file, savePath); err != nil {
+	if err = c.SaveUploadedFile(pdf, savePath); err != nil {
 		c.JSON(402, gin.H{"msg": "文件保存失败"})
 		return
 	}
-	author.HeadShot = saveName
-	err = global.DB.Save(author).Error
+	err = service.UpdateWorkPdf(authorID, workID, saveName)
 	if err != nil {
 		c.JSON(403, gin.H{"msg": "保存文件路径到数据库中失败"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": author})
+	c.JSON(http.StatusOK, gin.H{"msg": "上传成功", "data": saveName})
+}
+
+// 获取论文PDF地址
+// @Summary     获取学者上传的文章PDF地址 hr
+// @Description 获取学者上传的文章PDF地址
+// @Description
+// @Description 参数说明
+// @Description - author_id 作者的id
+// @Description
+// @Description - work_id 论文的id
+// @Description
+// @Description 返回说明
+// @Description - pdf地址,直接使用即可，无需拼接
+// @Tags        学者主页的论文获取、管理
+// @Accept      json
+// @Produce     json
+// @Param       data body     response.GetPaperPDFQ true "data 是请求参数,包括author_id ,work_id"
+// @Success     200  {string} json              "{"msg":"获取成功", "data": "pdf地址"}"
+// @Failure     400  {string} json              "{"msg":"参数错误"}"
+// @Failure     401  {string} json              "{"msg":"未找到该论文"}"
+// @Failure     402  {string} json              "{"msg":"未上传PDF"}"
+// @Router      /scholar/works/getpdf [POST]
+func GetPaperPDF(c *gin.Context) {
+	var d response.GetPaperPDFQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(400, gin.H{"msg": "参数错误"})
+		return
+	}
+	work, notFound := service.GetPersonalWork(d.AuthorID, d.WorkID)
+	if notFound {
+		c.JSON(401, gin.H{"msg": "未找到该论文"})
+		return
+	}
+	if work.PDF == "" {
+		c.JSON(402, gin.H{"msg": "未上传PDF"})
+		return
+	}
+	url := "http://ishare.horik.cn:8000/api/media/pdf/" + work.PDF
+	c.JSON(200, gin.H{"msg": "获取成功", "data": url})
 }
