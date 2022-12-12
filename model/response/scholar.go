@@ -32,6 +32,6 @@ type TopWorkQ struct {
 }
 
 type GetPaperPDFQ struct {
-	AuthorID string `json:"author_id" binding:"required"`
-	WorkID   string `json:"work_id" binding:"required"`
+	// AuthorID string `json:"author_id" binding:"required"`
+	WorkID string `json:"work_id" binding:"required"`
 }

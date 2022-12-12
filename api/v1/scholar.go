@@ -585,8 +585,6 @@ func UploadPaperPDF(c *gin.Context) {
 // @Description 获取学者上传的文章PDF地址
 // @Description
 // @Description 参数说明
-// @Description - author_id 作者的id
-// @Description
 // @Description - work_id 论文的id
 // @Description
 // @Description 返回说明
@@ -594,7 +592,7 @@ func UploadPaperPDF(c *gin.Context) {
 // @Tags        学者主页的论文获取、管理
 // @Accept      json
 // @Produce     json
-// @Param       data body     response.GetPaperPDFQ true "data 是请求参数,包括author_id ,work_id"
+// @Param       data body     response.GetPaperPDFQ true "data 是请求参数work_id"
 // @Success     200  {string} json              "{"msg":"获取成功", "data": "pdf地址"}"
 // @Failure     400  {string} json              "{"msg":"参数错误"}"
 // @Failure     401  {string} json              "{"msg":"未找到该论文"}"
@@ -606,15 +604,17 @@ func GetPaperPDF(c *gin.Context) {
 		c.JSON(400, gin.H{"msg": "参数错误"})
 		return
 	}
-	work, notFound := service.GetPersonalWork(d.AuthorID, d.WorkID)
+	works, notFound := service.GetScholarAllWorks(d.WorkID)
 	if notFound {
 		c.JSON(401, gin.H{"msg": "未找到该论文"})
 		return
 	}
-	if work.PDF == "" {
-		c.JSON(402, gin.H{"msg": "未上传PDF"})
-		return
+	for _, work := range works {
+		if work.PDF != "" {
+			url := "http://ishare.horik.cn:8000/api/media/pdf/" + work.PDF
+			c.JSON(200, gin.H{"msg": "获取成功", "data": url})
+			return
+		}
 	}
-	url := "http://ishare.horik.cn:8000/api/media/pdf/" + work.PDF
-	c.JSON(200, gin.H{"msg": "获取成功", "data": url})
+	c.JSON(402, gin.H{"msg": "未上传PDF"})
 }
