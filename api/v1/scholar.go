@@ -204,17 +204,20 @@ func GetHotWorks(c *gin.Context) {
 // @Description - page_size 分页的大小, 不能为0
 // @Description
 // @Description - display 是否显示已删除的论文 -1不显示 1显示
+// @Description
 // @Description 返回值说明
 // @Description - msg 返回信息
 // @Description
-// @Description - res 返回该页的works对象数组
+// @Description - data 返回该页的works对象数组
 // @Description
 // @Description - pages 分页总数，一共有多少页
+// @Description
+// @Description - total 论文总数
 // @Tags        学者主页的论文获取、管理
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.GetPersonalWorksQ true "data 是请求参数,包括author_id ,page ,page_size, display"
-// @Success     200  {string} json                       "{"msg":"获取成功","data":{}, "pages":{}}"
+// @Success     200  {string} json                       "{"msg":"获取成功","data":{}, "pages":{}, "total":{}}"
 // @Failure     400  {string} json                       "{"msg":"参数错误"}"
 // @Failure     401  {string} json                       "{"msg":"作者不存在"}"
 // @Failure     402  {string} json                       "{"msg":"page超出范围"}"
@@ -271,7 +274,13 @@ func GetPersonalWorks(c *gin.Context) {
 			c.JSON(500, gin.H{"msg": "获取objects失败"})
 			return
 		}
-		c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages})
+		// 获取论文总数
+		total, err := service.GetScholarWorksCount(author_id)
+		if err != nil {
+			c.JSON(404, gin.H{"msg": "查询论文总数出错，修改失败"})
+			return
+		}
+		c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages, "total": total})
 		return
 	}
 	// 不能找到则从openalex api中获取
@@ -293,6 +302,7 @@ func GetPersonalWorks(c *gin.Context) {
 		c.JSON(402, gin.H{"msg": "page超出范围"})
 		return
 	}
+	total := len(works)
 	go service.CreateWorks(works)
 	// 页数从1开始
 	if page == pages { // 最后一页
@@ -309,7 +319,7 @@ func GetPersonalWorks(c *gin.Context) {
 		c.JSON(500, gin.H{"msg": "获取objects失败"})
 		return
 	}
-	c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages})
+	c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages, "total": total})
 }
 
 // IgnoreWork 忽略论文
@@ -461,7 +471,7 @@ func TopWork(c *gin.Context) {
 // @Param       author_id formData string true "学者ID"
 // @Param       Headshot  formData file   true "新头像"
 // @Router      /scholar/author/headshot [POST]
-func UploadAuthorHeadshot(c *gin.Context) {
+func UploadPaperPDF(c *gin.Context) {
 	authorID := c.Request.FormValue("author_id")
 	author, notFound := service.GetAuthor(authorID)
 	if notFound {
@@ -490,7 +500,6 @@ func UploadAuthorHeadshot(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": author})
-	return
 }
 
 // ModifyAuthorIntro
@@ -522,4 +531,42 @@ func ModifyAuthorIntro(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"msg": "修改成功"})
+}
+
+// UploadAuthorHeadshot
+// @Summary     上传作品PDF hr
+// @Description 上传作者头像
+// @Tags        scholar
+// @Param       author_id formData string true "学者ID"
+// @Param       Headshot  formData file   true "新头像"
+// @Router      /scholar/author/headshot [POST]
+func UploadAuthorHeadshot(c *gin.Context) {
+	authorID := c.Request.FormValue("author_id")
+	author, notFound := service.GetAuthor(authorID)
+	if notFound {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "学者未被认领"})
+		return
+	}
+	file, err := c.FormFile("Headshot")
+	if err != nil {
+		c.JSON(401, gin.H{"msg": "头像文件获取失败"})
+		return
+	}
+	raw := fmt.Sprintf("%d", authorID) + time.Now().String() + file.Filename
+	md5 := utils.GetMd5(raw)
+	suffix := strings.Split(file.Filename, ".")[1]
+	saveDir := "./media/headshot/"
+	saveName := md5 + "." + suffix
+	savePath := path.Join(saveDir, saveName)
+	if err = c.SaveUploadedFile(file, savePath); err != nil {
+		c.JSON(402, gin.H{"msg": "文件保存失败"})
+		return
+	}
+	author.HeadShot = saveName
+	err = global.DB.Save(author).Error
+	if err != nil {
+		c.JSON(403, gin.H{"msg": "保存文件路径到数据库中失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": author})
 }
