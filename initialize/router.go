@@ -2,6 +2,7 @@ package initialize
 
 import (
 	v1 "IShare/api/v1"
+	v2 "IShare/api/v2"
 	"IShare/docs"
 	"IShare/middleware"
 	"net/http"
@@ -40,6 +41,7 @@ func SetupRouter(r *gin.Engine) {
 		ApplicationRouter.POST("/create", v1.CreateApplication)
 		ApplicationRouter.POST("/handle", v1.HandleApplication)
 		ApplicationRouter.GET("/list", v1.UncheckedApplicationList)
+		ApplicationRouter.POST("/code", v1.SendVerifyEmail)
 	}
 	SocialRouter := baseGroup.Group("/social")
 	{
@@ -63,6 +65,7 @@ func SetupRouter(r *gin.Engine) {
 	{
 		esGroup.GET("/statistic", v1.GetStatistics)
 		esGroup.GET("/get/", v1.GetObject)
+		esGroup.GET("/get2/", v2.GetObject2)
 		esGroup.POST("/search/base", v1.BaseSearch)
 		esGroup.POST("/search/doi", v1.DoiSearch)
 		esGroup.POST("/search/advanced", v1.AdvancedSearch)

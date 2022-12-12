@@ -438,8 +438,8 @@ func ModifyPlace(c *gin.Context) {
 // @Produce     json
 // @Param       data body     response.TopWorkQ true "data 是请求参数,包括author_id ,work_id"
 // @Success     200  {string} json              "{"msg":"置顶成功"}"
-// @Failure     400  {string} json              "{"msg":"参数错误"}"
-// @Failure     401  {string} json              "{"msg":"未找到该论文"}"
+// @Failure     400  {string} json                  "{"msg":"参数错误"}"
+// @Failure     401  {string} json                  "{"msg":"未找到该论文"}"
 // @Failure     402  {string} json              "{"msg":"修改失败"}"
 // @Router      /scholar/works/top [POST]
 func TopWork(c *gin.Context) {
@@ -546,7 +546,7 @@ func ModifyAuthorIntro(c *gin.Context) {
 // @Tags        学者主页的论文获取、管理
 // @Param       author_id formData string true "学者ID"
 // @Param       work_id   formData string true "论文ID"
-// @Param       PDF  formData file   true "PDF"
+// @Param       PDF       formData file   true "PDF"
 // @Router      /scholar/works/upload [POST]
 func UploadPaperPDF(c *gin.Context) {
 	authorID := c.Request.FormValue("author_id")
@@ -593,10 +593,10 @@ func UploadPaperPDF(c *gin.Context) {
 // @Accept      json
 // @Produce     json
 // @Param       data body     response.GetPaperPDFQ true "data 是请求参数work_id"
-// @Success     200  {string} json              "{"msg":"获取成功", "data": "pdf地址"}"
+// @Success     200  {string} json                  "{"msg":"获取成功", "data": "pdf地址"}"
 // @Failure     400  {string} json              "{"msg":"参数错误"}"
 // @Failure     401  {string} json              "{"msg":"未找到该论文"}"
-// @Failure     402  {string} json              "{"msg":"未上传PDF"}"
+// @Failure     402  {string} json                  "{"msg":"未上传PDF"}"
 // @Router      /scholar/works/getpdf [POST]
 func GetPaperPDF(c *gin.Context) {
 	var d response.GetPaperPDFQ

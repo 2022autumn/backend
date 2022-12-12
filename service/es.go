@@ -39,6 +39,66 @@ func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 	//return global.ES.Search().Index(index).Query(termQuery).Do(context.Background())
 	return global.ES.Get().Index(index).Id(id).Do(context.Background())
 }
+func GetObject2(index string, id string) (data map[string]interface{}, err error) {
+	if index == "works" {
+		index = "works_v1"
+	}
+	res, err := global.ES.Get().Index(index).Id(id).Do(context.Background())
+	if err != nil {
+		//https://api.openalex.org/works/W2741809807
+		if index == "works_v1" {
+			index = "works"
+		}
+		data, err := utils.GetByUrl("https://api.openalex.org/" + index + "/" + id)
+		return data, err
+	}
+	var data2 map[string]interface{}
+	err = json.Unmarshal(res.Source, &data2)
+	return data2, err
+}
+
+// mget对象 不保证顺序
+func GetObjects2(index string, ids []string) (res map[string]interface{}, err error) {
+	//https://api.openalex.org/works?filter=openalex_id:W1966354963|W1968537269|W1980250440|W2000332333|W2015137959|W2028830377
+	/*
+		W1966354963",
+		      "W1968537269",
+		      "W1980250440",
+		      "W2000332333",
+		      "W2015137959",
+		      "W2028830377",
+		      "W2033020845",
+		      "W2040155070",
+		      "W2045114325",
+		      "W2050314443",
+		      "W2057721183",
+		      "W2068745974",
+		      "W2069713827",
+		      "W2073672062",
+		      "W2073891001",
+		      "W2081536057",
+		      "W2126581974",
+		      "W2131691431",
+		      "W2148347826",
+		      "W2796700885"
+	*/
+	if index == "works_v1" {
+		index = "works"
+	}
+	url := "https://api.openalex.org/" + index + "?filter=openalex_id:"
+	for i, id := range ids {
+		if i != 0 {
+			url += "|"
+		}
+		url += id
+	}
+	url += "&per_page=200"
+	data, err := utils.GetByUrl(url)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
 
 // 通用搜索，针对works
 func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,

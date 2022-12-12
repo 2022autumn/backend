@@ -221,16 +221,8 @@ func GetObject(c *gin.Context) {
 	}
 	res, err := service.GetObject(idx, id)
 	if err != nil {
-		//https://api.openalex.org/works/W2741809807
-		//if idx == "work_v1" {
-		//	idx = "works"
-		//}
-		//data, err := utils.GetByUrl("https://api.openalex.org/" + idx + "/" + id)
-		//if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"msg": "es & openalex not found"})
 		return
-		//}
-
 	}
 	var tmp = make(map[string]interface{})
 	_ = json.Unmarshal(res.Source, &tmp)

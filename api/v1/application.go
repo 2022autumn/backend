@@ -5,7 +5,10 @@ import (
 	"IShare/model/database"
 	"IShare/model/response"
 	"IShare/service"
+	"fmt"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +21,7 @@ import (
 // @Param       data body response.CreateApplicationQ true "data"
 // @Accept      json
 // @Produce     json
-// @Success     200 {string} json "{"msg": "申请成功", "status": 200,"application": application,}"
+// @Success     200 {string} json "{"msg": "申请成功", "status": 200,"application": application}"
 // @Failure     400 {string} json "{"msg": "数据格式错误", "status": 400}"
 // @Failure     401 {string} json "{"msg": "没有该用户", "status": 401}"
 // @Failure     402 {string} json "{"msg": "创建申请失败", "status": 402}"
@@ -38,6 +41,25 @@ func CreateApplication(c *gin.Context) {
 		c.JSON(403, gin.H{"msg": "该学者已被认领", "status": 402})
 		return
 	}
+
+	//判断验证码是否正确
+	code, _ := strconv.Atoi(d.VerifyCode)
+	rec, notFound := service.CheckVerifyCode(d.UserID, code, d.Email)
+	if notFound {
+		c.JSON(405, gin.H{"msg": "验证失败", "status": 405})
+		return
+	} else {
+		gen_time := rec.GenTime
+		cur_time := time.Now()
+		diff := cur_time.Unix() - gen_time.Unix() //计算相差的秒数
+		fmt.Println(diff)
+		if diff > 600 {
+			//时限10分钟
+			c.JSON(405, gin.H{"msg": "验证码超时", "status": 405})
+			return
+		}
+	}
+
 	application := database.Application{
 		RealName:    d.RealName,
 		Institution: d.Institution,
@@ -53,6 +75,47 @@ func CreateApplication(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"application": application, "msg": "申请提交成功", "status": 200})
+}
+
+// SendVerifyEmail 获取验证码
+// @Summary     获取申请验证码 Vera
+// @Description 用户点击"获取验证码"按钮，系统向用户提供的邮箱发送6位验证码，用户需要在申请表单中填入验证码才可以成功完成身份验证，否则不应该可以提交申请。验证码时限为10分钟，超时无效
+// @Tags        管理
+// @Param       data body response.GetVerifyCodeQ true "data"
+// @Accept      json
+// @Produce     json
+// @Success     200 {string} json "{"msg": "邮件发送成功","status": 200}"
+// @Failure     400 {string} json "{"msg": "数据格式错误", "status": 400}"
+// @Failure     401 {string} json "{"msg": "没有该用户", "status": 401}"
+// @Failure     402 {string} json "{"msg": "验证码存储失败","status": 402}"
+// @Failure     403 {string} json "{"msg": "发送邮件失败","status": 403}"
+// @Router /application/code [POST]
+func SendVerifyEmail(c *gin.Context) {
+	var d response.GetVerifyCodeQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(400, gin.H{"msg": "数据格式错误", "status": 400})
+		return
+	}
+	userID := d.UserID
+	email := d.Email
+	if _, notFound := service.GetUserByID(userID); notFound {
+		c.JSON(401, gin.H{"msg": "没有该用户", "status": 401})
+		return
+	}
+	code := rand.New(rand.NewSource(time.Now().UnixNano())).Int() % 1000000
+	fmt.Println(code)
+	err := service.CreateVerifyCodeRecode(userID, code, email)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"msg": "验证码存储失败", "status": 402})
+		return
+	}
+
+	err = service.SendVerifyCode(email, code)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "发送邮件失败", "status": 403})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "邮件发送成功", "status": 200})
 }
 
 // HandleApplication 审核学者门户申请
