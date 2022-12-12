@@ -55,7 +55,7 @@ func CommonWorkSearch(boolQuery *elastic.BoolQuery, page int, size int,
 	addAggToSearch(service, aggs)
 	// addHighlightToSearch(service, fields)
 	if sortType == 0 {
-		res, err = service.From((page - 1) * size).Do(context.Background())
+		res, err = service.Sort("_score", ascending).From((page - 1) * size).Do(context.Background())
 	} else if sortType == 1 {
 		res, err = service.Sort("cited_by_count", ascending).From((page - 1) * size).Do(context.Background())
 	} else if sortType == 2 {
@@ -95,7 +95,6 @@ func addAggToSearch(service *elastic.SearchService, aggNames map[string]bool) *e
 	if aggNames["publishers"] {
 		service = service.Aggregation("publishers",
 			elastic.NewTermsAggregation().Field("host_venue.publisher.keyword"))
-
 	}
 	if aggNames["authors"] {
 		service = service.Aggregation("authors",
@@ -357,4 +356,21 @@ func PrefixSearch(index string, field string, prefix string, topN int) ([]string
 	}
 	log.Println(results)
 	return results, nil
+}
+
+func AuthorSearch(queryWord string, page int, size int,
+	sortType int, ascending bool) (res *elastic.SearchResult, err error) {
+	//fuzzyQuery := elastic.NewFuzzyQuery("display_name", queryWord).Fuzziness(2)
+	query := elastic.NewMatchPhraseQuery("display_name", queryWord).Slop(3)
+	service := global.ES.Search().Index("authors").Query(query).Size(size).TerminateAfter(LIMITCOUNT)
+	service = service.Aggregation("institution",
+		elastic.NewTermsAggregation().Field("last_known_institution.display_name.keyword").Size(15))
+	if sortType == 0 {
+		res, err = service.Sort("_score", ascending).From((page - 1) * size).Do(context.Background())
+	} else if sortType == 1 {
+		res, err = service.Sort("cited_by_count", ascending).From((page - 1) * size).Do(context.Background())
+	} else if sortType == 2 {
+		res, err = service.Sort("works_count", ascending).From((page - 1) * size).Do(context.Background())
+	}
+	return res, err
 }

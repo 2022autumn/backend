@@ -534,7 +534,7 @@ func GetStatistics(c *gin.Context) {
 	c.JSON(200, gin.H{"res": res})
 }
 
-// GetPrefixSuggestion doc
+// GetPrefixSuggestions doc
 // @Summary     根据前缀得到搜索建议，返回results 字符串数组 hr
 // @description 根据前缀得到搜索建议，返回results 字符串数组
 // @Tags        esSearch
@@ -558,4 +558,38 @@ func GetPrefixSuggestions(c *gin.Context) {
 		panic(err)
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "msg": "获取成功", "res": prefixResult})
+}
+
+// AuthorSearch
+// @Summary     txc
+// @Description 根据作者名字搜索作者,模糊搜索
+// @Tags        esSearch
+// @Param       query_word query    string true "query_word"
+// @Param       page       query    int    true "page"
+// @Param       size       query    int    true "size"
+// @Param       sort       query    int    true "sort"
+// @Param       asc        query    bool   true "asc"
+// @Success     200        {string} json   "{"res":{},"msg": "Author Search Success"}"
+// @Failure     401        {string} json   "{"msg": "Author Search Error","err":err}"
+// @Router      /es/search/author [GET]
+func AuthorSearch(c *gin.Context) {
+	queryWord := c.Query("query_word")
+	page, _ := strconv.Atoi(c.Query("page"))
+	size, _ := strconv.Atoi(c.Query("size"))
+	sort, _ := strconv.Atoi(c.Query("sort"))
+	asc, _ := strconv.ParseBool(c.Query("asc"))
+	res, err := service.AuthorSearch(queryWord, page, size, sort, asc)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"msg": "Author Search Error",
+			"err": err,
+		})
+		return
+	}
+	var data = response.BaseSearchA{}
+	data.Hits, data.Works, data.Aggs, _ = utils.NormalizationSearchResult(res)
+	c.JSON(200, gin.H{
+		"msg": "Author Search Success",
+		"res": data,
+	})
 }

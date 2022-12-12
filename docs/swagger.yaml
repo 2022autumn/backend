@@ -528,6 +528,47 @@ paths:
       summary: 高级搜索 txc
       tags:
       - esSearch
+  /es/search/author:
+    get:
+      description: 根据作者名字搜索作者,模糊搜索
+      parameters:
+      - description: query_word
+        in: query
+        name: query_word
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: size
+        in: query
+        name: size
+        required: true
+        type: integer
+      - description: sort
+        in: query
+        name: sort
+        required: true
+        type: integer
+      - description: asc
+        in: query
+        name: asc
+        required: true
+        type: boolean
+      responses:
+        "200":
+          description: '{"res":{},"msg": "Author Search Success"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg": "Author Search Error","err":err}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - esSearch
   /es/search/base:
     post:
       consumes:

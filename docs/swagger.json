@@ -296,6 +296,66 @@
                 "responses": {}
             }
         },
+        "/es/search/author": {
+            "get": {
+                "description": "根据作者名字搜索作者,模糊搜索",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "query_word",
+                        "name": "query_word",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "size",
+                        "name": "size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "sort",
+                        "name": "sort",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "asc",
+                        "name": "asc",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"res\":{},\"msg\": \"Author Search Success\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\": \"Author Search Error\",\"err\":err}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/es/search/base": {
             "post": {
                 "description": "基本搜索，Cond里面填筛选条件，key仅包含[\"type\", \"author\", \"institution\", \"publisher\", \"venue\", \"publication_year\"]",
