@@ -282,44 +282,50 @@ func GetPersonalWorks(c *gin.Context) {
 		}
 		c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages, "total": total})
 		return
-	}
-	// 不能找到则从openalex api中获取
-	log.Println("从openalex api中获取author works")
-	author := res.Source
-	var author_map map[string]interface{}
-	_ = json.Unmarshal(author, &author_map)
-	works_api_url := author_map["works_api_url"].(string)
-	works = make([]database.PersonalWorks, 0)
-	service.GetAllPersonalWorksByUrl(works_api_url, &works, author_id)
-	if len(works) == 0 {
-		c.JSON(403, gin.H{"msg": "该作者没有论文"})
-		return
-	}
-	// 总页数,向上取整
-	pages := int(math.Ceil(float64(len(works)) / float64(page_size)))
-	// 分页
-	if page > pages {
-		c.JSON(402, gin.H{"msg": "page超出范围"})
-		return
-	}
-	total := len(works)
-	go service.CreateWorks(works)
-	// 页数从1开始
-	if page == pages { // 最后一页
-		works = works[(page-1)*page_size:]
 	} else {
-		works = works[(page-1)*page_size : page*page_size]
+		// 不能找到则从openalex api中获取
+		log.Println("从openalex api中获取author works")
+		author := res.Source
+		var author_map map[string]interface{}
+		_ = json.Unmarshal(author, &author_map)
+		works_api_url := author_map["works_api_url"].(string)
+		works = make([]database.PersonalWorks, 0)
+		service.GetAllPersonalWorksByUrl(works_api_url, &works, author_id)
+		if len(works) == 0 {
+			c.JSON(403, gin.H{"msg": "该作者没有论文"})
+			return
+		}
+		// 总页数,向上取整
+		pages := int(math.Ceil(float64(len(works)) / float64(page_size)))
+		// 分页
+		if page > pages {
+			c.JSON(402, gin.H{"msg": "page超出范围"})
+			return
+		}
+		total := len(works)
+		// 获取论文总数
+		count, err := service.GetScholarWorksCount(author_id)
+		if count == 0 || err != nil { // 之前没有插入过
+			service.UpdateScholarWorksCount(author_id, total)
+			go service.CreateWorks(works)
+		}
+		// 页数从1开始
+		if page == pages { // 最后一页
+			works = works[(page-1)*page_size:]
+		} else {
+			works = works[(page-1)*page_size : page*page_size]
+		}
+		// 获取works_id
+		for _, work := range works {
+			data = append(data, work.WorkID)
+		}
+		objects, err := service.GetObjects("works", data)
+		if err != nil {
+			c.JSON(500, gin.H{"msg": "获取objects失败"})
+			return
+		}
+		c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages, "total": total})
 	}
-	// 获取works_id
-	for _, work := range works {
-		data = append(data, work.WorkID)
-	}
-	objects, err := service.GetObjects("works", data)
-	if err != nil {
-		c.JSON(500, gin.H{"msg": "获取objects失败"})
-		return
-	}
-	c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages, "total": total})
 }
 
 // IgnoreWork 忽略论文

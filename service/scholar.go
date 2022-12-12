@@ -85,11 +85,11 @@ func GetWorkPlace(author_id string, work_id string) (place int, notFound bool) {
 	return work.Place, notFound
 }
 
-// 获取学者的作品总数
-func GetScholarWorksCount(author_id string) (count int, err error) {
-	err = global.DB.Model(&database.PersonalWorks{}).Where("author_id = ?", author_id).Count(&count).Error
-	return count, err
-}
+// // 获取学者的作品总数
+// func GetScholarWorksCount(author_id string) (count int, err error) {
+// 	err = global.DB.Model(&database.PersonalWorks{}).Where("author_id = ?", author_id).Count(&count).Error
+// 	return count, err
+// }
 
 // 加锁，交换两个作品的place
 func SwapWorkPlace(author_id string, work_id1 string, work_id2 string) (err error) {
@@ -162,6 +162,29 @@ func GetAuthor(author_id string) (author database.Author, notFound bool) {
 	return author, notFound
 }
 
+// 插入作者
+func UpdateScholarWorksCount(author_id string, count int) (err error) {
+	var tmp database.PersonalWorksCount
+	notFound := global.DB.Where("author_id = ?", author_id).First(&tmp).RecordNotFound()
+	if notFound {
+		tmp.AuthorID = author_id
+		tmp.Count = count
+		err = global.DB.Create(&tmp).Error
+	} else {
+		err = global.DB.Model(&database.PersonalWorksCount{}).Where("author_id = ?", author_id).Update("count", count).Error
+	}
+	return err
+}
+
+func GetScholarWorksCount(author_id string) (count int, err error) {
+	var tmp database.PersonalWorksCount
+	notFound := global.DB.Where("author_id = ?", author_id).First(&tmp).RecordNotFound()
+	if notFound {
+		return 0, nil
+	}
+	return tmp.Count, nil
+}
+
 // 批量创建作者的作品, 加锁
 func CreateWorks(works []database.PersonalWorks) (err error) {
 	tx := global.DB.Begin()
@@ -174,12 +197,11 @@ func CreateWorks(works []database.PersonalWorks) (err error) {
 		}
 		err = tx.Create(&work).Error
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 	tx.Commit()
-	return err
+	return nil
 }
 
 // 修改作品ignore属性 加锁
