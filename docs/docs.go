@@ -199,6 +199,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/es/get2/": {
+            "get": {
+                "description": "根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759",
+                "tags": [
+                    "esSearch"
+                ],
+                "summary": "根据id获取对象 txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "对象id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户id",
+                        "name": "userid",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\":200,\"res\":{}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"status\":400,\"msg\":\"id type error\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "{\"status\":201,\"msg\":\"es get err or not found\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/es/getAuthorRelationNet": {
             "get": {
                 "description": "根据author的id获取专家关系网络, 目前会返回Top N的关系网，N=10，后续可以讨论修改N的大小或者传参给我\n\n目前接口时延约为1s, 后续考虑把计算出来的结果存入数据库，二次查询时延降低\n",

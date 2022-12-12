@@ -453,6 +453,35 @@ paths:
       summary: 根据id获取对象 txc
       tags:
       - esSearch
+  /es/get2/:
+    get:
+      description: 根据id获取对象，可以是author，work，institution,venue,concept W4237558494,W2009180309,W2984203759
+      parameters:
+      - description: 对象id
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: 用户id
+        in: query
+        name: userid
+        type: string
+      responses:
+        "200":
+          description: '{"status":200,"res":{}}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400,"msg":"id type error"}'
+          schema:
+            type: string
+        "404":
+          description: '{"status":201,"msg":"es get err or not found"}'
+          schema:
+            type: string
+      summary: 根据id获取对象 txc
+      tags:
+      - esSearch
   /es/getAuthorRelationNet:
     get:
       description: |
