@@ -879,7 +879,7 @@ const docTemplate = `{
         },
         "/scholar/works/getpdf": {
             "post": {
-                "description": "获取学者上传的文章PDF地址\n\n参数说明\n- author_id 作者的id\n\n- work_id 论文的id\n\n返回说明\n- pdf地址,直接使用即可，无需拼接",
+                "description": "获取学者上传的文章PDF地址\n\n参数说明\n- work_id 论文的id\n\n返回说明\n- pdf地址,直接使用即可，无需拼接",
                 "consumes": [
                     "application/json"
                 ],
@@ -892,7 +892,7 @@ const docTemplate = `{
                 "summary": "获取学者上传的文章PDF地址 hr",
                 "parameters": [
                     {
-                        "description": "data 是请求参数,包括author_id ,work_id",
+                        "description": "data 是请求参数work_id",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -2206,14 +2206,11 @@ const docTemplate = `{
         "response.GetPaperPDFQ": {
             "type": "object",
             "required": [
-                "author_id",
                 "work_id"
             ],
             "properties": {
-                "author_id": {
-                    "type": "string"
-                },
                 "work_id": {
+                    "description": "AuthorID string ` + "`" + `json:\"author_id\" binding:\"required\"` + "`" + `",
                     "type": "string"
                 }
             }
