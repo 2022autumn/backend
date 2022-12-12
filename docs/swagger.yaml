@@ -261,6 +261,16 @@ definitions:
     required:
     - user_id
     type: object
+  response.PaperBelongingQ:
+    properties:
+      paper_id:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - paper_id
+    - user_id
+    type: object
   response.PwdModifyQ:
     properties:
       password_new:
@@ -282,8 +292,7 @@ definitions:
         minLength: 6
         type: string
       username:
-        maxLength: 100
-        minLength: 3
+        minLength: 1
         type: string
     required:
     - password
@@ -1541,6 +1550,37 @@ paths:
           description: '{"success": false,"status":403, "msg": "标签不存在"}'
           schema:
             type: string
+      summary: 删除标签 Vera
+      tags:
+      - 社交
+  /social/tag/paperTagList:
+    post:
+      consumes:
+      - application/json
+      description: 返回用户所有的收藏夹列表，并一一标记文章是否从属于收藏夹
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.PaperBelongingQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status":200,"msg":"获取成功","data":data}'
+          schema:
+            type: string
+        "400":
+          description: '{"status": 400, "msg": "用户ID不存在"}'
+          schema:
+            type: string
+        "401":
+          description: '{"status": 401, "msg": "未查询到结果"}'
+          schema:
+            type: string
+      summary: 查询文章所在的收藏夹 Vera
       tags:
       - 社交
   /social/tag/rename:
@@ -1578,6 +1618,7 @@ paths:
           description: '{"status":403,"msg":"修改失败"}'
           schema:
             type: string
+      summary: 收藏夹重命名 Vera
       tags:
       - 社交
   /social/tag/sublist:

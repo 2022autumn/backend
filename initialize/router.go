@@ -58,6 +58,7 @@ func SetupRouter(r *gin.Engine) {
 		SocialRouter.POST("/tag/delete", v1.DeleteTag)
 		SocialRouter.POST("/tag/cancelCollectPaper", v1.RemovePaperTag)
 		SocialRouter.POST("/tag/rename", v1.RenameTag)
+		SocialRouter.POST("/tag/paperTagList", v1.PaperTagList)
 		SocialRouter.POST("/follow", middleware.AuthRequired(), v1.FollowAuthor)
 		SocialRouter.POST("/follow/list", middleware.AuthRequired(), v1.GetUserFollows)
 	}
