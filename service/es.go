@@ -40,15 +40,9 @@ func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 	return global.ES.Get().Index(index).Id(id).Do(context.Background())
 }
 func GetObject2(index string, id string) (data map[string]interface{}, err error) {
-	if index == "works" {
-		index = "works_v1"
-	}
 	res, err := global.ES.Get().Index(index).Id(id).Do(context.Background())
 	if err != nil {
 		//https://api.openalex.org/works/W2741809807
-		if index == "works_v1" {
-			index = "works"
-		}
 		data, err := utils.GetByUrl("https://api.openalex.org/" + index + "/" + id)
 		return data, err
 	}
@@ -82,9 +76,6 @@ func GetObjects2(index string, ids []string) (res map[string]interface{}, err er
 		      "W2148347826",
 		      "W2796700885"
 	*/
-	if index == "works_v1" {
-		index = "works"
-	}
 	url := "https://api.openalex.org/" + index + "?filter=openalex_id:"
 	for i, id := range ids {
 		if i != 0 {

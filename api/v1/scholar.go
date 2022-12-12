@@ -225,7 +225,7 @@ func GetHotWorks(c *gin.Context) {
 // @Router      /scholar/works/get [POST]
 func GetPersonalWorks(c *gin.Context) {
 	var d response.GetPersonalWorksQ
-	var data []string
+	var works_ids []string
 	if err := c.ShouldBind(&d); err != nil {
 		c.JSON(400, gin.H{"msg": "参数错误"})
 		return
@@ -248,9 +248,12 @@ func GetPersonalWorks(c *gin.Context) {
 		works, notFound = service.GetScholarAllWorks(author_id)
 	}
 	if !notFound && len(works) != 0 { // 能找到则从数据库中获取
-		// 按照place排序 从小到大
+		// 先按照Top排序，从大到小，再按照place排序 从小到大
 		sort.Slice(works, func(i, j int) bool {
-			return works[i].Place < works[j].Place
+			if works[i].Top == works[j].Top {
+				return works[i].Place < works[j].Place
+			}
+			return works[i].Top > works[j].Top
 		})
 		// 总页数,向上取整
 		pages := int(math.Ceil(float64(len(works)) / float64(page_size)))
@@ -267,9 +270,9 @@ func GetPersonalWorks(c *gin.Context) {
 		}
 		// 获取works_id
 		for _, work := range works {
-			data = append(data, work.WorkID)
+			works_ids = append(works_ids, work.WorkID)
 		}
-		objects, err := service.GetObjects("works", data)
+		objects, err := service.GetObjects("works", works_ids)
 		if err != nil {
 			c.JSON(500, gin.H{"msg": "获取objects失败"})
 			return
@@ -280,7 +283,21 @@ func GetPersonalWorks(c *gin.Context) {
 			c.JSON(404, gin.H{"msg": "查询论文总数出错，修改失败"})
 			return
 		}
-		c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages, "total": total})
+		data := make([]map[string]interface{}, len(works))
+		if objects != nil {
+			for i, v := range objects.Docs {
+				if v.Found {
+					json.Unmarshal(v.Source, &data[i])
+					data[i]["Top"] = works[i].Top
+					data[i]["find"] = true
+				} else {
+					data[i] = make(map[string]interface{})
+					data[i]["find"] = false
+					println(works_ids[i] + " not found")
+				}
+			}
+		}
+		c.JSON(200, gin.H{"msg": "获取成功", "data": data, "pages": pages, "total": total})
 		return
 	} else {
 		// 不能找到则从openalex api中获取
@@ -317,14 +334,28 @@ func GetPersonalWorks(c *gin.Context) {
 		}
 		// 获取works_id
 		for _, work := range works {
-			data = append(data, work.WorkID)
+			works_ids = append(works_ids, work.WorkID)
 		}
-		objects, err := service.GetObjects("works", data)
+		objects, err := service.GetObjects("works", works_ids)
 		if err != nil {
 			c.JSON(500, gin.H{"msg": "获取objects失败"})
 			return
 		}
-		c.JSON(200, gin.H{"msg": "获取成功", "data": objects, "pages": pages, "total": total})
+		data := make([]map[string]interface{}, len(works))
+		if objects != nil {
+			for i, v := range objects.Docs {
+				if v.Found {
+					json.Unmarshal(v.Source, &data[i])
+					data[i]["Top"] = works[i].Top
+					data[i]["find"] = true
+				} else {
+					data[i] = make(map[string]interface{})
+					data[i]["find"] = false
+					println(works_ids[i] + " not found")
+				}
+			}
+		}
+		c.JSON(200, gin.H{"msg": "获取成功", "data": data, "pages": pages, "total": total})
 	}
 }
 
@@ -468,6 +499,45 @@ func TopWork(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"msg": "置顶成功"})
+}
+
+// 取消置顶论文
+// @Summary     学者管理主页--取消置顶论文 hr
+// @Description 学者管理主页--取消置顶论文
+// @Description
+// @Description 参数说明
+// @Description - author_id 作者的id
+// @Description
+// @Description - work_id 论文的id
+// @Tags        学者主页的论文获取、管理
+// @Accept      json
+// @Produce     json
+// @Param       data body     response.TopWorkQ true "data 是请求参数,包括author_id ,work_id"
+// @Success     200  {string} json              "{"msg":"取消置顶成功"}"
+// @Failure     400  {string} json                  "{"msg":"参数错误"}"
+// @Failure     401  {string} json                  "{"msg":"未找到该论文"}"
+// @Failure     402  {string} json              "{"msg":"修改失败"}"
+// @Router      /scholar/works/top [POST]
+func UnTopWork(c *gin.Context) {
+	var d response.TopWorkQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(400, gin.H{"msg": "参数数目或类型错误"})
+		return
+	}
+	author_id, work_id := d.AuthorID, d.WorkID
+	// 获取当前论文的place
+	place, notFound := service.GetWorkPlace(author_id, work_id)
+	if notFound || place == -1 {
+		c.JSON(401, gin.H{"msg": "未找到该论文"})
+		return
+	}
+	// 置顶论文
+	err := service.UnTopWork(author_id, work_id)
+	if err != nil {
+		c.JSON(402, gin.H{"msg": "修改失败"})
+		return
+	}
+	c.JSON(200, gin.H{"msg": "取消置顶成功"})
 }
 
 // UploadAuthorHeadshot

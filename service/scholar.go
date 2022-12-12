@@ -4,8 +4,6 @@ import (
 	"IShare/global"
 	"IShare/model/database"
 	"log"
-
-	"github.com/jinzhu/gorm"
 )
 
 func CreateUserConcept(uc *database.UserConcept) (err error) {
@@ -131,30 +129,36 @@ func GetWorkByPlace(author_id string, place int) (work database.PersonalWorks, n
 
 // 置顶作品
 func TopWork(author_id string, work_id string) (err error) {
-	tx := global.DB.Begin()
-	var work database.PersonalWorks
-	err = tx.Where("author_id = ? AND work_id = ?", author_id, work_id).First(&work).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
+	// tx := global.DB.Begin()
+	// var work database.PersonalWorks
+	// err = tx.Where("author_id = ? AND work_id = ?", author_id, work_id).First(&work).Error
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
+	// err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND place < ?", author_id, work.Place).Update("place", gorm.Expr("place + 1")).Error
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
 	// err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id).Update("place", 0).Error
 	// if err != nil {
 	// 	tx.Rollback()
 	// 	return err
 	// }
-	err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND place < ?", author_id, work.Place).Update("place", gorm.Expr("place + 1")).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id).Update("place", 0).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Commit()
-	return nil
+	// tx.Commit()
+	return UpdateWorkTop(author_id, work_id, 1)
+}
+
+// 取消置顶
+func UnTopWork(author_id string, work_id string) (err error) {
+	return UpdateWorkTop(author_id, work_id, -1)
+}
+
+// 修改作品的top属性
+func UpdateWorkTop(author_id string, work_id string, top int) (err error) {
+	err = global.DB.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id).Update("top", top).Error
+	return err
 }
 
 func GetAuthor(author_id string) (author database.Author, notFound bool) {
