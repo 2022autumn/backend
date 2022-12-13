@@ -136,6 +136,12 @@ func GetObject2(c *gin.Context) {
 		}
 	}
 	if idx == "works" {
+		filter := utils.InitWorksfilter()
+		utils.FilterData(&res, &filter)
+		if res["abstract_inverted_index"] != nil {
+			res["abstract"] = utils.TransInvertedIndex2String(res["abstract_inverted_index"].(map[string]interface{}))
+			res["abstract_inverted_index"] = nil
+		}
 		referenced_works := res["referenced_works"].([]interface{})
 		res["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := res["related_works"].([]interface{})
@@ -164,6 +170,7 @@ func GetObject2(c *gin.Context) {
 			}
 		}
 	}
+
 	if idx == "authors" {
 		var info = make(map[string]interface{})
 		if userid != "" {

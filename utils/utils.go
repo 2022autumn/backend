@@ -171,7 +171,10 @@ func InitWorksfilter() map[string]interface{} {
 	authorship["institutions"] = append(authorship["institutions"].([]map[string]interface{}), institution)
 	// 向worksfilter.authorships中添加元素map
 	worksfilter["authorships"] = append(worksfilter["authorships"].([]map[string]interface{}), authorship)
-
+	concepts := make(map[string]interface{})
+	concepts["id"] = true                                       // concepts.id 需要修改 "https://openalex.org/C1969205032" -> "C1969205032"
+	worksfilter["concepts"] = make([]map[string]interface{}, 0) // concepts 需要修改
+	worksfilter["concepts"] = append(worksfilter["concepts"].([]map[string]interface{}), concepts)
 	return worksfilter
 }
 
