@@ -257,7 +257,7 @@ func GetTopN(Vertex_set *[]map[string]interface{}, Edge_set *[]map[string]interf
 		*TopEdge_set = append(*TopEdge_set, (*Edge_set)[i])
 	}
 	for _, Edge := range *TopEdge_set {
-		source := Edge["source"].(string)
+		source := Edge["from"].(string)
 		for _, Vertex := range *Vertex_set {
 			if Vertex["id"] == source {
 				*TopVertex_set = append(*TopVertex_set, Vertex)
@@ -268,7 +268,7 @@ func GetTopN(Vertex_set *[]map[string]interface{}, Edge_set *[]map[string]interf
 exit:
 	// 2. 获取Top N Edge target 对应的Vertex
 	for _, Edge := range *TopEdge_set {
-		target := Edge["target"].(string)
+		target := Edge["to"].(string)
 		for _, Vertex := range *Vertex_set {
 			if Vertex["id"] == target {
 				*TopVertex_set = append(*TopVertex_set, Vertex)
