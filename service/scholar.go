@@ -232,6 +232,7 @@ func IgnoreWork(author_id string, work_id string) (err error) {
 // 获取特定学者的特定作品
 func GetPersonalWork(author_id string, work_id string) (work database.PersonalWorks, notFound bool) {
 	notFound = global.DB.Where("author_id = ? AND work_id = ?", author_id, work_id).First(&work).RecordNotFound()
+	log.Println("work", work)
 	return work, notFound
 }
 

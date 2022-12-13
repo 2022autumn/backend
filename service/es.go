@@ -158,7 +158,7 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 	// 1. 判断author_id类型
 	ty, err := utils.TransObjPrefix(author_id)
 	if err != nil {
-		log.Println(err)
+		log.Println("TransObjPrefix", err)
 		return nil, nil, err
 	}
 	if ty != "authors" {
@@ -246,8 +246,8 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 			}
 		}
 	}
-	log.Println("Vertex_set: ", Vertex_set)
-	log.Println("Edge_set: ", Edge_set)
+	// log.Println("Vertex_set: ", Vertex_set)
+	// log.Println("Edge_set: ", Edge_set)
 	TopVertex_set := make([]map[string]interface{}, 0)
 	TopEdge_set := make([]map[string]interface{}, 0)
 	GetTopN(&Vertex_set, &Edge_set, &TopVertex_set, &TopEdge_set, 10)

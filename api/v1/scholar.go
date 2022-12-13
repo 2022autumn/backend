@@ -625,6 +625,8 @@ func ModifyAuthorIntro(c *gin.Context) {
 func UploadPaperPDF(c *gin.Context) {
 	authorID := c.Request.FormValue("author_id")
 	workID := c.Request.FormValue("work_id")
+	log.Println("authorID: ", authorID)
+	log.Println("workID: ", workID)
 	_, notFound := service.GetPersonalWork(authorID, workID)
 	if notFound {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "论文不存在"})
