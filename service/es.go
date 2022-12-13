@@ -202,7 +202,7 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 			for _, Vertex := range Vertex_set {
 				// 判断是否已经存在, 如果存在则不添加 通过id string判断
 				if Vertex["id"] == work_author_id {
-					log.Println("exist: ", Vertex["id"])
+					// log.Println("exist: ", Vertex["id"])
 					exist = true
 					break
 				}
