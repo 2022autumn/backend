@@ -6,7 +6,6 @@ import (
 	"IShare/model/response"
 	"IShare/service"
 	"IShare/utils"
-	"encoding/json"
 	"fmt"
 	"log"
 	"math"
@@ -233,7 +232,7 @@ func GetPersonalWorks(c *gin.Context) {
 		c.JSON(400, gin.H{"msg": "author_id 为空，参数错误"})
 		return
 	}
-	res, err := service.GetObject("authors", author_id)
+	res, err, _ := service.GetObject2("authors", author_id)
 	if err != nil {
 		c.JSON(401, gin.H{"msg": "作者不存在"})
 		return
@@ -270,7 +269,7 @@ func GetPersonalWorks(c *gin.Context) {
 		for _, work := range works {
 			works_ids = append(works_ids, work.WorkID)
 		}
-		objects, err := service.GetObjects("works", works_ids)
+		objects, err := service.GetObjects2("works", works_ids)
 		if err != nil {
 			c.JSON(500, gin.H{"msg": "获取objects失败"})
 			return
@@ -282,16 +281,38 @@ func GetPersonalWorks(c *gin.Context) {
 			return
 		}
 		data := make([]map[string]interface{}, len(works))
+		_works := objects["results"].([]interface{})
 		if objects != nil {
-			for i, v := range objects.Docs {
-				if v.Found {
-					json.Unmarshal(v.Source, &data[i])
-					data[i]["Top"] = works[i].Top
-					data[i]["find"] = true
-				} else {
-					data[i] = make(map[string]interface{})
-					data[i]["find"] = false
-					println(works_ids[i] + " not found")
+			//for i, v := range objects {
+			//	if v.Found {
+			//		json.Unmarshal(v.Source, &data[i])
+			//		data[i]["Top"] = works[i].Top
+			//		data[i]["find"] = true
+			//	} else {
+			//		data[i] = make(map[string]interface{})
+			//		data[i]["find"] = false
+			//		println(works_ids[i] + " not found")
+			//	}
+			//}
+			workfilter := utils.InitWorksfilter()
+			for i, v := range works_ids {
+				for j, _v := range _works {
+					work := _v.(map[string]interface{})
+					id := work["id"].(string)
+					if v == utils.RemovePrefix(id) {
+						utils.FilterData(&work, &workfilter)
+						data[i] = work
+						data[i]["Top"] = works[j].Top
+						data[i]["find"] = true
+						data[i]["pdf"] = works[j].PDF
+						if works[j].PDF != "" {
+							data[i]["isupdatepdf"] = 1
+						} else {
+							data[i]["isupdatepdf"] = 0
+						}
+						_works = append(_works[:j], _works[j+1:]...)
+						break
+					}
 				}
 			}
 		}
@@ -300,10 +321,10 @@ func GetPersonalWorks(c *gin.Context) {
 	} else {
 		// 不能找到则从openalex api中获取
 		log.Println("从openalex api中获取author works")
-		author := res.Source
-		var author_map map[string]interface{}
-		_ = json.Unmarshal(author, &author_map)
-		works_api_url := author_map["works_api_url"].(string)
+		//author := res[]
+		//var author_map map[string]interface{}
+		//_ = json.Unmarshal(author, &author_map)
+		works_api_url := res["works_api_url"].(string)
 		works = make([]database.PersonalWorks, 0)
 		service.GetAllPersonalWorksByUrl(works_api_url, &works, author_id)
 		if len(works) == 0 {
@@ -334,22 +355,44 @@ func GetPersonalWorks(c *gin.Context) {
 		for _, work := range works {
 			works_ids = append(works_ids, work.WorkID)
 		}
-		objects, err := service.GetObjects("works", works_ids)
+		objects, err := service.GetObjects2("works", works_ids)
 		if err != nil {
 			c.JSON(500, gin.H{"msg": "获取objects失败"})
 			return
 		}
 		data := make([]map[string]interface{}, len(works))
+		_works := objects["results"].([]interface{})
 		if objects != nil {
-			for i, v := range objects.Docs {
-				if v.Found {
-					json.Unmarshal(v.Source, &data[i])
-					data[i]["Top"] = works[i].Top
-					data[i]["find"] = true
-				} else {
-					data[i] = make(map[string]interface{})
-					data[i]["find"] = false
-					println(works_ids[i] + " not found")
+			//for i, v := range objects.Docs {
+			//	if v.Found {
+			//		json.Unmarshal(v.Source, &data[i])
+			//		data[i]["Top"] = works[i].Top
+			//		data[i]["find"] = true
+			//	} else {
+			//		data[i] = make(map[string]interface{})
+			//		data[i]["find"] = false
+			//		println(works_ids[i] + " not found")
+			//	}
+			//}
+			workfilter := utils.InitWorksfilter()
+			for i, v := range works_ids {
+				for j, _v := range _works {
+					work := _v.(map[string]interface{})
+					id := work["id"].(string)
+					if v == utils.RemovePrefix(id) {
+						utils.FilterData(&work, &workfilter)
+						data[i] = work
+						data[i]["Top"] = works[j].Top
+						data[i]["find"] = true
+						data[i]["pdf"] = works[j].PDF
+						if works[j].PDF != "" {
+							data[i]["isupdatepdf"] = 1
+						} else {
+							data[i]["isupdatepdf"] = 0
+						}
+						_works = append(_works[:j], _works[j+1:]...)
+						break
+					}
 				}
 			}
 		}
