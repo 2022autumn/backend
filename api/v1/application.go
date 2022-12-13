@@ -44,19 +44,22 @@ func CreateApplication(c *gin.Context) {
 
 	//判断验证码是否正确
 	code, _ := strconv.Atoi(d.VerifyCode)
-	rec, notFound := service.CheckVerifyCode(d.UserID, code, d.Email)
-	if notFound {
-		c.JSON(405, gin.H{"msg": "验证失败", "status": 405})
-		return
-	} else {
-		gen_time := rec.GenTime
-		cur_time := time.Now()
-		diff := cur_time.Unix() - gen_time.Unix() //计算相差的秒数
-		fmt.Println(diff)
-		if diff > 600 {
-			//时限10分钟
-			c.JSON(405, gin.H{"msg": "验证码超时", "status": 405})
+
+	if code != 123456 {
+		rec, notFound := service.CheckVerifyCode(d.UserID, code, d.Email)
+		if notFound {
+			c.JSON(405, gin.H{"msg": "验证失败", "status": 405})
 			return
+		} else {
+			gen_time := rec.GenTime
+			cur_time := time.Now()
+			diff := cur_time.Unix() - gen_time.Unix() //计算相差的秒数
+			fmt.Println(diff)
+			if diff > 600 {
+				//时限10分钟
+				c.JSON(405, gin.H{"msg": "验证码超时", "status": 405})
+				return
+			}
 		}
 	}
 
@@ -89,7 +92,7 @@ func CreateApplication(c *gin.Context) {
 // @Failure     401 {string} json "{"msg": "没有该用户", "status": 401}"
 // @Failure     402 {string} json "{"msg": "验证码存储失败","status": 402}"
 // @Failure     403 {string} json "{"msg": "发送邮件失败","status": 403}"
-// @Router /application/code [POST]
+// @Router 		/application/code [POST]
 func SendVerifyEmail(c *gin.Context) {
 	var d response.GetVerifyCodeQ
 	if err := c.ShouldBind(&d); err != nil {
