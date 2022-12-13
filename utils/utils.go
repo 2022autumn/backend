@@ -177,6 +177,27 @@ func InitWorksfilter() map[string]interface{} {
 	worksfilter["concepts"] = append(worksfilter["concepts"].([]map[string]interface{}), concepts)
 	return worksfilter
 }
+func InitAuthorsfilter() map[string]interface{} {
+	authorsfilter := make(map[string]interface{})
+	authorsfilter["id"] = true
+	authorsfilter["orcid"] = false
+	authorsfilter["display_name_alternatives"] = false
+	authorsfilter["ids"] = make(map[string]interface{})
+	authorsfilter["ids"].(map[string]interface{})["openalex"] = false
+	authorsfilter["ids"].(map[string]interface{})["mag"] = false
+	authorsfilter["last_known_institution"] = make(map[string]interface{})
+	authorsfilter["last_known_institution"].(map[string]interface{})["id"] = true
+	authorsfilter["last_known_institution"].(map[string]interface{})["ror"] = false
+	authorsfilter["last_known_institution"].(map[string]interface{})["country_code"] = false
+	authorsfilter["last_known_institution"].(map[string]interface{})["type"] = false
+	authorsfilter["x_concepts"] = make([]map[string]interface{}, 0)
+	x_concept := make(map[string]interface{})
+	x_concept["id"] = true
+	authorsfilter["x_concepts"] = append(authorsfilter["x_concepts"].([]map[string]interface{}), x_concept)
+	authorsfilter["updated_date"] = false
+	authorsfilter["created_date"] = false
+	return authorsfilter
+}
 
 // 保证filter中的key在data中存在
 func FilterData(data *map[string]interface{}, filter *map[string]interface{}) {

@@ -57,17 +57,15 @@ func AddUserConcept(c *gin.Context) {
 	//}
 	userConcept, notFound := service.GetUserConcept(user.UserID, d.ConceptID)
 	if notFound {
-		res, err := service.GetObject("concepts", d.ConceptID)
+		res, err, _ := service.GetObject2("concepts", d.ConceptID)
 		if err != nil {
 			c.JSON(402, gin.H{"msg": "concept不存在"})
 			return
 		}
-		var tmp map[string]interface{}
-		_ = json.Unmarshal(res.Source, &tmp)
 		userConcept = database.UserConcept{
 			UserID:      user.UserID,
 			ConceptID:   d.ConceptID,
-			ConceptName: tmp["display_name"].(string),
+			ConceptName: res["display_name"].(string),
 		}
 		if err := service.CreateUserConcept(&userConcept); err != nil {
 			c.JSON(403, gin.H{"msg": "添加失败"})
@@ -475,8 +473,8 @@ func ModifyPlace(c *gin.Context) {
 // @Produce     json
 // @Param       data body     response.TopWorkQ true "data 是请求参数,包括author_id ,work_id"
 // @Success     200  {string} json              "{"msg":"置顶成功"}"
-// @Failure     400  {string} json                  "{"msg":"参数错误"}"
-// @Failure     401  {string} json                  "{"msg":"未找到该论文"}"
+// @Failure     400  {string} json              "{"msg":"参数错误"}"
+// @Failure     401  {string} json              "{"msg":"未找到该论文"}"
 // @Failure     402  {string} json              "{"msg":"修改失败"}"
 // @Router      /scholar/works/top [POST]
 func TopWork(c *gin.Context) {

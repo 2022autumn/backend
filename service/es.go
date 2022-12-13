@@ -39,16 +39,16 @@ func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 	//return global.ES.Search().Index(index).Query(termQuery).Do(context.Background())
 	return global.ES.Get().Index(index).Id(id).Do(context.Background())
 }
-func GetObject2(index string, id string) (data map[string]interface{}, err error) {
+func GetObject2(index string, id string) (data map[string]interface{}, err error, source int) {
 	res, err := global.ES.Get().Index(index).Id(id).Do(context.Background())
 	if err != nil {
 		//https://api.openalex.org/works/W2741809807
 		data, err := utils.GetByUrl("https://api.openalex.org/" + index + "/" + id)
-		return data, err
+		return data, err, 1
 	}
 	var data2 map[string]interface{}
 	err = json.Unmarshal(res.Source, &data2)
-	return data2, err
+	return data2, err, 0
 }
 
 // mget对象 不保证顺序
