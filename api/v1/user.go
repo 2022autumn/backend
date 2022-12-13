@@ -322,3 +322,48 @@ func UploadHeadshot(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": user})
 }
+
+// GetUserHistory 查看用户历史浏览记录
+// @Summary     ccf
+// @Description 查看用户历史浏览记录
+// @Tags        用户
+// @Param       user_id query string true "user_id"
+// @Accept      json
+// @Produce     json
+// @Success     200 {string} json "{"status":200,"msg":"获取用户历史浏览记录成功","data":{object}}"
+// @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
+// @Failure     401 {string} json "{"status":400,"msg":"从数据库获取历史浏览记录失败"}"
+// @Router      /user/history [GET]
+func GetUserHistory(c *gin.Context) {
+	userID := c.Query("user_id")
+	id, _ := strconv.ParseInt(userID, 0, 64)
+	//用户不存在
+	user, notFoundUserByID := service.QueryAUserByID(uint64(id))
+	if notFoundUserByID {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": 400,
+			"msg":    "用户ID不存在",
+		})
+		return
+	}
+	//获取用户浏览记录
+	historyList, err := service.GetUserHistoryByID(user.UserID)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"status": 401,
+			"msg":    "从数据库获取历史浏览记录失败",
+		})
+	}
+	var dataList = make([]map[string]interface{}, 0)
+	for _, history := range historyList {
+		var his = make(map[string]interface{})
+		his["work_id"] = history.WorkID
+		his["browse_time"] = history.BrowseTime
+		dataList = append(dataList, his)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": 200,
+		"msg":    "获取用户历史浏览记录成功",
+		"data":   dataList,
+	})
+}

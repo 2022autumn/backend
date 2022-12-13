@@ -281,6 +281,12 @@ func GetObject(c *gin.Context) {
 				println("save work view err")
 			}
 		}
+		//创建浏览记录ccf
+		uid, _ := strconv.ParseInt(userid, 0, 64)
+		e := service.CreateUserBrowseHistory(uint64(uid), id) //传user_id和work_id
+		if e != nil {
+			fmt.Println(e)
+		}
 	}
 	if idx == "authors" {
 		var info = make(map[string]interface{})

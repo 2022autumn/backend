@@ -34,6 +34,7 @@ func SetupRouter(r *gin.Engine) {
 		baseGroup.POST("/user/mod", v1.ModifyUser)          //编辑个人信息
 		baseGroup.POST("/user/pwd", v1.ModifyPassword)      //重置用户密码
 		baseGroup.POST("/user/headshot", v1.UploadHeadshot) //上传用户头像
+		baseGroup.GET("/user/history", v1.GetUserHistory)   //查看用户历史浏览记录
 		baseGroup.Static("/media", "./media")
 	}
 	ApplicationRouter := baseGroup.Group("/application")
