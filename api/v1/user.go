@@ -333,3 +333,17 @@ func GetRegisterUserNum(c *gin.Context) {
 	num := service.GetAllUser()
 	c.JSON(http.StatusOK, gin.H{"status": 200, "register_num": num})
 }
+
+// GetBrowseHistory
+// @Summary     txc
+// @Description 获取用户浏览历史
+// @Tags        用户
+// @Param       token header   string true "token"
+// @Success     200   {string} json   "{"status": 200, "msg": "获取成功", "data": {object}}"
+// @Router      /user/history [GET]
+func GetBrowseHistory(c *gin.Context) {
+	user := c.MustGet("user").(database.User)
+	var history []database.BrowseHistory
+	global.DB.Where("user_id = ?", user.UserID).Order("browse_time desc").Find(&history)
+	c.JSON(http.StatusOK, gin.H{"status": 200, "msg": "获取成功", "data": history})
+}

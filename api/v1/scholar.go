@@ -308,7 +308,7 @@ func GetPersonalWorks(c *gin.Context) {
 						data[i]["Top"] = works[i].Top
 						data[i]["find"] = true
 						data[i]["pdf"] = works[i].PDF
-						if works[j].PDF != "" {
+						if works[i].PDF != "" {
 							data[i]["isupdatepdf"] = 1
 						} else {
 							data[i]["isupdatepdf"] = 0
@@ -392,7 +392,7 @@ func GetPersonalWorks(c *gin.Context) {
 						data[i]["Top"] = works[i].Top
 						data[i]["find"] = true
 						data[i]["pdf"] = works[i].PDF
-						if works[j].PDF != "" {
+						if works[i].PDF != "" {
 							data[i]["isupdatepdf"] = 1
 						} else {
 							data[i]["isupdatepdf"] = 0

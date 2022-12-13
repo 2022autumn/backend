@@ -1,5 +1,7 @@
 package database
 
+import "time"
+
 // User 用户
 type User struct {
 	UserID   uint64 `gorm:"primary_key; autoIncrement; not null;" json:"user_id"`
@@ -20,6 +22,10 @@ type User struct {
 	Verified   int    `gorm:"default:0" json:"verified"`          //是否已经认证
 }
 type BrowseHistory struct {
-	UserID uint64 `gorm:"not null;" json:"user_id"`
-	WorkID string `gorm:"not null;" json:"work_id"`
+	UserID          uint64    `gorm:"not null;" json:"user_id"`
+	WorkID          string    `gorm:"not null;" json:"work_id"`
+	Title           string    `gorm:"not null;type:text" json:"title"`
+	HostVenue       string    `gorm:"not null;type:text" json:"host_venue"`
+	PublicationYear string    `gorm:"not null;" json:"publication_year"`
+	BrowseTime      time.Time `gorm:"not null;" json:"browse_time"`
 }

@@ -1860,6 +1860,23 @@ paths:
       summary: 上传用户头像 ccf
       tags:
       - 用户
+  /user/history:
+    get:
+      description: 获取用户浏览历史
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"status": 200, "msg": "获取成功", "data": {object}}'
+          schema:
+            type: string
+      summary: txc
+      tags:
+      - 用户
   /user/info:
     get:
       consumes:

@@ -2,11 +2,14 @@ package v2
 
 import (
 	v1 "IShare/api/v1"
+	"IShare/global"
 	"IShare/model/database"
 	"IShare/service"
 	"IShare/utils"
+	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -212,6 +215,23 @@ func GetObject2(c *gin.Context) {
 				if flag == false {
 					concept["islike"] = false
 				}
+			}
+		}
+		if idx == "works" {
+			bh := database.BrowseHistory{
+				UserID:          userid,
+				WorkID:          id,
+				Title:           res["title"].(string),
+				PublicationYear: strconv.Itoa(int(res["publication_year"].(float64))),
+				BrowseTime:      time.Now(),
+			}
+			if res["host_venue"] != nil {
+				host_venue := res["host_venue"].(map[string]interface{})
+				bh.HostVenue = host_venue["display_name"].(string)
+			}
+			err := global.DB.Create(&bh).Error
+			if err != nil {
+				log.Println(err, "create browse history err")
 			}
 		}
 	}

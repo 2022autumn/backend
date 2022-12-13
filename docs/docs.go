@@ -2183,6 +2183,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/history": {
+            "get": {
+                "description": "获取用户浏览历史",
+                "tags": [
+                    "用户"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": 200, \"msg\": \"获取成功\", \"data\": {object}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/user/info": {
             "get": {
                 "description": "查看用户个人信息",
