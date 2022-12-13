@@ -30,3 +30,8 @@ type AvatarQ struct {
 }
 
 //binding:"required就是gin自带的数据验证，表示数据不为空，为空则返回错误;
+
+type GetBrowseHistoryQ struct {
+	Page int `json:"page"`
+	Size int `json:"size"`
+}

@@ -2197,6 +2197,15 @@ const docTemplate = `{
                         "name": "token",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.GetBrowseHistoryQ"
+                        }
                     }
                 ],
                 "responses": {
@@ -2551,6 +2560,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.GetBrowseHistoryQ": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
                     "type": "integer"
                 }
             }

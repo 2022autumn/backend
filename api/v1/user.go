@@ -338,12 +338,24 @@ func GetRegisterUserNum(c *gin.Context) {
 // @Summary     txc
 // @Description 获取用户浏览历史
 // @Tags        用户
-// @Param       token header   string true "token"
-// @Success     200   {string} json   "{"status": 200, "msg": "获取成功", "data": {object}}"
+// @Param       token header   string                     true "token"
+// @Param       data  body     response.GetBrowseHistoryQ true "data"
+// @Success     200   {string} json                       "{"status": 200, "msg": "获取成功", "data": {object}}"
 // @Router      /user/history [GET]
 func GetBrowseHistory(c *gin.Context) {
 	user := c.MustGet("user").(database.User)
+	var d response.GetBrowseHistoryQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 400, "msg": "参数错误"})
+		return
+	}
 	var history []database.BrowseHistory
 	global.DB.Where("user_id = ?", user.UserID).Order("browse_time desc").Find(&history)
-	c.JSON(http.StatusOK, gin.H{"status": 200, "msg": "获取成功", "data": history})
+	count := len(history)
+	if count < d.Page*d.Size {
+		history = history[(d.Page-1)*d.Size:]
+	} else {
+		history = history[(d.Page-1)*d.Size : d.Page*d.Size]
+	}
+	c.JSON(http.StatusOK, gin.H{"status": 200, "msg": "获取成功", "data": history, "count": count})
 }

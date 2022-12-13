@@ -139,6 +139,13 @@ definitions:
     - author_id
     - user_id
     type: object
+  response.GetBrowseHistoryQ:
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+    type: object
   response.GetPaperPDFQ:
     properties:
       work_id:
@@ -1869,6 +1876,12 @@ paths:
         name: token
         required: true
         type: string
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.GetBrowseHistoryQ'
       responses:
         "200":
           description: '{"status": 200, "msg": "获取成功", "data": {object}}'
