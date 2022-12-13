@@ -1189,6 +1189,46 @@ paths:
       summary: 学者管理主页--置顶论文 hr
       tags:
       - 学者主页的论文获取、管理
+  /scholar/works/untop:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        学者管理主页--取消置顶论文
+
+        参数说明
+        - author_id 作者的id
+
+        - work_id 论文的id
+      parameters:
+      - description: data 是请求参数,包括author_id ,work_id
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.TopWorkQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg":"取消置顶成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"参数错误"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg":"未找到该论文"}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg":"修改失败"}'
+          schema:
+            type: string
+      summary: 学者管理主页--取消置顶论文 hr
+      tags:
+      - 学者主页的论文获取、管理
   /scholar/works/upload:
     post:
       description: |-

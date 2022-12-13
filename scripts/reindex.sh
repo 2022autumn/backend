@@ -28,9 +28,9 @@ echo "Reindexing $Source to $Destination completed"
 end_time=$(date +%s)
 echo "Total time taken: $((end_time-st_time)) seconds"
 # 修改刷新间隔为1s
-echo "Enabling refresh interval"
-curl -H "Content-Type: Application/json" -uelastic:$password -XPUT localhost:9200/$Destination/_settings -d '{
-    "index": {
-        "refresh_interval": "1s"
-    }
-}'
+# echo "Enabling refresh interval"
+# curl -H "Content-Type: Application/json" -uelastic:$password -XPUT localhost:9200/$Destination/_settings -d '{
+#     "index": {
+#         "refresh_interval": "30s"
+#     }
+# }'

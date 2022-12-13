@@ -184,9 +184,11 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 
 	Vertex_set = make([]map[string]interface{}, 0)
 	Edge_set = make([]map[string]interface{}, 0)
+	// label 只取前5个字符
 	Vertex_set = append(Vertex_set, map[string]interface{}{
 		"id":    author_id,
-		"label": display_name,
+		"label": display_name[:5],
+		"full":  display_name,
 	})
 	for _, work := range works {
 		// work_id := work["id"].(string)
@@ -215,6 +217,7 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 					if Edge["source"] == author_id && Edge["target"] == work_author_id {
 						exist = true
 						Edge["weight"] = Edge["weight"].(int) + 1
+						Edge["width"] = Edge["width"].(int) + 1
 						dispaly_work := make(map[string]interface{})
 						dispaly_work["id"] = work["id"].(string)
 						dispaly_work["title"] = work["title"].(string)
@@ -224,9 +227,10 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 				}
 				if !exist {
 					Edge_set = append(Edge_set, map[string]interface{}{
-						"source": author_id,
-						"target": work_author_id,
+						"from":   author_id,
+						"to":     work_author_id,
 						"weight": 1,
+						"width":  1,
 						"works":  []interface{}{},
 					})
 					dispaly_work := make(map[string]interface{})

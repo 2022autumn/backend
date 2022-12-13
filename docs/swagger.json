@@ -1181,6 +1181,58 @@
                 }
             }
         },
+        "/scholar/works/untop": {
+            "post": {
+                "description": "学者管理主页--取消置顶论文\n\n参数说明\n- author_id 作者的id\n\n- work_id 论文的id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "学者主页的论文获取、管理"
+                ],
+                "summary": "学者管理主页--取消置顶论文 hr",
+                "parameters": [
+                    {
+                        "description": "data 是请求参数,包括author_id ,work_id",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.TopWorkQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"取消置顶成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"参数错误\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"未找到该论文\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"修改失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/scholar/works/upload": {
             "post": {
                 "description": "学者管理主页--上传作品PDF\n\n参数说明\n- author_id 作者的id\n\n- work_id 论文的id\n\n- PDF 上传的PDF文件",

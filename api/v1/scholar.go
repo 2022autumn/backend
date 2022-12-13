@@ -517,7 +517,7 @@ func TopWork(c *gin.Context) {
 // @Failure     400  {string} json                  "{"msg":"参数错误"}"
 // @Failure     401  {string} json                  "{"msg":"未找到该论文"}"
 // @Failure     402  {string} json              "{"msg":"修改失败"}"
-// @Router      /scholar/works/top [POST]
+// @Router      /scholar/works/untop [POST]
 func UnTopWork(c *gin.Context) {
 	var d response.TopWorkQ
 	if err := c.ShouldBind(&d); err != nil {
