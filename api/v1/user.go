@@ -341,7 +341,7 @@ func GetRegisterUserNum(c *gin.Context) {
 // @Param       token header   string                     true "token"
 // @Param       data  body     response.GetBrowseHistoryQ true "data"
 // @Success     200   {string} json                       "{"status": 200, "msg": "获取成功", "data": {object}}"
-// @Router      /user/history [GET]
+// @Router      /user/history [POST]
 func GetBrowseHistory(c *gin.Context) {
 	user := c.MustGet("user").(database.User)
 	var d response.GetBrowseHistoryQ

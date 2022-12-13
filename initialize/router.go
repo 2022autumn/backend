@@ -36,7 +36,7 @@ func SetupRouter(r *gin.Engine) {
 		baseGroup.POST("/user/headshot", v1.UploadHeadshot) //上传用户头像
 		baseGroup.GET("/info/register_num", v1.GetRegisterUserNum)
 		baseGroup.GET("/info/verified_num", v1.GetVerifiedUserNum)
-		baseGroup.GET("/user/history", middleware.AuthRequired(), v1.GetBrowseHistory)
+		baseGroup.POST("/user/history", middleware.AuthRequired(), v1.GetBrowseHistory)
 		baseGroup.Static("/media", "./media")
 	}
 	ApplicationRouter := baseGroup.Group("/application")
