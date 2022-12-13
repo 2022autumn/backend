@@ -33,7 +33,8 @@ func CreateApplication(c *gin.Context) {
 		c.JSON(400, gin.H{"msg": "数据格式错误", "status": 400})
 		return
 	}
-	if _, notFound := service.GetUserByID(d.UserID); notFound {
+	user, notFound := service.GetUserByID(d.UserID)
+	if notFound {
 		c.JSON(401, gin.H{"msg": "没有该用户", "status": 401})
 		return
 	}
@@ -70,6 +71,7 @@ func CreateApplication(c *gin.Context) {
 		VerifyCode:  d.VerifyCode,
 		Content:     d.Content,
 		UserID:      d.UserID,
+		Username:    user.Username,
 		Status:      0,
 		AuthorID:    d.AuthorID,
 	}
