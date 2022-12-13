@@ -301,6 +301,10 @@ func GetPersonalWorks(c *gin.Context) {
 					id := work["id"].(string)
 					if v == utils.RemovePrefix(id) {
 						utils.FilterData(&work, &workfilter)
+						if work["abstract_inverted_index"] != nil {
+							work["abstract"] = utils.TransInvertedIndex2String(work["abstract_inverted_index"].(map[string]interface{}))
+							work["abstract_inverted_index"] = nil
+						}
 						data[i] = work
 						data[i]["Top"] = works[j].Top
 						data[i]["find"] = true
@@ -381,6 +385,10 @@ func GetPersonalWorks(c *gin.Context) {
 					id := work["id"].(string)
 					if v == utils.RemovePrefix(id) {
 						utils.FilterData(&work, &workfilter)
+						if work["abstract_inverted_index"] != nil {
+							work["abstract"] = utils.TransInvertedIndex2String(work["abstract_inverted_index"].(map[string]interface{}))
+							work["abstract_inverted_index"] = nil
+						}
 						data[i] = work
 						data[i]["Top"] = works[j].Top
 						data[i]["find"] = true
