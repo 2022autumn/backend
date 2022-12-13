@@ -34,7 +34,10 @@ func GetWorkCited(work map[string]interface{}) string {
 func TransRefs2Cited(refs []interface{}) []map[string]interface{} {
 	var newRefs = make([]map[string]interface{}, 0)
 	var ids []string
-	for _, v := range refs {
+	for i, v := range refs {
+		if i > 15 {
+			break
+		}
 		ids = append(ids, v.(string))
 	}
 	works, _ := service.GetObjects2("works", ids)
@@ -53,7 +56,10 @@ func TransRefs2Cited(refs []interface{}) []map[string]interface{} {
 func TransRefs2Intro(refs []interface{}) []map[string]interface{} {
 	var newRefs = make([]map[string]interface{}, 0)
 	var ids []string
-	for _, v := range refs {
+	for i, v := range refs {
+		if i > 10 {
+			break
+		}
 		ids = append(ids, v.(string))
 	}
 	works, _ := service.GetObjects2("works", ids)
