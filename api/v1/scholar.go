@@ -131,17 +131,16 @@ func RollWorks(c *gin.Context) {
 				workids = append(workids, utils.RemovePrefix(work["id"].(string)))
 			}
 			rand.Shuffle(len(workids), func(i, j int) { workids[i], workids[j] = workids[j], workids[i] })
-			res, err := service.GetObjects("works", workids)
+			res, err := service.GetObjects2("works", workids)
 			if err == nil {
-				for _, work := range res.Docs {
-					if work.Found {
-						ret = append(ret, map[string]interface{}{
-							"work": work.Source,
-						})
-						if len(ret) == retSize {
-							c.JSON(200, gin.H{"msg": "获取成功", "data": ret})
-							return
-						}
+				works := res["results"].([]interface{})
+				for _, work := range works {
+					ret = append(ret, map[string]interface{}{
+						"work": work,
+					})
+					if len(ret) == retSize {
+						c.JSON(200, gin.H{"msg": "获取成功", "data": ret})
+						return
 					}
 				}
 			}
