@@ -80,6 +80,15 @@ func CreateApplication(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"application": application, "msg": "申请提交成功", "status": 200})
 }
 
+func TestCodeGen(c *gin.Context) {
+	code := ""
+	for i := 0; i < 6; i++ {
+		code += strconv.Itoa(rand.Int() % 10)
+	}
+	fmt.Println(code)
+	c.JSON(http.StatusOK, gin.H{"code": code})
+}
+
 // SendVerifyEmail 获取验证码
 // @Summary     获取申请验证码 Vera
 // @Description 用户点击"获取验证码"按钮，系统向用户提供的邮箱发送6位验证码，用户需要在申请表单中填入验证码才可以成功完成身份验证，否则不应该可以提交申请。验证码时限为10分钟，超时无效
@@ -105,7 +114,11 @@ func SendVerifyEmail(c *gin.Context) {
 		c.JSON(401, gin.H{"msg": "没有该用户", "status": 401})
 		return
 	}
-	code := rand.New(rand.NewSource(time.Now().UnixNano())).Int() % 1000000
+	//code := rand.New(rand.NewSource(time.Now().UnixNano())).Int() % 1000000
+	code := ""
+	for i := 0; i < 6; i++ {
+		code += strconv.Itoa(rand.Int() % 10)
+	}
 	fmt.Println(code)
 	err := service.CreateVerifyCodeRecode(userID, code, email)
 	if err != nil {

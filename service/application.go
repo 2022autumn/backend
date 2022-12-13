@@ -119,14 +119,14 @@ func SendMail(mailTo []string, subject string, body string) error {
 
 }
 
-func SendVerifyCode(email string, code int) (err error) {
+func SendVerifyCode(email string, code string) (err error) {
 	subject := "来自ishare的申请验证码"
 	// 邮件正文
 	mailTo := []string{
 		email,
 	}
 	body := "尊敬的用户您好，欢迎使用ishare学术交流平台，您的申请验证码是:\n"
-	body += strconv.Itoa(code) + "\n"
+	body += code + "\n"
 
 	err = SendMail(mailTo, subject, body)
 	if err != nil {
@@ -139,7 +139,7 @@ func SendVerifyCode(email string, code int) (err error) {
 	return nil
 }
 
-func CreateVerifyCodeRecode(userID uint64, code int, email string) (err error) {
+func CreateVerifyCodeRecode(userID uint64, code string, email string) (err error) {
 	rec := database.VerifyCode{
 		Code:    code,
 		UserID:  userID,
