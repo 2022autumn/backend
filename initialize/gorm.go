@@ -42,6 +42,7 @@ func InitMySQL() {
 		&database.WorkView{},
 		&database.PersonalWorks{},
 		&database.VerifyCode{},
+		&database.PersonalWorksCount{},
 	)
 	// 检查数据库连接是否存在, 好像没啥用
 	err = global.DB.DB().Ping()

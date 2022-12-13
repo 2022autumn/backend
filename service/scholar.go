@@ -4,8 +4,6 @@ import (
 	"IShare/global"
 	"IShare/model/database"
 	"log"
-
-	"github.com/jinzhu/gorm"
 )
 
 func CreateUserConcept(uc *database.UserConcept) (err error) {
@@ -85,11 +83,11 @@ func GetWorkPlace(author_id string, work_id string) (place int, notFound bool) {
 	return work.Place, notFound
 }
 
-// 获取学者的作品总数
-func GetScholarWorksCount(author_id string) (count int, err error) {
-	err = global.DB.Model(&database.PersonalWorks{}).Where("author_id = ?", author_id).Count(&count).Error
-	return count, err
-}
+// // 获取学者的作品总数
+// func GetScholarWorksCount(author_id string) (count int, err error) {
+// 	err = global.DB.Model(&database.PersonalWorks{}).Where("author_id = ?", author_id).Count(&count).Error
+// 	return count, err
+// }
 
 // 加锁，交换两个作品的place
 func SwapWorkPlace(author_id string, work_id1 string, work_id2 string) (err error) {
@@ -131,35 +129,64 @@ func GetWorkByPlace(author_id string, place int) (work database.PersonalWorks, n
 
 // 置顶作品
 func TopWork(author_id string, work_id string) (err error) {
-	tx := global.DB.Begin()
-	var work database.PersonalWorks
-	err = tx.Where("author_id = ? AND work_id = ?", author_id, work_id).First(&work).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
+	// tx := global.DB.Begin()
+	// var work database.PersonalWorks
+	// err = tx.Where("author_id = ? AND work_id = ?", author_id, work_id).First(&work).Error
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
+	// err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND place < ?", author_id, work.Place).Update("place", gorm.Expr("place + 1")).Error
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
 	// err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id).Update("place", 0).Error
 	// if err != nil {
 	// 	tx.Rollback()
 	// 	return err
 	// }
-	err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND place < ?", author_id, work.Place).Update("place", gorm.Expr("place + 1")).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	err = tx.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id).Update("place", 0).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Commit()
-	return nil
+	// tx.Commit()
+	return UpdateWorkTop(author_id, work_id, 1)
+}
+
+// 取消置顶
+func UnTopWork(author_id string, work_id string) (err error) {
+	return UpdateWorkTop(author_id, work_id, -1)
+}
+
+// 修改作品的top属性
+func UpdateWorkTop(author_id string, work_id string, top int) (err error) {
+	err = global.DB.Model(&database.PersonalWorks{}).Where("author_id = ? AND work_id = ?", author_id, work_id).Update("top", top).Error
+	return err
 }
 
 func GetAuthor(author_id string) (author database.Author, notFound bool) {
 	notFound = global.DB.Where("author_id = ?", author_id).First(&author).RecordNotFound()
 	return author, notFound
+}
+
+// 插入作者
+func UpdateScholarWorksCount(author_id string, count int) (err error) {
+	var tmp database.PersonalWorksCount
+	notFound := global.DB.Where("author_id = ?", author_id).First(&tmp).RecordNotFound()
+	if notFound {
+		tmp.AuthorID = author_id
+		tmp.Count = count
+		err = global.DB.Create(&tmp).Error
+	} else {
+		err = global.DB.Model(&database.PersonalWorksCount{}).Where("author_id = ?", author_id).Update("count", count).Error
+	}
+	return err
+}
+
+func GetScholarWorksCount(author_id string) (count int, err error) {
+	var tmp database.PersonalWorksCount
+	notFound := global.DB.Where("author_id = ?", author_id).First(&tmp).RecordNotFound()
+	if notFound {
+		return 0, nil
+	}
+	return tmp.Count, nil
 }
 
 // 批量创建作者的作品, 加锁
@@ -174,12 +201,11 @@ func CreateWorks(works []database.PersonalWorks) (err error) {
 		}
 		err = tx.Create(&work).Error
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 	tx.Commit()
-	return err
+	return nil
 }
 
 // 修改作品ignore属性 加锁

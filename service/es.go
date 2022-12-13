@@ -40,15 +40,9 @@ func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 	return global.ES.Get().Index(index).Id(id).Do(context.Background())
 }
 func GetObject2(index string, id string) (data map[string]interface{}, err error) {
-	if index == "works" {
-		index = "works_v1"
-	}
 	res, err := global.ES.Get().Index(index).Id(id).Do(context.Background())
 	if err != nil {
 		//https://api.openalex.org/works/W2741809807
-		if index == "works_v1" {
-			index = "works"
-		}
 		data, err := utils.GetByUrl("https://api.openalex.org/" + index + "/" + id)
 		return data, err
 	}
@@ -82,9 +76,6 @@ func GetObjects2(index string, ids []string) (res map[string]interface{}, err er
 		      "W2148347826",
 		      "W2796700885"
 	*/
-	if index == "works_v1" {
-		index = "works"
-	}
 	url := "https://api.openalex.org/" + index + "?filter=openalex_id:"
 	for i, id := range ids {
 		if i != 0 {
@@ -193,9 +184,11 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 
 	Vertex_set = make([]map[string]interface{}, 0)
 	Edge_set = make([]map[string]interface{}, 0)
+	// label 只取前5个字符
 	Vertex_set = append(Vertex_set, map[string]interface{}{
 		"id":    author_id,
-		"label": display_name,
+		"label": display_name[:5],
+		"full":  display_name,
 	})
 	for _, work := range works {
 		// work_id := work["id"].(string)
@@ -205,25 +198,31 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 			work_authorship_map := work_authorship.(map[string]interface{})
 			work_author_id := work_authorship_map["author"].(map[string]interface{})["id"].(string)
 			exist := false
+			// log.Println("work_author_id: ", work_author_id)
 			for _, Vertex := range Vertex_set {
+				// 判断是否已经存在, 如果存在则不添加 通过id string判断
 				if Vertex["id"] == work_author_id {
+					log.Println("exist: ", Vertex["id"])
 					exist = true
 					break
 				}
 			}
 			if !exist {
+				// log.Println("not exist: ", work_author_id)
 				work_author_display_name := work_authorship_map["author"].(map[string]interface{})["display_name"].(string)
 				Vertex_set = append(Vertex_set, map[string]interface{}{
 					"id":    work_author_id,
-					"label": work_author_display_name,
+					"label": work_author_display_name[:5],
+					"full":  work_author_display_name,
 				})
 			}
 			if work_author_id != author_id {
 				exist := false
 				for _, Edge := range Edge_set {
-					if Edge["source"] == author_id && Edge["target"] == work_author_id {
+					if Edge["from"] == author_id && Edge["to"] == work_author_id {
 						exist = true
 						Edge["weight"] = Edge["weight"].(int) + 1
+						Edge["width"] = Edge["width"].(int) + 1
 						dispaly_work := make(map[string]interface{})
 						dispaly_work["id"] = work["id"].(string)
 						dispaly_work["title"] = work["title"].(string)
@@ -233,9 +232,10 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 				}
 				if !exist {
 					Edge_set = append(Edge_set, map[string]interface{}{
-						"source": author_id,
-						"target": work_author_id,
+						"from":   author_id,
+						"to":     work_author_id,
 						"weight": 1,
+						"width":  1,
 						"works":  []interface{}{},
 					})
 					dispaly_work := make(map[string]interface{})
@@ -246,6 +246,8 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 			}
 		}
 	}
+	log.Println("Vertex_set: ", Vertex_set)
+	log.Println("Edge_set: ", Edge_set)
 	TopVertex_set := make([]map[string]interface{}, 0)
 	TopEdge_set := make([]map[string]interface{}, 0)
 	GetTopN(&Vertex_set, &Edge_set, &TopVertex_set, &TopEdge_set, 10)
@@ -262,7 +264,7 @@ func GetTopN(Vertex_set *[]map[string]interface{}, Edge_set *[]map[string]interf
 		*TopEdge_set = append(*TopEdge_set, (*Edge_set)[i])
 	}
 	for _, Edge := range *TopEdge_set {
-		source := Edge["source"].(string)
+		source := Edge["from"].(string)
 		for _, Vertex := range *Vertex_set {
 			if Vertex["id"] == source {
 				*TopVertex_set = append(*TopVertex_set, Vertex)
@@ -273,7 +275,7 @@ func GetTopN(Vertex_set *[]map[string]interface{}, Edge_set *[]map[string]interf
 exit:
 	// 2. 获取Top N Edge target 对应的Vertex
 	for _, Edge := range *TopEdge_set {
-		target := Edge["target"].(string)
+		target := Edge["to"].(string)
 		for _, Vertex := range *Vertex_set {
 			if Vertex["id"] == target {
 				*TopVertex_set = append(*TopVertex_set, Vertex)

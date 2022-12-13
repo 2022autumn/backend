@@ -67,4 +67,10 @@ type PersonalWorks struct {
 	Place    int    `gorm:"not null;" json:"place"`
 	Ignore   bool   `gorm:"not null;default:false" json:"ignore"`
 	PDF      string `gorm:"default:''" json:"pdf"`
+	Top      int    `gorm:"not null;default:-1" json:"top"`
+}
+
+type PersonalWorksCount struct {
+	AuthorID string `gorm:"primary_key;not null;" json:"author_id"`
+	Count    int    `gorm:"not null;default:0" json:"count"`
 }
