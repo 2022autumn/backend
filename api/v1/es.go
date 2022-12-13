@@ -635,6 +635,7 @@ func AuthorSearch2(c *gin.Context) {
 		author := v.(map[string]interface{})
 		id := author["id"].(string)
 		id = utils.RemovePrefix(id)
+		author["id"] = id
 		au, notFound := service.GetAuthor(id)
 		if notFound {
 			author["headshot"] = "author_default.jpg"
