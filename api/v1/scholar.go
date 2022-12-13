@@ -84,7 +84,7 @@ func AddUserConcept(c *gin.Context) {
 // @Summary     获取用户关注的关键词 txc
 // @Description 获取用户关注的关键词
 // @Tags        scholar
-// @Param       token header   string true "token"
+// @Param       token     header   string true "token"
 // @Success     200   {string} json   "{"msg":"获取成功","data":{}}"
 // @Failure     401   {string} json   "{"msg":"数据库获取失败"}"
 // @Router      /scholar/concept [GET]
@@ -301,10 +301,14 @@ func GetPersonalWorks(c *gin.Context) {
 					id := work["id"].(string)
 					if v == utils.RemovePrefix(id) {
 						utils.FilterData(&work, &workfilter)
+						if work["abstract_inverted_index"] != nil {
+							work["abstract"] = utils.TransInvertedIndex2String(work["abstract_inverted_index"].(map[string]interface{}))
+							work["abstract_inverted_index"] = nil
+						}
 						data[i] = work
-						data[i]["Top"] = works[j].Top
+						data[i]["Top"] = works[i].Top
 						data[i]["find"] = true
-						data[i]["pdf"] = works[j].PDF
+						data[i]["pdf"] = works[i].PDF
 						if works[j].PDF != "" {
 							data[i]["isupdatepdf"] = 1
 						} else {
@@ -381,10 +385,14 @@ func GetPersonalWorks(c *gin.Context) {
 					id := work["id"].(string)
 					if v == utils.RemovePrefix(id) {
 						utils.FilterData(&work, &workfilter)
+						if work["abstract_inverted_index"] != nil {
+							work["abstract"] = utils.TransInvertedIndex2String(work["abstract_inverted_index"].(map[string]interface{}))
+							work["abstract_inverted_index"] = nil
+						}
 						data[i] = work
-						data[i]["Top"] = works[j].Top
+						data[i]["Top"] = works[i].Top
 						data[i]["find"] = true
-						data[i]["pdf"] = works[j].PDF
+						data[i]["pdf"] = works[i].PDF
 						if works[j].PDF != "" {
 							data[i]["isupdatepdf"] = 1
 						} else {
@@ -585,8 +593,13 @@ func UnTopWork(c *gin.Context) {
 // @Summary     上传作者头像 txc
 // @Description 上传作者头像
 // @Tags        scholar
+// @Param       token header   string                      true "token"
 // @Param       author_id formData string true "学者ID"
 // @Param       Headshot  formData file   true "新头像"
+// @Success     200       {string} json   "{"msg":"上传成功","data": author}"
+// @Failure     400       {string} json   "{"msg":"学者未被认领"}"
+// @Failure     401       {string} json   "{"msg":"无权限"}"
+// @Failure     402       {string} json   "{"msg":"头像文件获取失败"}"
 // @Router      /scholar/author/headshot [POST]
 func UploadAuthorHeadshot(c *gin.Context) {
 	authorID := c.Request.FormValue("author_id")
@@ -595,9 +608,14 @@ func UploadAuthorHeadshot(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "学者未被认领"})
 		return
 	}
+	user := c.MustGet("user").(database.User)
+	if user.AuthorID != authorID {
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "无权限"})
+		return
+	}
 	file, err := c.FormFile("Headshot")
 	if err != nil {
-		c.JSON(401, gin.H{"msg": "头像文件获取失败"})
+		c.JSON(402, gin.H{"msg": "头像文件获取失败"})
 		return
 	}
 	raw := fmt.Sprintf("%d", authorID) + time.Now().String() + file.Filename
@@ -625,10 +643,12 @@ func UploadAuthorHeadshot(c *gin.Context) {
 // @Tags        scholar
 // @Accept      json
 // @Produce     json
-// @Param       data body     response.ModifyAuthorIntroQ true "data"
-// @Success     200  {string} json                        "{"msg":"修改成功"}"
-// @Failure     400  {string} json                        "{"msg":"参数错误"}"
-// @Failure     401  {string} json                        "{"msg":"学者未被认领"}"
+// @Param       token header   string true "token"
+// @Param       data  body     response.ModifyAuthorIntroQ true "data"
+// @Success     200   {string} json                        "{"msg":"修改成功"}"
+// @Failure     400   {string} json                        "{"msg":"参数错误"}"
+// @Failure     401   {string} json                        "{"msg":"无权限"}"
+// @Failure     404   {string} json                        "{"msg":"学者未被认领"}"
 // @Router      /scholar/author/intro [POST]
 func ModifyAuthorIntro(c *gin.Context) {
 	var d response.ModifyAuthorIntroQ
@@ -638,7 +658,12 @@ func ModifyAuthorIntro(c *gin.Context) {
 	}
 	author, notFound := service.GetAuthor(d.AuthorID)
 	if notFound {
-		c.JSON(401, gin.H{"msg": "学者未被认领"})
+		c.JSON(404, gin.H{"msg": "学者未被认领"})
+		return
+	}
+	user := c.MustGet("user").(database.User)
+	if user.AuthorID != d.AuthorID {
+		c.JSON(401, gin.H{"msg": "无权限"})
 		return
 	}
 	author.Intro = d.Intro
