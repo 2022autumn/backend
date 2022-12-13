@@ -1324,6 +1324,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/scholar/works/unupload": {
+            "post": {
+                "description": "学者管理主页--取消上传作品PDF\n\n参数说明\n- author_id 作者的id\n\n- work_id 论文的id",
+                "tags": [
+                    "学者主页的论文获取、管理"
+                ],
+                "summary": "学者管理主页--取消上传作品PDF txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "学者ID",
+                        "name": "author_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "论文ID",
+                        "name": "work_id",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"取消上传成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"论文不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"msg\":\"保存文件路径到数据库中失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/scholar/works/upload": {
             "post": {
                 "description": "学者管理主页--上传作品PDF\n\n参数说明\n- author_id 作者的id\n\n- work_id 论文的id\n\n- PDF 上传的PDF文件",

@@ -35,7 +35,7 @@ func SetupRouter(r *gin.Engine) {
 		baseGroup.POST("/user/pwd", v1.ModifyPassword)      //重置用户密码
 		baseGroup.POST("/user/headshot", v1.UploadHeadshot) //上传用户头像
 		baseGroup.GET("/info/register_num", v1.GetRegisterUserNum)
-		baseGroup.GET("info/verified_num", v1.GetVerifiedUserNum)
+		baseGroup.GET("/info/verified_num", v1.GetVerifiedUserNum)
 		baseGroup.Static("/media", "./media")
 	}
 	ApplicationRouter := baseGroup.Group("/application")
@@ -96,6 +96,7 @@ func SetupRouter(r *gin.Engine) {
 		personalWorksGroup.POST("/top", v1.TopWork)
 		personalWorksGroup.POST("/untop", v1.UnTopWork)
 		personalWorksGroup.POST("/upload", v1.UploadPaperPDF)
+		personalWorksGroup.POST("/unupload", v1.UnUploadPaperPDF)
 		personalWorksGroup.POST("/getpdf", v1.GetPaperPDF)
 	}
 }

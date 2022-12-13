@@ -1281,6 +1281,42 @@ paths:
       summary: 学者管理主页--取消置顶论文 hr
       tags:
       - 学者主页的论文获取、管理
+  /scholar/works/unupload:
+    post:
+      description: |-
+        学者管理主页--取消上传作品PDF
+
+        参数说明
+        - author_id 作者的id
+
+        - work_id 论文的id
+      parameters:
+      - description: 学者ID
+        in: formData
+        name: author_id
+        required: true
+        type: string
+      - description: 论文ID
+        in: formData
+        name: work_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"msg":"取消上传成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"论文不存在"}'
+          schema:
+            type: string
+        "403":
+          description: '{"msg":"保存文件路径到数据库中失败"}'
+          schema:
+            type: string
+      summary: 学者管理主页--取消上传作品PDF txc
+      tags:
+      - 学者主页的论文获取、管理
   /scholar/works/upload:
     post:
       description: |-

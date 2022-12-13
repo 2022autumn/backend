@@ -84,7 +84,7 @@ func AddUserConcept(c *gin.Context) {
 // @Summary     获取用户关注的关键词 txc
 // @Description 获取用户关注的关键词
 // @Tags        scholar
-// @Param       token     header   string true "token"
+// @Param       token header   string                      true "token"
 // @Success     200   {string} json   "{"msg":"获取成功","data":{}}"
 // @Failure     401   {string} json   "{"msg":"数据库获取失败"}"
 // @Router      /scholar/concept [GET]
@@ -593,7 +593,7 @@ func UnTopWork(c *gin.Context) {
 // @Summary     上传作者头像 txc
 // @Description 上传作者头像
 // @Tags        scholar
-// @Param       token header   string                      true "token"
+// @Param       token     header   string true "token"
 // @Param       author_id formData string true "学者ID"
 // @Param       Headshot  formData file   true "新头像"
 // @Success     200       {string} json   "{"msg":"上传成功","data": author}"
@@ -722,6 +722,37 @@ func UploadPaperPDF(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "上传成功", "data": saveName})
+}
+
+// UnUploadPaperPDF
+// @Summary     学者管理主页--取消上传作品PDF txc
+// @Description 学者管理主页--取消上传作品PDF
+// @Description
+// @Description 参数说明
+// @Description - author_id 作者的id
+// @Description
+// @Description - work_id 论文的id
+// @Tags        学者主页的论文获取、管理
+// @Param       author_id formData string true "学者ID"
+// @Param       work_id   formData string true "论文ID"
+// @Success     200       {string} json   "{"msg":"取消上传成功"}"
+// @Failure     400       {string} json   "{"msg":"论文不存在"}"
+// @Failure     403       {string} json   "{"msg":"保存文件路径到数据库中失败"}"
+// @Router      /scholar/works/unupload [POST]
+func UnUploadPaperPDF(c *gin.Context) {
+	authorID := c.Request.FormValue("author_id")
+	workID := c.Request.FormValue("work_id")
+	_, notFound := service.GetPersonalWork(authorID, workID)
+	if notFound {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "论文不存在"})
+		return
+	}
+	err := service.UpdateWorkPdf(authorID, workID, "")
+	if err != nil {
+		c.JSON(403, gin.H{"msg": "保存文件路径到数据库中失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "取消上传成功"})
 }
 
 // 获取论文PDF地址
