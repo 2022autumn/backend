@@ -171,8 +171,32 @@ func InitWorksfilter() map[string]interface{} {
 	authorship["institutions"] = append(authorship["institutions"].([]map[string]interface{}), institution)
 	// 向worksfilter.authorships中添加元素map
 	worksfilter["authorships"] = append(worksfilter["authorships"].([]map[string]interface{}), authorship)
-
+	concepts := make(map[string]interface{})
+	concepts["id"] = true                                       // concepts.id 需要修改 "https://openalex.org/C1969205032" -> "C1969205032"
+	worksfilter["concepts"] = make([]map[string]interface{}, 0) // concepts 需要修改
+	worksfilter["concepts"] = append(worksfilter["concepts"].([]map[string]interface{}), concepts)
 	return worksfilter
+}
+func InitAuthorsfilter() map[string]interface{} {
+	authorsfilter := make(map[string]interface{})
+	authorsfilter["id"] = true
+	authorsfilter["orcid"] = false
+	authorsfilter["display_name_alternatives"] = false
+	authorsfilter["ids"] = make(map[string]interface{})
+	authorsfilter["ids"].(map[string]interface{})["openalex"] = false
+	authorsfilter["ids"].(map[string]interface{})["mag"] = false
+	authorsfilter["last_known_institution"] = make(map[string]interface{})
+	authorsfilter["last_known_institution"].(map[string]interface{})["id"] = true
+	authorsfilter["last_known_institution"].(map[string]interface{})["ror"] = false
+	authorsfilter["last_known_institution"].(map[string]interface{})["country_code"] = false
+	authorsfilter["last_known_institution"].(map[string]interface{})["type"] = false
+	authorsfilter["x_concepts"] = make([]map[string]interface{}, 0)
+	x_concept := make(map[string]interface{})
+	x_concept["id"] = true
+	authorsfilter["x_concepts"] = append(authorsfilter["x_concepts"].([]map[string]interface{}), x_concept)
+	authorsfilter["updated_date"] = false
+	authorsfilter["created_date"] = false
+	return authorsfilter
 }
 
 // 保证filter中的key在data中存在

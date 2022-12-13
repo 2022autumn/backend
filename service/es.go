@@ -39,16 +39,16 @@ func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 	//return global.ES.Search().Index(index).Query(termQuery).Do(context.Background())
 	return global.ES.Get().Index(index).Id(id).Do(context.Background())
 }
-func GetObject2(index string, id string) (data map[string]interface{}, err error) {
+func GetObject2(index string, id string) (data map[string]interface{}, err error, source int) {
 	res, err := global.ES.Get().Index(index).Id(id).Do(context.Background())
 	if err != nil {
 		//https://api.openalex.org/works/W2741809807
 		data, err := utils.GetByUrl("https://api.openalex.org/" + index + "/" + id)
-		return data, err
+		return data, err, 1
 	}
 	var data2 map[string]interface{}
 	err = json.Unmarshal(res.Source, &data2)
-	return data2, err
+	return data2, err, 0
 }
 
 // mget对象 不保证顺序
@@ -158,7 +158,7 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 	// 1. 判断author_id类型
 	ty, err := utils.TransObjPrefix(author_id)
 	if err != nil {
-		log.Println(err)
+		log.Println("TransObjPrefix", err)
 		return nil, nil, err
 	}
 	if ty != "authors" {
@@ -202,7 +202,7 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 			for _, Vertex := range Vertex_set {
 				// 判断是否已经存在, 如果存在则不添加 通过id string判断
 				if Vertex["id"] == work_author_id {
-					log.Println("exist: ", Vertex["id"])
+					// log.Println("exist: ", Vertex["id"])
 					exist = true
 					break
 				}
@@ -246,8 +246,8 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 			}
 		}
 	}
-	log.Println("Vertex_set: ", Vertex_set)
-	log.Println("Edge_set: ", Edge_set)
+	// log.Println("Vertex_set: ", Vertex_set)
+	// log.Println("Edge_set: ", Edge_set)
 	TopVertex_set := make([]map[string]interface{}, 0)
 	TopEdge_set := make([]map[string]interface{}, 0)
 	GetTopN(&Vertex_set, &Edge_set, &TopVertex_set, &TopEdge_set, 10)

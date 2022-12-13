@@ -103,39 +103,20 @@ func GetObject2(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "id type error"})
 		return
 	}
-	res, err := service.GetObject2(idx, id)
+	res, err, source := service.GetObject2(idx, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"msg": "es & openalex not found"})
 		return
 	}
-	if userid != "" {
-		userid, _ := strconv.ParseUint(userid, 0, 64)
-		ucs, err := service.GetUserConcepts(userid)
-		if err != nil {
-			c.JSON(405, gin.H{"msg": "get user concepts err"})
-			return
-		}
-		if res["concepts"] != nil {
-			concepts := res["concepts"].([]interface{})
-			for _, c := range concepts {
-				concept := c.(map[string]interface{})
-				conceptid := concept["id"].(string)
-				var flag = false
-				for i, uc := range ucs {
-					if conceptid == uc.ConceptID {
-						concept["islike"] = true
-						flag = true
-						ucs = append(ucs[:i], ucs[i+1:]...)
-						break
-					}
-				}
-				if flag == false {
-					concept["islike"] = false
-				}
+	if idx == "works" {
+		if source == 1 {
+			filter := utils.InitWorksfilter()
+			utils.FilterData(&res, &filter)
+			if res["abstract_inverted_index"] != nil {
+				res["abstract"] = utils.TransInvertedIndex2String(res["abstract_inverted_index"].(map[string]interface{}))
+				res["abstract_inverted_index"] = nil
 			}
 		}
-	}
-	if idx == "works" {
 		referenced_works := res["referenced_works"].([]interface{})
 		res["referenced_works"] = TransRefs2Cited(referenced_works)
 		related_works := res["related_works"].([]interface{})
@@ -165,6 +146,10 @@ func GetObject2(c *gin.Context) {
 		}
 	}
 	if idx == "authors" {
+		if source == 1 {
+			filter := utils.InitAuthorsfilter()
+			utils.FilterData(&res, &filter)
+		}
 		var info = make(map[string]interface{})
 		if userid != "" {
 			userid, _ := strconv.ParseUint(userid, 0, 64)
@@ -196,6 +181,33 @@ func GetObject2(c *gin.Context) {
 			"status": 200,
 		})
 		return
+	}
+	if userid != "" {
+		userid, _ := strconv.ParseUint(userid, 0, 64)
+		ucs, err := service.GetUserConcepts(userid)
+		if err != nil {
+			c.JSON(405, gin.H{"msg": "get user concepts err"})
+			return
+		}
+		if res["concepts"] != nil {
+			concepts := res["concepts"].([]interface{})
+			for _, c := range concepts {
+				concept := c.(map[string]interface{})
+				conceptid := concept["id"].(string)
+				var flag = false
+				for i, uc := range ucs {
+					if conceptid == uc.ConceptID {
+						concept["islike"] = true
+						flag = true
+						ucs = append(ucs[:i], ucs[i+1:]...)
+						break
+					}
+				}
+				if flag == false {
+					concept["islike"] = false
+				}
+			}
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"data":   res,

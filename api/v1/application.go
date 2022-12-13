@@ -92,7 +92,7 @@ func CreateApplication(c *gin.Context) {
 // @Failure     401 {string} json "{"msg": "没有该用户", "status": 401}"
 // @Failure     402 {string} json "{"msg": "验证码存储失败","status": 402}"
 // @Failure     403 {string} json "{"msg": "发送邮件失败","status": 403}"
-// @Router 		/application/code [POST]
+// @Router      /application/code [POST]
 func SendVerifyEmail(c *gin.Context) {
 	var d response.GetVerifyCodeQ
 	if err := c.ShouldBind(&d); err != nil {
