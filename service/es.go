@@ -198,23 +198,28 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 			work_authorship_map := work_authorship.(map[string]interface{})
 			work_author_id := work_authorship_map["author"].(map[string]interface{})["id"].(string)
 			exist := false
+			// log.Println("work_author_id: ", work_author_id)
 			for _, Vertex := range Vertex_set {
+				// 判断是否已经存在, 如果存在则不添加 通过id string判断
 				if Vertex["id"] == work_author_id {
+					log.Println("exist: ", Vertex["id"])
 					exist = true
 					break
 				}
 			}
 			if !exist {
+				// log.Println("not exist: ", work_author_id)
 				work_author_display_name := work_authorship_map["author"].(map[string]interface{})["display_name"].(string)
 				Vertex_set = append(Vertex_set, map[string]interface{}{
 					"id":    work_author_id,
-					"label": work_author_display_name,
+					"label": work_author_display_name[:5],
+					"full":  work_author_display_name,
 				})
 			}
 			if work_author_id != author_id {
 				exist := false
 				for _, Edge := range Edge_set {
-					if Edge["source"] == author_id && Edge["target"] == work_author_id {
+					if Edge["from"] == author_id && Edge["to"] == work_author_id {
 						exist = true
 						Edge["weight"] = Edge["weight"].(int) + 1
 						Edge["width"] = Edge["width"].(int) + 1
@@ -241,6 +246,8 @@ func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interfa
 			}
 		}
 	}
+	log.Println("Vertex_set: ", Vertex_set)
+	log.Println("Edge_set: ", Edge_set)
 	TopVertex_set := make([]map[string]interface{}, 0)
 	TopEdge_set := make([]map[string]interface{}, 0)
 	GetTopN(&Vertex_set, &Edge_set, &TopVertex_set, &TopEdge_set, 10)
