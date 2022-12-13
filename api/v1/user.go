@@ -322,3 +322,14 @@ func UploadHeadshot(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": user})
 }
+
+// GetRegisterUserNum 获取网站所有注册用户数量
+// @Summary 获取网站所有注册用户数量 Vera
+// @Description 统计网站信息，该接口不需要前端参数
+// @Tags        网站信息
+// @Success     200      {string} json   "{"status": 200, "register_num": int}"
+// @Router      /info/register_num [GET]
+func GetRegisterUserNum(c *gin.Context) {
+	num := service.GetAllUser()
+	c.JSON(http.StatusOK, gin.H{"status": 200, "register_num": num})
+}

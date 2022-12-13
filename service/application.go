@@ -163,3 +163,9 @@ func CheckVerifyCode(userID uint64, code int, email string) (rec database.Verify
 		return rec, false
 	}
 }
+
+func GetVerifiedUser() (num int) {
+	verified := make([]database.User, 0)
+	global.DB.Where("verified = ?", 1).Find(&verified)
+	return len(verified)
+}

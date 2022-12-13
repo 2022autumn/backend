@@ -62,3 +62,8 @@ func UpdateAUser(user *database.User, username string, password string, userInfo
 	err := global.DB.Save(user).Error
 	return err
 }
+func GetAllUser() (num int) {
+	users := make([]database.User, 0)
+	global.DB.Where("").Find(&users)
+	return len(users)
+}

@@ -223,3 +223,14 @@ func UncheckedApplicationList(c *gin.Context) {
 	//c.JSON(http.StatusOK, gin.H{"success": true, "message": "获取成功", "status": 200, "submits": submits_arr, "submit_count": len(submits)})
 	//return
 }
+
+// GetVerifiedUserNum 获取网站认证学者数
+// @Summary   	获取网站认证学者数   Vera
+// @Description 获取网站认证学者数
+// @Tags		网站信息
+// @Success     200 {string} json "{"status": 200, "verified_num": num}"
+// @Router		/info/verified_num [GET]
+func GetVerifiedUserNum(c *gin.Context) {
+	num := service.GetVerifiedUser()
+	c.JSON(http.StatusOK, gin.H{"status": 200, "verified_num": num})
+}

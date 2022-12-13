@@ -608,6 +608,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/info/register_num": {
+            "get": {
+                "description": "统计网站信息，该接口不需要前端参数",
+                "tags": [
+                    "网站信息"
+                ],
+                "summary": "获取网站所有注册用户数量 Vera",
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": 200, \"register_num\": int}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/info/verified_num": {
+            "get": {
+                "description": "获取网站认证学者数",
+                "tags": [
+                    "网站信息"
+                ],
+                "summary": "获取网站认证学者数   Vera",
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": 200, \"verified_num\": num}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "登录\n填入用户名和密码",
