@@ -189,8 +189,14 @@ func GetObject2(c *gin.Context) {
 			c.JSON(405, gin.H{"msg": "get user concepts err"})
 			return
 		}
-		if res["concepts"] != nil {
-			concepts := res["concepts"].([]interface{})
+		var concepts []interface{}
+		if res["concepts"] != nil || res["x_concepts"] != nil {
+			if res["concepts"] != nil {
+				concepts = res["concepts"].([]interface{})
+			}
+			if res["x_concepts"] != nil {
+				concepts = res["x_concepts"].([]interface{})
+			}
 			for _, c := range concepts {
 				concept := c.(map[string]interface{})
 				conceptid := concept["id"].(string)
