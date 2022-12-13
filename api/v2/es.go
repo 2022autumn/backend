@@ -129,6 +129,19 @@ func GetObject2(c *gin.Context) {
 			"apa": v1.GenAPACited(res),
 			"gb":  v1.GenGBCited(res),
 		}
+		authorworks, _ := service.GetWorksByWorkID(id) //添加pdf链接
+		res["pdflinks"] = make([]string, 0)
+		if res["open_access"] != nil {
+			open_access := res["open_access"].(map[string]interface{})
+			if open_access["oa_url"] != nil {
+				res["pdflinks"] = append(res["pdflinks"].([]string), open_access["oa_url"].(string))
+			}
+		}
+		for _, v := range authorworks {
+			if v.PDF != "" {
+				res["pdflinks"] = append(res["pdflinks"].([]string), v.PDF)
+			}
+		}
 		wv, notFound := service.GetWorkView(id)
 		if notFound {
 			wv = database.WorkView{
@@ -163,6 +176,9 @@ func GetObject2(c *gin.Context) {
 			info["is_mine"] = user.AuthorID == id
 			_, notFound = service.GetUserFollow(userid, id)
 			info["isfollow"] = notFound == false
+		} else {
+			info["is_mine"] = false
+			info["isfollow"] = false
 		}
 		author, notFound := service.GetAuthor(id)
 		if notFound {

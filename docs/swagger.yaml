@@ -1868,7 +1868,7 @@ paths:
       tags:
       - 用户
   /user/history:
-    get:
+    post:
       description: 获取用户浏览历史
       parameters:
       - description: token

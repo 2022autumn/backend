@@ -2184,7 +2184,7 @@ const docTemplate = `{
             }
         },
         "/user/history": {
-            "get": {
+            "post": {
                 "description": "获取用户浏览历史",
                 "tags": [
                     "用户"
