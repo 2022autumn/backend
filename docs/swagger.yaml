@@ -841,6 +841,11 @@ paths:
     post:
       description: 上传作者头像
       parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
       - description: 学者ID
         in: formData
         name: author_id
@@ -851,7 +856,23 @@ paths:
         name: Headshot
         required: true
         type: file
-      responses: {}
+      responses:
+        "200":
+          description: '{"msg":"上传成功","data": author}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"学者未被认领"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg":"无权限"}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg":"头像文件获取失败"}'
+          schema:
+            type: string
       summary: 上传作者头像 txc
       tags:
       - scholar
@@ -861,6 +882,11 @@ paths:
       - application/json
       description: 修改作者简介
       parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
       - description: data
         in: body
         name: data
@@ -879,6 +905,10 @@ paths:
           schema:
             type: string
         "401":
+          description: '{"msg":"无权限"}'
+          schema:
+            type: string
+        "404":
           description: '{"msg":"学者未被认领"}'
           schema:
             type: string

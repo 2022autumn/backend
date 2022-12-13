@@ -83,8 +83,8 @@ func SetupRouter(r *gin.Engine) {
 		scholarGroup.GET("/concept", middleware.AuthRequired(), v1.GetUserConcepts)
 		scholarGroup.GET("/roll", v1.RollWorks)
 		scholarGroup.GET("/hot", v1.GetHotWorks)
-		scholarGroup.POST("/author/headshot", v1.UploadAuthorHeadshot)
-		scholarGroup.POST("/author/intro", v1.ModifyAuthorIntro)
+		scholarGroup.POST("/author/headshot", middleware.AuthRequired(), v1.UploadAuthorHeadshot)
+		scholarGroup.POST("/author/intro", middleware.AuthRequired(), v1.ModifyAuthorIntro)
 	}
 	// 学者主页论文
 	personalWorksGroup := scholarGroup.Group("/works")

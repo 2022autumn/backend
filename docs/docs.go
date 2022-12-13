@@ -738,6 +738,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "学者ID",
                         "name": "author_id",
                         "in": "formData",
@@ -751,7 +758,32 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"上传成功\",\"data\": author}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"学者未被认领\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"无权限\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"头像文件获取失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/scholar/author/intro": {
@@ -768,6 +800,13 @@ const docTemplate = `{
                 ],
                 "summary": "txc",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "data",
                         "name": "data",
@@ -792,6 +831,12 @@ const docTemplate = `{
                         }
                     },
                     "401": {
+                        "description": "{\"msg\":\"无权限\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
                         "description": "{\"msg\":\"学者未被认领\"}",
                         "schema": {
                             "type": "string"
