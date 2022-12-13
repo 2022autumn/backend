@@ -91,6 +91,7 @@ func SetupRouter(r *gin.Engine) {
 		personalWorksGroup.POST("/ignore", v1.IgnoreWork)
 		personalWorksGroup.POST("/modify", v1.ModifyPlace)
 		personalWorksGroup.POST("/top", v1.TopWork)
+		personalWorksGroup.POST("/untop", v1.UnTopWork)
 		personalWorksGroup.POST("/upload", v1.UploadPaperPDF)
 		personalWorksGroup.POST("/getpdf", v1.GetPaperPDF)
 	}
