@@ -2,13 +2,15 @@ package v2
 
 import (
 	v1 "IShare/api/v1"
+	"IShare/global"
 	"IShare/model/database"
 	"IShare/service"
 	"IShare/utils"
+	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func GetWorkCited(work map[string]interface{}) string {
@@ -22,7 +24,11 @@ func GetWorkCited(work map[string]interface{}) string {
 			break
 		}
 	}
-	cited += "\"" + work["title"].(string) + "\""
+	if work["title"] != nil {
+		cited += "\"" + work["title"].(string) + "\""
+	} else {
+		cited += "\"\""
+	}
 	if work["host_venue"] != nil {
 		if work["host_venue"].(map[string]interface{})["display_name"] != nil {
 			cited += "," + work["host_venue"].(map[string]interface{})["display_name"].(string)
@@ -72,7 +78,7 @@ func TransRefs2Intro(refs []interface{}) []map[string]interface{} {
 				"title":            work["title"],
 				"publication_year": work["publication_year"],
 			}
-			if work["host_venue"] != nil {
+			if work["host_venue"] != nil && work["host_venue"].(map[string]interface{})["display_name"] != nil {
 				host_venue := work["host_venue"].(map[string]interface{})
 				newRef["host_venue"] = host_venue["display_name"]
 			} else {
@@ -108,10 +114,60 @@ func GetObject2(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"msg": "es & openalex not found"})
 		return
 	}
+	if userid != "" {
+		userid, _ := strconv.ParseUint(userid, 0, 64)
+		ucs, err := service.GetUserConcepts(userid)
+		if err != nil {
+			c.JSON(405, gin.H{"msg": "get user concepts err"})
+			return
+		}
+		var concepts []interface{}
+		if res["concepts"] != nil || res["x_concepts"] != nil {
+			if res["concepts"] != nil {
+				concepts = res["concepts"].([]interface{})
+			}
+			if res["x_concepts"] != nil {
+				concepts = res["x_concepts"].([]interface{})
+			}
+			for _, c := range concepts {
+				concept := c.(map[string]interface{})
+				conceptid := concept["id"].(string)
+				var flag = false
+				for i, uc := range ucs {
+					if conceptid == uc.ConceptID {
+						concept["islike"] = true
+						flag = true
+						ucs = append(ucs[:i], ucs[i+1:]...)
+						break
+					}
+				}
+				if flag == false {
+					concept["islike"] = false
+				}
+			}
+		}
+		if idx == "works" {
+			bh := database.BrowseHistory{
+				UserID:          userid,
+				WorkID:          id,
+				Title:           res["title"].(string),
+				PublicationYear: strconv.Itoa(int(res["publication_year"].(float64))),
+				BrowseTime:      time.Now(),
+			}
+			if res["host_venue"] != nil {
+				host_venue := res["host_venue"].(map[string]interface{})
+				if host_venue["display_name"] != nil {
+					bh.HostVenue = host_venue["display_name"].(string)
+				}
+			}
+			err := global.DB.Create(&bh).Error
+			if err != nil {
+				log.Println(err, "create browse history err")
+			}
+		}
+	}
 	if idx == "works" {
 		if source == 1 {
-			filter := utils.InitWorksfilter()
-			utils.FilterData(&res, &filter)
 			if res["abstract_inverted_index"] != nil {
 				res["abstract"] = utils.TransInvertedIndex2String(res["abstract_inverted_index"].(map[string]interface{}))
 				res["abstract_inverted_index"] = nil
@@ -125,6 +181,24 @@ func GetObject2(c *gin.Context) {
 			"mla": v1.GenMLACited(res),
 			"apa": v1.GenAPACited(res),
 			"gb":  v1.GenGBCited(res),
+		}
+		authorworks, _ := service.GetWorksByWorkID(id) //添加pdf链接
+		res["pdflinks"] = make([]string, 0)
+		if res["open_access"] != nil {
+			open_access := res["open_access"].(map[string]interface{})
+			if open_access["oa_url"] != nil {
+				res["pdflinks"] = append(res["pdflinks"].([]string), open_access["oa_url"].(string))
+			} else if authorworks != nil && len(authorworks) != 0 {
+				open_access["oa_url"] = "http://ishare.horik.cn:8000/api/media/pdf/" + authorworks[0].PDF
+			}
+		} else if authorworks != nil && len(authorworks) != 0 {
+			res["open_access"] = make(map[string]interface{})
+			res["open_access"].(map[string]interface{})["oa_url"] = "http://ishare.horik.cn:8000/api/media/pdf/" + authorworks[0].PDF
+		}
+		for _, v := range authorworks {
+			if v.PDF != "" {
+				res["pdflinks"] = append(res["pdflinks"].([]string), "http://ishare.horik.cn:8000/api/media/pdf/"+v.PDF)
+			}
 		}
 		wv, notFound := service.GetWorkView(id)
 		if notFound {
@@ -146,10 +220,6 @@ func GetObject2(c *gin.Context) {
 		}
 	}
 	if idx == "authors" {
-		if source == 1 {
-			filter := utils.InitAuthorsfilter()
-			utils.FilterData(&res, &filter)
-		}
 		var info = make(map[string]interface{})
 		if userid != "" {
 			userid, _ := strconv.ParseUint(userid, 0, 64)
@@ -160,6 +230,9 @@ func GetObject2(c *gin.Context) {
 			info["is_mine"] = user.AuthorID == id
 			_, notFound = service.GetUserFollow(userid, id)
 			info["isfollow"] = notFound == false
+		} else {
+			info["is_mine"] = false
+			info["isfollow"] = false
 		}
 		author, notFound := service.GetAuthor(id)
 		if notFound {
@@ -181,33 +254,6 @@ func GetObject2(c *gin.Context) {
 			"status": 200,
 		})
 		return
-	}
-	if userid != "" {
-		userid, _ := strconv.ParseUint(userid, 0, 64)
-		ucs, err := service.GetUserConcepts(userid)
-		if err != nil {
-			c.JSON(405, gin.H{"msg": "get user concepts err"})
-			return
-		}
-		if res["concepts"] != nil {
-			concepts := res["concepts"].([]interface{})
-			for _, c := range concepts {
-				concept := c.(map[string]interface{})
-				conceptid := concept["id"].(string)
-				var flag = false
-				for i, uc := range ucs {
-					if conceptid == uc.ConceptID {
-						concept["islike"] = true
-						flag = true
-						ucs = append(ucs[:i], ucs[i+1:]...)
-						break
-					}
-				}
-				if flag == false {
-					concept["islike"] = false
-				}
-			}
-		}
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"data":   res,

@@ -62,19 +62,8 @@ func UpdateAUser(user *database.User, username string, password string, userInfo
 	err := global.DB.Save(user).Error
 	return err
 }
-
-// GetUserHistoryByID 根据用户 ID 查询某个用户的历史浏览记录
-func GetUserHistoryByID(userID uint64) (userHistory []database.History, err error) {
-	err = global.DB.Where("user_id = ?", userID).Find(&userHistory).Error
-	return
-}
-
-// CreateUserBrowseHistory 创建某个用户的对某篇文章的历史浏览记录
-func CreateUserBrowseHistory(userID uint64, workID string) (err error) {
-	history := database.History{
-		UserID: userID,
-		WorkID: workID,
-	}
-	err = global.DB.Create(history).Error
-	return err
+func GetAllUser() (num int) {
+	users := make([]database.User, 0)
+	global.DB.Where("").Find(&users)
+	return len(users)
 }

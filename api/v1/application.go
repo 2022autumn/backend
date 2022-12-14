@@ -33,7 +33,8 @@ func CreateApplication(c *gin.Context) {
 		c.JSON(400, gin.H{"msg": "数据格式错误", "status": 400})
 		return
 	}
-	if _, notFound := service.GetUserByID(d.UserID); notFound {
+	user, notFound := service.GetUserByID(d.UserID)
+	if notFound {
 		c.JSON(401, gin.H{"msg": "没有该用户", "status": 401})
 		return
 	}
@@ -70,6 +71,7 @@ func CreateApplication(c *gin.Context) {
 		VerifyCode:  d.VerifyCode,
 		Content:     d.Content,
 		UserID:      d.UserID,
+		Username:    user.Username,
 		Status:      0,
 		AuthorID:    d.AuthorID,
 	}
@@ -78,6 +80,15 @@ func CreateApplication(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"application": application, "msg": "申请提交成功", "status": 200})
+}
+
+func TestCodeGen(c *gin.Context) {
+	code := ""
+	for i := 0; i < 6; i++ {
+		code += strconv.Itoa(rand.Int() % 10)
+	}
+	fmt.Println(code)
+	c.JSON(http.StatusOK, gin.H{"code": code})
 }
 
 // SendVerifyEmail 获取验证码
@@ -105,7 +116,11 @@ func SendVerifyEmail(c *gin.Context) {
 		c.JSON(401, gin.H{"msg": "没有该用户", "status": 401})
 		return
 	}
-	code := rand.New(rand.NewSource(time.Now().UnixNano())).Int() % 1000000
+	//code := rand.New(rand.NewSource(time.Now().UnixNano())).Int() % 1000000
+	code := ""
+	for i := 0; i < 6; i++ {
+		code += strconv.Itoa(rand.Int() % 10)
+	}
 	fmt.Println(code)
 	err := service.CreateVerifyCodeRecode(userID, code, email)
 	if err != nil {
@@ -222,4 +237,15 @@ func UncheckedApplicationList(c *gin.Context) {
 	//}
 	//c.JSON(http.StatusOK, gin.H{"success": true, "message": "获取成功", "status": 200, "submits": submits_arr, "submit_count": len(submits)})
 	//return
+}
+
+// GetVerifiedUserNum 获取网站认证学者数
+// @Summary     获取网站认证学者数   Vera
+// @Description 获取网站认证学者数
+// @Tags        网站信息
+// @Success     200 {string} json "{"status": 200, "verified_num": num}"
+// @Router      /info/verified_num [GET]
+func GetVerifiedUserNum(c *gin.Context) {
+	num := service.GetVerifiedUser()
+	c.JSON(http.StatusOK, gin.H{"status": 200, "verified_num": num})
 }

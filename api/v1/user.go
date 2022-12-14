@@ -323,47 +323,39 @@ func UploadHeadshot(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": user})
 }
 
-// GetUserHistory 查看用户历史浏览记录
-// @Summary     ccf
-// @Description 查看用户历史浏览记录
+// GetRegisterUserNum 获取网站所有注册用户数量
+// @Summary     获取网站所有注册用户数量 Vera
+// @Description 统计网站信息，该接口不需要前端参数
+// @Tags        网站信息
+// @Success     200 {string} json "{"status": 200, "register_num": int}"
+// @Router      /info/register_num [GET]
+func GetRegisterUserNum(c *gin.Context) {
+	num := service.GetAllUser()
+	c.JSON(http.StatusOK, gin.H{"status": 200, "register_num": num})
+}
+
+// GetBrowseHistory
+// @Summary     txc
+// @Description 获取用户浏览历史
 // @Tags        用户
-// @Param       user_id query string true "user_id"
-// @Accept      json
-// @Produce     json
-// @Success     200 {string} json "{"status":200,"msg":"获取用户历史浏览记录成功","data":{object}}"
-// @Failure     400 {string} json "{"status":400,"msg":"用户ID不存在"}"
-// @Failure     401 {string} json "{"status":400,"msg":"从数据库获取历史浏览记录失败"}"
-// @Router      /user/history [GET]
-func GetUserHistory(c *gin.Context) {
-	userID := c.Query("user_id")
-	id, _ := strconv.ParseInt(userID, 0, 64)
-	//用户不存在
-	user, notFoundUserByID := service.QueryAUserByID(uint64(id))
-	if notFoundUserByID {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status": 400,
-			"msg":    "用户ID不存在",
-		})
+// @Param       token header   string                     true "token"
+// @Param       data  body     response.GetBrowseHistoryQ true "data"
+// @Success     200   {string} json                       "{"status": 200, "msg": "获取成功", "data": {object}}"
+// @Router      /user/history [POST]
+func GetBrowseHistory(c *gin.Context) {
+	user := c.MustGet("user").(database.User)
+	var d response.GetBrowseHistoryQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 400, "msg": "参数错误"})
 		return
 	}
-	//获取用户浏览记录
-	historyList, err := service.GetUserHistoryByID(user.UserID)
-	if err != nil {
-		c.JSON(401, gin.H{
-			"status": 401,
-			"msg":    "从数据库获取历史浏览记录失败",
-		})
+	var history []database.BrowseHistory
+	global.DB.Where("user_id = ?", user.UserID).Order("browse_time desc").Find(&history)
+	count := len(history)
+	if count < d.Page*d.Size {
+		history = history[(d.Page-1)*d.Size:]
+	} else {
+		history = history[(d.Page-1)*d.Size : d.Page*d.Size]
 	}
-	var dataList = make([]map[string]interface{}, 0)
-	for _, history := range historyList {
-		var his = make(map[string]interface{})
-		his["work_id"] = history.WorkID
-		his["browse_time"] = history.BrowseTime
-		dataList = append(dataList, his)
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"status": 200,
-		"msg":    "获取用户历史浏览记录成功",
-		"data":   dataList,
-	})
+	c.JSON(http.StatusOK, gin.H{"status": 200, "msg": "获取成功", "data": history, "count": count})
 }

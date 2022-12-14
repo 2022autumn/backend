@@ -34,7 +34,9 @@ func SetupRouter(r *gin.Engine) {
 		baseGroup.POST("/user/mod", v1.ModifyUser)          //编辑个人信息
 		baseGroup.POST("/user/pwd", v1.ModifyPassword)      //重置用户密码
 		baseGroup.POST("/user/headshot", v1.UploadHeadshot) //上传用户头像
-		baseGroup.GET("/user/history", v1.GetUserHistory)   //查看用户历史浏览记录
+		baseGroup.GET("/info/register_num", v1.GetRegisterUserNum)
+		baseGroup.GET("/info/verified_num", v1.GetVerifiedUserNum)
+		baseGroup.POST("/user/history", middleware.AuthRequired(), v1.GetBrowseHistory)
 		baseGroup.Static("/media", "./media")
 	}
 	ApplicationRouter := baseGroup.Group("/application")
@@ -43,6 +45,7 @@ func SetupRouter(r *gin.Engine) {
 		ApplicationRouter.POST("/handle", v1.HandleApplication)
 		ApplicationRouter.GET("/list", v1.UncheckedApplicationList)
 		ApplicationRouter.POST("/code", v1.SendVerifyEmail)
+		ApplicationRouter.GET("/testCode", v1.TestCodeGen)
 	}
 	SocialRouter := baseGroup.Group("/social")
 	{
@@ -82,8 +85,8 @@ func SetupRouter(r *gin.Engine) {
 		scholarGroup.GET("/concept", middleware.AuthRequired(), v1.GetUserConcepts)
 		scholarGroup.GET("/roll", v1.RollWorks)
 		scholarGroup.GET("/hot", v1.GetHotWorks)
-		scholarGroup.POST("/author/headshot", v1.UploadAuthorHeadshot)
-		scholarGroup.POST("/author/intro", v1.ModifyAuthorIntro)
+		scholarGroup.POST("/author/headshot", middleware.AuthRequired(), v1.UploadAuthorHeadshot)
+		scholarGroup.POST("/author/intro", middleware.AuthRequired(), v1.ModifyAuthorIntro)
 	}
 	// 学者主页论文
 	personalWorksGroup := scholarGroup.Group("/works")
@@ -94,6 +97,7 @@ func SetupRouter(r *gin.Engine) {
 		personalWorksGroup.POST("/top", v1.TopWork)
 		personalWorksGroup.POST("/untop", v1.UnTopWork)
 		personalWorksGroup.POST("/upload", v1.UploadPaperPDF)
+		personalWorksGroup.POST("/unupload", v1.UnUploadPaperPDF)
 		personalWorksGroup.POST("/getpdf", v1.GetPaperPDF)
 	}
 }
