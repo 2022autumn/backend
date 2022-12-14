@@ -25,7 +25,11 @@ func GetWorkCited(work map[string]interface{}) string {
 			break
 		}
 	}
-	cited += "\"" + work["title"].(string) + "\""
+	if work["title"] != nil {
+		cited += "\"" + work["title"].(string) + "\""
+	} else {
+		cited += "\"\""
+	}
 	if work["host_venue"] != nil {
 		if work["host_venue"].(map[string]interface{})["display_name"] != nil {
 			cited += "," + work["host_venue"].(map[string]interface{})["display_name"].(string)
