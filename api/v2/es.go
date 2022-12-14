@@ -135,7 +135,12 @@ func GetObject2(c *gin.Context) {
 			open_access := res["open_access"].(map[string]interface{})
 			if open_access["oa_url"] != nil {
 				res["pdflinks"] = append(res["pdflinks"].([]string), open_access["oa_url"].(string))
+			} else if authorworks != nil && len(authorworks) != 0 {
+				open_access["oa_url"] = authorworks[0].PDF
 			}
+		} else if authorworks != nil && len(authorworks) != 0 {
+			res["open_access"] = make(map[string]interface{})
+			res["open_access"].(map[string]interface{})["oa_url"] = authorworks[0].PDF
 		}
 		for _, v := range authorworks {
 			if v.PDF != "" {
