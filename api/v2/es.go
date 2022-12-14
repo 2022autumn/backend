@@ -117,8 +117,6 @@ func GetObject2(c *gin.Context) {
 	}
 	if idx == "works" {
 		if source == 1 {
-			filter := utils.InitWorksfilter()
-			utils.FilterData(&res, &filter)
 			if res["abstract_inverted_index"] != nil {
 				res["abstract"] = utils.TransInvertedIndex2String(res["abstract_inverted_index"].(map[string]interface{}))
 				res["abstract_inverted_index"] = nil
@@ -171,10 +169,6 @@ func GetObject2(c *gin.Context) {
 		}
 	}
 	if idx == "authors" {
-		if source == 1 {
-			filter := utils.InitAuthorsfilter()
-			utils.FilterData(&res, &filter)
-		}
 		var info = make(map[string]interface{})
 		if userid != "" {
 			userid, _ := strconv.ParseUint(userid, 0, 64)
