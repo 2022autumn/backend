@@ -27,7 +27,7 @@ var DEBUG = false
 var BULK_SIZE = 5000 // 一个文档约为1K，5000个文档约为5M
 
 const (
-	Limit  = 8 // 同时运行的goroutine上限
+	Limit  = 5 // 同时运行的goroutine上限
 	Weight = 1 // 信号量的权重
 )
 
@@ -53,6 +53,9 @@ func main() {
 	for _, dir_path := range data_dir_path {
 		current_dir_name := path.Base(dir_path)
 		index := current_dir_name
+		if index == "works" {
+			index = "works_v1"
+		}
 		current_filter := filter[current_dir_name]
 		files, err := ioutil.ReadDir(dir_path)
 		if err != nil {

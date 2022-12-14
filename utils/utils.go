@@ -256,16 +256,19 @@ func GetByUrl(urlstring string) (map[string]interface{}, error) {
 	resp, err := http.Get(u.String())
 	log.Println("- single get works_api_url time: ", time.Since(req_st_time))
 	if err != nil {
+		log.Println("<ERROR in GetByUrl> http get: ", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Println("<ERROR in GetByUrl> ioutil: ", err)
 		return nil, err
 	}
 	var result map[string]interface{}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
+		log.Println("<ERROR in GetByUrl> json unmarshal: ", err)
 		return nil, err
 	}
 	return result, nil
