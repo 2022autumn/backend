@@ -355,8 +355,8 @@ func BaseSearch(c *gin.Context) {
 		panic(err)
 	}
 	boolQuery := elastic.NewBoolQuery()
-	tiQuery := elastic.NewMatchPhraseQuery("title", d.QueryWord)
-	abQuery := elastic.NewMatchPhraseQuery("abstract", d.QueryWord)
+	tiQuery := elastic.NewMatchPhraseQuery("full", d.QueryWord)
+	abQuery := elastic.NewMatchPhraseQuery("full", d.QueryWord)
 	b2Query := elastic.NewBoolQuery()
 	b2Query.Should(tiQuery, abQuery)
 	boolQuery.Must(b2Query)
