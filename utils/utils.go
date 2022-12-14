@@ -213,6 +213,13 @@ func InitAuthorsfilter() map[string]interface{} {
 // 保证filter中的key在data中存在
 func FilterData(data *map[string]interface{}, filter *map[string]interface{}) {
 	for k, v := range *filter {
+		if k == "abstract_inverted_index" {
+			abstract := TransInvertedIndex2String((*data)[k])
+			// 删去abstract_inverted_index
+			delete(*data, "abstract_inverted_index")
+			// 添加abstract字段
+			(*data)["abstract"] = abstract
+		}
 		// 如果v为bool类型，若为true则修改，若为false则删除
 		if reflect.TypeOf(v).Kind() == reflect.Bool {
 			if v.(bool) {
