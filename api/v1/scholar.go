@@ -135,6 +135,11 @@ func RollWorks(c *gin.Context) {
 			if err == nil {
 				works := res["results"].([]interface{})
 				for _, work := range works {
+					work := work.(map[string]interface{})
+					if work["abstract_inverted_index"] != nil {
+						work["abstract"] = utils.TransInvertedIndex2String(work["abstract_inverted_index"].(map[string]interface{}))
+						work["abstract_inverted_index"] = nil
+					}
 					ret = append(ret, map[string]interface{}{
 						"work": work,
 					})
@@ -160,11 +165,17 @@ func RollWorks(c *gin.Context) {
 			global.DB.Table("work_views").Offset(ids[i]).First(&work)
 			workids = append(workids, work.WorkID)
 		}
-		res, err := service.GetObjects("works", workids)
+		res, err := service.GetObjects2("works", workids)
 		if err == nil {
-			for _, work := range res.Docs {
+			works := res["results"].([]interface{})
+			for _, work := range works {
+				work := work.(map[string]interface{})
+				if work["abstract_inverted_index"] != nil {
+					work["abstract"] = utils.TransInvertedIndex2String(work["abstract_inverted_index"].(map[string]interface{}))
+					work["abstract_inverted_index"] = nil
+				}
 				ret = append(ret, map[string]interface{}{
-					"work": work.Source,
+					"work": work,
 				})
 			}
 		}
