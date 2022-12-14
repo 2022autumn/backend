@@ -1,7 +1,11 @@
 package main
 
 import (
+	"IShare/global"
+	"IShare/initialize"
+	"IShare/utils"
 	"bufio"
+	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -10,144 +14,68 @@ import (
 	"path"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/olivere/elastic/v7"
+	"golang.org/x/sync/semaphore"
 )
 
-//--------------------- datafilter ---------------------
-// datafilter文件主要是对openAlex下载下来的json文件进行过滤，只保留需要的字段，去掉不需要的字段，减少文件的大小
-// 处理思路：读取json -> 过滤json对象 -> 写入新的json文件 -> 删除旧的json文件
-// 起多个协程读取json文件，每个协程读取一个文件。每个协程按行读取文件，每行是一个json对象。然后将json对象转换成map[string]interface{}类型，然后过滤，最后追加写入新的json文件
-//
-//--------------------- datafilter ---------------------
+var DEBUG = false
 
-//------- 1. 读取json文件 超大文件的读取 -------//
-/**
-* 需求: 读取大小在4G以上的文件，该文件中每一行都是一个json格式的字符串
-* 问题：使用ioutil.ReadFile()读取文件时，一次性把所有文件内容读到内存中，导致内存占据过大，程序性能不佳，甚至崩溃（本机16GB还能抗住，但是多线程运行就别想了）鉴于总共需要处理的文件约900G，所以需要一种占据内存小的读取方式，方便后面开多线程处理（8核CPU闲着也是闲着）
-* 解决：使用bufio.NewReader()读取文件，每次读取一行，然后再进行json解析
-* 参考博客1：https://learnku.com/articles/23559/two-schemes-for-reading-golang-super-large-files
-* 参考博客2: https://www.jianshu.com/p/509bb77ec103
-* 参考博客3: https://zhuanlan.zhihu.com/p/184937550
- */
+// 一般建议是1000-5000个文档，如果你的文档很大，可以适当减少队列，大小建议是5-15MB，默认不能超过100M，
+var BULK_SIZE = 5000 // 一个文档约为1K，5000个文档约为5M
 
-/**
-* 处理一个json文件，经过过滤后，写入新的json文件，删除旧的json文件
-* 新文件的名字是旧文件名字在最前面加上filterred_ eg: authors_data_10.json -> filtered_authors_data_10.json
-* @param fileName: json文件绝对路径
-* @param filter: 过滤map
- */
-func processFile(dir_path string, fileName string, filter map[string]interface{}) {
-	log.Println("processFile: ", dir_path+fileName)
-	// 获取当前时间
-	startTime := time.Now().UnixNano()
-	file, err := os.Open(dir_path + fileName)
-	if err != nil {
-		log.Println("open file error: ", err)
+const (
+	Limit  = 5 // 同时运行的goroutine上限
+	Weight = 1 // 信号量的权重
+)
+
+var sem = semaphore.NewWeighted(Limit)
+
+func main() {
+	start_time := time.Now()
+	initialize.InitViper()
+	initialize.InitElasticSearch()
+	filter := initFilter()
+	if DEBUG {
 		return
 	}
-	defer file.Close()
-
-	outfile, outerr := os.OpenFile(dir_path+"filterred_"+fileName, os.O_WRONLY, 0644)
-	if outerr != nil {
-		os.Create(dir_path + "filterred_" + fileName)
-		outfile, outerr = os.OpenFile(dir_path+"filterred_"+fileName, os.O_WRONLY, 0644)
-		if outerr != nil {
-			log.Println("open outfile error: ", outerr)
-			return
+	data_dir_path := []string{"/data/openalex/authors/", "/data/openalex/concepts/", "/data/openalex/institutions/", "/data/openalex/works/", "/data/openalex/venues/"}
+	if DEBUG {
+		data_dir_path = []string{"/data/openalex/testdata/authors/", "/data/openalex/testdata/concepts/", "/data/openalex/testdata/institutions/", "/data/openalex/testdata/works/", "/data/openalex/testdata/venues/"}
+		// single test for works
+		if true {
+			data_dir_path = []string{"/data/openalex/testdata/works/"}
 		}
 	}
-	defer outfile.Close()
-
-	reader := bufio.NewReader(file)
-
-	for {
-		// 1. 按行读取文件
-		line, err := reader.ReadString('\n')
+	var wg sync.WaitGroup
+	for _, dir_path := range data_dir_path {
+		current_dir_name := path.Base(dir_path)
+		index := current_dir_name
+		if index == "works" {
+			index = "works_v1"
+		}
+		current_filter := filter[current_dir_name]
+		files, err := ioutil.ReadDir(dir_path)
 		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			log.Println("read file error: ", err)
+			log.Println("read dir: ", current_dir_name, " error: ", err)
 			return
 		}
-		// 2. json解析
-		var data map[string]interface{}
-		err = json.Unmarshal([]byte(line), &data)
-		if err != nil {
-			log.Println("json unmarshal error: ", err)
-			return
-		}
-		// 3. 过滤
-		if filter != nil {
-			// 3.1 过滤
-			filterData(&data, &filter)
-			// 把过滤后的map转换成json字符串
-			jsonStr, err := json.Marshal(data)
-			if err != nil {
-				log.Println("json marshal error: ", err)
-				return
+		// 启动一个处理文件的协程
+		for _, file := range files {
+			wg.Add(1)
+			if DEBUG {
+				index = current_dir_name + "_test"
 			}
-			// 3.2 写入新的json文件
-			// 按行把jsonstr写入文件
-			_, err = outfile.WriteString(string(jsonStr) + "\n")
-			if err != nil {
-				log.Println("write file error: ", err)
-				return
-			}
-		} else {
-			// 3.1 打印error日志
-			log.Printf("filter map is nil, fileName: %s", fileName)
-			return
+			go processFile(dir_path, file.Name(), current_filter, &wg, index)
 		}
 	}
-	// 4. 删除旧的json文件
-	os.Remove(dir_path + fileName)
-	// 5. 计算时间
-	endTime := time.Now().UnixNano()
-	log.Printf("processFile: %s, time: %d ms", fileName, (endTime-startTime)/1000000)
+	wg.Wait()
+	end_time := time.Now()
+	log.Println("total time: ", end_time.Sub(start_time))
 }
 
-// 保证filter中的key在data中存在
-func filterData(data *map[string]interface{}, filter *map[string]interface{}) {
-	for k, v := range *filter {
-		// 如果v为bool类型，若为true则修改，若为false则删除
-		if reflect.TypeOf(v).Kind() == reflect.Bool {
-			if v.(bool) {
-				// 修改规则类似："https://openalex.org/W2741809807" -> "W2741809807"
-				if (*data)[k] != nil {
-					// data[k] 为string类型，需要修改
-					if reflect.TypeOf((*data)[k]).Kind() == reflect.String {
-						(*data)[k] = strings.Replace((*data)[k].(string), "https://openalex.org/", "", -1)
-					}
-					// data[k] 为数组类型 每个元素都是string类型，都需要修改
-					if reflect.TypeOf((*data)[k]).Kind() == reflect.Slice {
-						for i, v := range (*data)[k].([]interface{}) {
-							(*data)[k].([]interface{})[i] = strings.Replace(v.(string), "https://openalex.org/", "", -1)
-						}
-					}
-				}
-			} else {
-				delete(*data, k)
-			}
-		} else if reflect.TypeOf(v).Kind() == reflect.Map {
-			// 如果v为map类型，则递归
-			if (*data)[k] != nil {
-				inner_data := (*data)[k].(map[string]interface{})
-				inner_filter := v.(map[string]interface{})
-				filterData(&inner_data, &inner_filter)
-			}
-		} else if reflect.TypeOf(v).Kind() == reflect.Slice {
-			// 如果v为map的数组类型，则遍历data数组，递归
-			inner_filter := v.([]map[string]interface{})[0]
-			for _, value := range (*data)[k].([]interface{}) {
-				inner_data := value.(map[string]interface{})
-				filterData(&inner_data, &inner_filter)
-			}
-		}
-	}
-}
-
-//------- 2. 过滤json文件 filter初始化-------//
 // create filter map
 func initFilter() map[string]map[string]interface{} {
 	filter := make(map[string]map[string]interface{})
@@ -264,7 +192,7 @@ func initWorksfilter() map[string]interface{} {
 	authorship["author"] = make(map[string]interface{})
 	authorship["author"].(map[string]interface{})["id"] = true // authorships.author.id 需要修改 "https://openalex.org/A1969205032" -> "A1969205032"
 	authorship["author"].(map[string]interface{})["orcid"] = false
-
+	authorship["raw_affiliation_string"] = false
 	authorship["institutions"] = make([]map[string]interface{}, 0) // authorships.institutions 需要修改
 	// 建立authorships.institutions数组中的元素map
 	institution := make(map[string]interface{})
@@ -288,6 +216,8 @@ func initWorksfilter() map[string]interface{} {
 
 	worksfilter["mesh"] = false
 	worksfilter["alternate_host_venues"] = false
+
+	worksfilter["abstract_inverted_index"] = "trans"
 
 	worksfilter["referenced_works"] = true
 	worksfilter["related_works"] = true
@@ -314,45 +244,125 @@ func initVenuesfilter() map[string]interface{} {
 	return venuesfilter
 }
 
-// 执行test之前需要先make filter获取数据
-func test() {
-	filter := initFilter()
-	processFile("/home/horik/backend/scripts/", "work.json", filter["works"])
-	processFile("/home/horik/backend/scripts/", "author.json", filter["authors"])
-	processFile("/home/horik/backend/scripts/", "venue.json", filter["venues"])
-	processFile("/home/horik/backend/scripts/", "institution.json", filter["institutions"])
-	processFile("/home/horik/backend/scripts/", "concept.json", filter["concepts"])
-}
+/**
+* 处理一个json文件，经过过滤后，写入新的json文件，删除旧的json文件
+* 新文件的名字是旧文件名字在最前面加上filterred_ eg: authors_data_10.json -> filtered_authors_data_10.json
+* @param fileName: json文件绝对路径
+* @param filter: 过滤map
+ */
+func processFile(dir_path string, fileName string, filter map[string]interface{}, wg *sync.WaitGroup, index string) {
+	sem.Acquire(context.Background(), Weight)
+	defer wg.Done()
+	defer sem.Release(Weight)
+	startTime := time.Now()
 
-func main() {
-
-	if false {
-		test()
+	log.Println("processFile: ", dir_path+fileName)
+	file, err := os.Open(dir_path + fileName)
+	if err != nil {
+		log.Println("open file error: ", err)
 		return
 	}
-
-	// 初始化过滤map
-	filter := initFilter()
-
-	// 过滤数据部分
-	data_dir_path := []string{"/data/openalex/authors/", "/data/openalex/concepts/", "/data/openalex/institutions/", "/data/openalex/works/", "/data/openalex/venues/"}
-	// 获取每个文件夹下的文件列表
-	for _, dir_path := range data_dir_path {
-		// 获取文件目录的最后一个目录名
-		current_dir_name := path.Base(dir_path)
-		current_filter := filter[current_dir_name]
-		// fmt.Println(current_dir_name)
-		files, err := ioutil.ReadDir(dir_path)
+	defer file.Close()
+	// 文件大小为0，直接跳过
+	fileInfo, err := file.Stat()
+	if err != nil {
+		log.Println("get file info error: ", err)
+		return
+	}
+	if fileInfo.Size() == 0 {
+		log.Println("file size is 0, skip: ", dir_path+fileName)
+		return
+	}
+	reader := bufio.NewReader(file)
+	client := global.ES
+	bulkRequest := client.Bulk()
+	for {
+		// 1. 按行读取文件
+		line, err := reader.ReadString('\n')
 		if err != nil {
-			log.Fatal(err)
-		}
-		// 启动一个处理文件的协程
-		for _, file := range files {
-			// 如果是filter过的文件则跳过
-			if strings.Contains(file.Name(), "filter") {
-				continue
+			if err == io.EOF {
+				break
 			}
-			processFile(dir_path, file.Name(), current_filter)
+			log.Println("read file error: ", err, " in file: ", fileName)
+			return
+		}
+		// 2. json解析
+		var data map[string]interface{}
+		err = json.Unmarshal([]byte(line), &data)
+		if err != nil {
+			log.Println("json unmarshal error: ", err, " in file: ", fileName)
+			return
+		}
+		filterData(&data, &filter)
+		req := elastic.NewBulkIndexRequest().Index(index).Id(data["id"].(string)).Doc(data)
+		bulkRequest = bulkRequest.Add(req)
+		// 每BULK_SIZE条数据提交一次
+		if bulkRequest.NumberOfActions() >= BULK_SIZE {
+			// 插入时，遇到相同id的数据，会更新原数据
+			_, err := bulkRequest.Do(context.Background())
+			if err != nil {
+				log.Println("bulk error: ", err, " error file: ", file)
+				return
+			}
+			bulkRequest = client.Bulk()
+		}
+	}
+	if bulkRequest.NumberOfActions() > 0 {
+		_, err := bulkRequest.Do(context.Background())
+		if err != nil {
+			log.Println("bulk error: ", err, " error file: ", file)
+			return
+		}
+	}
+	os.Remove(dir_path + fileName)
+	log.Println("processFile: ", dir_path+fileName, " done, cost time: ", time.Since(startTime))
+}
+
+// 保证filter中的key在data中存在
+func filterData(data *map[string]interface{}, filter *map[string]interface{}) {
+	for k, v := range *filter {
+		if k == "abstract_inverted_index" {
+			abstract := utils.TransInvertedIndex2String((*data)[k])
+			// 删去abstract_inverted_index
+			delete(*data, "abstract_inverted_index")
+			// 添加abstract字段
+			(*data)["abstract"] = abstract
+		}
+		// 如果v为bool类型，若为true则修改，若为false则删除
+		if reflect.TypeOf(v).Kind() == reflect.Bool {
+			if v.(bool) {
+				// 修改规则类似："https://openalex.org/W2741809807" -> "W2741809807"
+				if (*data)[k] != nil {
+					// data[k] 为string类型，需要修改
+					if reflect.TypeOf((*data)[k]).Kind() == reflect.String {
+						(*data)[k] = strings.Replace((*data)[k].(string), "https://openalex.org/", "", -1)
+					}
+					// data[k] 为数组类型 每个元素都是string类型，都需要修改
+					if reflect.TypeOf((*data)[k]).Kind() == reflect.Slice {
+						for i, v := range (*data)[k].([]interface{}) {
+							(*data)[k].([]interface{})[i] = strings.Replace(v.(string), "https://openalex.org/", "", -1)
+						}
+					}
+				}
+			} else {
+				delete(*data, k)
+			}
+		} else if reflect.TypeOf(v).Kind() == reflect.Map {
+			// 如果v为map类型，则递归
+			if (*data)[k] != nil {
+				inner_data := (*data)[k].(map[string]interface{})
+				inner_filter := v.(map[string]interface{})
+				filterData(&inner_data, &inner_filter)
+			}
+		} else if reflect.TypeOf(v).Kind() == reflect.Slice {
+			// 如果v为map的数组类型，则遍历data数组，递归
+			if (*data)[k] != nil {
+				inner_filter := v.([]map[string]interface{})[0]
+				for _, value := range (*data)[k].([]interface{}) {
+					inner_data := value.(map[string]interface{})
+					filterData(&inner_data, &inner_filter)
+				}
+			}
 		}
 	}
 }
