@@ -139,6 +139,13 @@ definitions:
     - author_id
     - user_id
     type: object
+  response.GetBrowseHistoryQ:
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+    type: object
   response.GetPaperPDFQ:
     properties:
       work_id:
@@ -755,6 +762,28 @@ paths:
       summary: 获取统计信息 txc
       tags:
       - esSearch
+  /info/register_num:
+    get:
+      description: 统计网站信息，该接口不需要前端参数
+      responses:
+        "200":
+          description: '{"status": 200, "register_num": int}'
+          schema:
+            type: string
+      summary: 获取网站所有注册用户数量 Vera
+      tags:
+      - 网站信息
+  /info/verified_num:
+    get:
+      description: 获取网站认证学者数
+      responses:
+        "200":
+          description: '{"status": 200, "verified_num": num}'
+          schema:
+            type: string
+      summary: 获取网站认证学者数   Vera
+      tags:
+      - 网站信息
   /login:
     post:
       consumes:
@@ -819,6 +848,11 @@ paths:
     post:
       description: 上传作者头像
       parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
       - description: 学者ID
         in: formData
         name: author_id
@@ -829,7 +863,23 @@ paths:
         name: Headshot
         required: true
         type: file
-      responses: {}
+      responses:
+        "200":
+          description: '{"msg":"上传成功","data": author}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"学者未被认领"}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg":"无权限"}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg":"头像文件获取失败"}'
+          schema:
+            type: string
       summary: 上传作者头像 txc
       tags:
       - scholar
@@ -839,6 +889,11 @@ paths:
       - application/json
       description: 修改作者简介
       parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
       - description: data
         in: body
         name: data
@@ -857,6 +912,10 @@ paths:
           schema:
             type: string
         "401":
+          description: '{"msg":"无权限"}'
+          schema:
+            type: string
+        "404":
           description: '{"msg":"学者未被认领"}'
           schema:
             type: string
@@ -1227,6 +1286,42 @@ paths:
           schema:
             type: string
       summary: 学者管理主页--取消置顶论文 hr
+      tags:
+      - 学者主页的论文获取、管理
+  /scholar/works/unupload:
+    post:
+      description: |-
+        学者管理主页--取消上传作品PDF
+
+        参数说明
+        - author_id 作者的id
+
+        - work_id 论文的id
+      parameters:
+      - description: 学者ID
+        in: formData
+        name: author_id
+        required: true
+        type: string
+      - description: 论文ID
+        in: formData
+        name: work_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"msg":"取消上传成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg":"论文不存在"}'
+          schema:
+            type: string
+        "403":
+          description: '{"msg":"保存文件路径到数据库中失败"}'
+          schema:
+            type: string
+      summary: 学者管理主页--取消上传作品PDF txc
       tags:
       - 学者主页的论文获取、管理
   /scholar/works/upload:
@@ -1770,6 +1865,29 @@ paths:
           schema:
             type: string
       summary: 上传用户头像 ccf
+      tags:
+      - 用户
+  /user/history:
+    post:
+      description: 获取用户浏览历史
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.GetBrowseHistoryQ'
+      responses:
+        "200":
+          description: '{"status": 200, "msg": "获取成功", "data": {object}}'
+          schema:
+            type: string
+      summary: txc
       tags:
       - 用户
   /user/info:

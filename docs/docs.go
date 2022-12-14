@@ -608,6 +608,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/info/register_num": {
+            "get": {
+                "description": "统计网站信息，该接口不需要前端参数",
+                "tags": [
+                    "网站信息"
+                ],
+                "summary": "获取网站所有注册用户数量 Vera",
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": 200, \"register_num\": int}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/info/verified_num": {
+            "get": {
+                "description": "获取网站认证学者数",
+                "tags": [
+                    "网站信息"
+                ],
+                "summary": "获取网站认证学者数   Vera",
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": 200, \"verified_num\": num}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "登录\n填入用户名和密码",
@@ -704,6 +738,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "学者ID",
                         "name": "author_id",
                         "in": "formData",
@@ -717,7 +758,32 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"上传成功\",\"data\": author}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"学者未被认领\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "{\"msg\":\"无权限\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "402": {
+                        "description": "{\"msg\":\"头像文件获取失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/scholar/author/intro": {
@@ -734,6 +800,13 @@ const docTemplate = `{
                 ],
                 "summary": "txc",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "data",
                         "name": "data",
@@ -758,6 +831,12 @@ const docTemplate = `{
                         }
                     },
                     "401": {
+                        "description": "{\"msg\":\"无权限\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
                         "description": "{\"msg\":\"学者未被认领\"}",
                         "schema": {
                             "type": "string"
@@ -1238,6 +1317,51 @@ const docTemplate = `{
                     },
                     "402": {
                         "description": "{\"msg\":\"修改失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/scholar/works/unupload": {
+            "post": {
+                "description": "学者管理主页--取消上传作品PDF\n\n参数说明\n- author_id 作者的id\n\n- work_id 论文的id",
+                "tags": [
+                    "学者主页的论文获取、管理"
+                ],
+                "summary": "学者管理主页--取消上传作品PDF txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "学者ID",
+                        "name": "author_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "论文ID",
+                        "name": "work_id",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"msg\":\"取消上传成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\":\"论文不存在\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "{\"msg\":\"保存文件路径到数据库中失败\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -2059,6 +2183,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/history": {
+            "post": {
+                "description": "获取用户浏览历史",
+                "tags": [
+                    "用户"
+                ],
+                "summary": "txc",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/response.GetBrowseHistoryQ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"status\": 200, \"msg\": \"获取成功\", \"data\": {object}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/user/info": {
             "get": {
                 "description": "查看用户个人信息",
@@ -2401,6 +2560,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.GetBrowseHistoryQ": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
                     "type": "integer"
                 }
             }

@@ -28,9 +28,6 @@ func InitMySQL() {
 	// 迁移
 	global.DB.AutoMigrate(
 		&database.Author{},
-		//&database.Institution{},
-		//&database.Venue{},
-		//&database.AuthorConnection{},
 		&database.Application{},
 		&database.Comment{},
 		&database.Like{},
@@ -43,6 +40,7 @@ func InitMySQL() {
 		&database.PersonalWorks{},
 		&database.VerifyCode{},
 		&database.PersonalWorksCount{},
+		&database.BrowseHistory{},
 	)
 	// 检查数据库连接是否存在, 好像没啥用
 	err = global.DB.DB().Ping()

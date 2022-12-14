@@ -141,6 +141,17 @@ func NormalizationSearchResult(res *elastic.SearchResult) (hits int64, result []
 			var tmp = make(map[string]interface{})
 			_ = json.Unmarshal(by, &tmp)
 			aggs[k] = tmp["buckets"].([]interface{})
+			if k == "publication_years" {
+				years := aggs[k].([]interface{})
+				nyears := make([]map[string]interface{}, 0)
+				for _, v := range years {
+					y := v.(map[string]interface{})
+					if int(y["key"].(float64)) <= 2022 {
+						nyears = append(nyears, y)
+					}
+				}
+				aggs[k] = nyears
+			}
 		}
 	}
 	return hits, result, aggs, TookInMillis
@@ -158,15 +169,15 @@ func InitWorksfilter() map[string]interface{} {
 	authorship := make(map[string]interface{})
 	authorship["author"] = make(map[string]interface{})
 	authorship["author"].(map[string]interface{})["id"] = true // authorships.author.id 需要修改 "https://openalex.org/A1969205032" -> "A1969205032"
-	authorship["author"].(map[string]interface{})["orcid"] = false
-	authorship["raw_affiliation_string"] = false
+	//authorship["author"].(map[string]interface{})["orcid"] = false
+	//authorship["raw_affiliation_string"] = false
 	authorship["institutions"] = make([]map[string]interface{}, 0) // authorships.institutions 需要修改
 	// 建立authorships.institutions数组中的元素map
 	institution := make(map[string]interface{})
 	institution["id"] = true // authorships.institutions.id 需要修改 "https://openalex.org/I1969205032" -> "I1969205032"
-	institution["ror"] = false
-	institution["country_code"] = false
-	institution["type"] = false
+	//institution["ror"] = false
+	//institution["country_code"] = false
+	//institution["type"] = false
 	// 向authorships.institutions数组中添加元素map
 	authorship["institutions"] = append(authorship["institutions"].([]map[string]interface{}), institution)
 	// 向worksfilter.authorships中添加元素map
@@ -187,9 +198,9 @@ func InitAuthorsfilter() map[string]interface{} {
 	authorsfilter["ids"].(map[string]interface{})["mag"] = false
 	authorsfilter["last_known_institution"] = make(map[string]interface{})
 	authorsfilter["last_known_institution"].(map[string]interface{})["id"] = true
-	authorsfilter["last_known_institution"].(map[string]interface{})["ror"] = false
-	authorsfilter["last_known_institution"].(map[string]interface{})["country_code"] = false
-	authorsfilter["last_known_institution"].(map[string]interface{})["type"] = false
+	//authorsfilter["last_known_institution"].(map[string]interface{})["ror"] = false
+	//authorsfilter["last_known_institution"].(map[string]interface{})["country_code"] = false
+	//authorsfilter["last_known_institution"].(map[string]interface{})["type"] = false
 	authorsfilter["x_concepts"] = make([]map[string]interface{}, 0)
 	x_concept := make(map[string]interface{})
 	x_concept["id"] = true

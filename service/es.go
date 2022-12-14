@@ -49,6 +49,13 @@ func GetObject2(index string, id string) (data map[string]interface{}, err error
 			log.Println("<ERROR in GetObject2> GetByUrl error: ", err)
 			return nil, err, 1
 		}
+		if index == "works" {
+			workfilter := utils.InitWorksfilter()
+			utils.FilterData(&data, &workfilter)
+		} else if index == "authors" {
+			authorfilter := utils.InitAuthorsfilter()
+			utils.FilterData(&data, &authorfilter)
+		}
 		return data, err, 1
 	}
 	var data2 map[string]interface{}
@@ -85,6 +92,11 @@ func GetObjects2(index string, ids []string) (res map[string]interface{}, err er
 		      "W2148347826",
 		      "W2796700885"
 	*/
+	if len(ids) == 0 {
+		return map[string]interface{}{
+			"results": []interface{}{},
+		}, nil
+	}
 	url := "https://api.openalex.org/" + index + "?filter=openalex_id:"
 	for i, id := range ids {
 		if i != 0 {
@@ -96,6 +108,19 @@ func GetObjects2(index string, ids []string) (res map[string]interface{}, err er
 	data, err := utils.GetByUrl(url)
 	if err != nil {
 		return nil, err
+	}
+	if index == "works" {
+		workfilter := utils.InitWorksfilter()
+		for _, v := range data["results"].([]interface{}) {
+			work := v.(map[string]interface{})
+			utils.FilterData(&work, &workfilter)
+		}
+	} else if index == "authors" {
+		authorfilter := utils.InitAuthorsfilter()
+		for _, v := range data["results"].([]interface{}) {
+			author := v.(map[string]interface{})
+			utils.FilterData(&author, &authorfilter)
+		}
 	}
 	return data, nil
 }

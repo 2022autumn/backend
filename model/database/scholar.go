@@ -39,6 +39,7 @@ type Author struct {
 type Application struct {
 	ApplicationID uint64    `gorm:"primary_key;not null;" json:"application_id"`
 	UserID        uint64    `gorm:"not null;" json:"user_id"` //申请者的用户id
+	Username      string    `gorm:"not null;" json:"username"`
 	RealName      string    `gorm:"not null;type:varchar(100);" json:"real_name"`
 	AuthorID      string    `gorm:"not null;" json:"author_id"`
 	Status        int       `gorm:"not null;default:0" json:"status"` //0:未处理；1：通过申请 2：未通过申请

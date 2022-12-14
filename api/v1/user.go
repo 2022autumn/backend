@@ -322,3 +322,40 @@ func UploadHeadshot(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"msg": "修改用户头像成功", "data": user})
 }
+
+// GetRegisterUserNum 获取网站所有注册用户数量
+// @Summary     获取网站所有注册用户数量 Vera
+// @Description 统计网站信息，该接口不需要前端参数
+// @Tags        网站信息
+// @Success     200 {string} json "{"status": 200, "register_num": int}"
+// @Router      /info/register_num [GET]
+func GetRegisterUserNum(c *gin.Context) {
+	num := service.GetAllUser()
+	c.JSON(http.StatusOK, gin.H{"status": 200, "register_num": num})
+}
+
+// GetBrowseHistory
+// @Summary     txc
+// @Description 获取用户浏览历史
+// @Tags        用户
+// @Param       token header   string                     true "token"
+// @Param       data  body     response.GetBrowseHistoryQ true "data"
+// @Success     200   {string} json                       "{"status": 200, "msg": "获取成功", "data": {object}}"
+// @Router      /user/history [POST]
+func GetBrowseHistory(c *gin.Context) {
+	user := c.MustGet("user").(database.User)
+	var d response.GetBrowseHistoryQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": 400, "msg": "参数错误"})
+		return
+	}
+	var history []database.BrowseHistory
+	global.DB.Where("user_id = ?", user.UserID).Order("browse_time desc").Find(&history)
+	count := len(history)
+	if count < d.Page*d.Size {
+		history = history[(d.Page-1)*d.Size:]
+	} else {
+		history = history[(d.Page-1)*d.Size : d.Page*d.Size]
+	}
+	c.JSON(http.StatusOK, gin.H{"status": 200, "msg": "获取成功", "data": history, "count": count})
+}
