@@ -141,6 +141,9 @@ func RollWorks(c *gin.Context) {
 						work["abstract"] = utils.TransInvertedIndex2String(work["abstract_inverted_index"].(map[string]interface{}))
 						work["abstract_inverted_index"] = nil
 					}
+					if work["abstract"] == nil {
+						work["abstract"] = ""
+					}
 					ret = append(ret, map[string]interface{}{
 						"work": work,
 					})
@@ -175,6 +178,9 @@ func RollWorks(c *gin.Context) {
 				if work["abstract_inverted_index"] != nil {
 					work["abstract"] = utils.TransInvertedIndex2String(work["abstract_inverted_index"].(map[string]interface{}))
 					work["abstract_inverted_index"] = nil
+				}
+				if work["abstract"] == nil {
+					work["abstract"] = ""
 				}
 				ret = append(ret, map[string]interface{}{
 					"work": work,
