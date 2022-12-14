@@ -141,6 +141,17 @@ func NormalizationSearchResult(res *elastic.SearchResult) (hits int64, result []
 			var tmp = make(map[string]interface{})
 			_ = json.Unmarshal(by, &tmp)
 			aggs[k] = tmp["buckets"].([]interface{})
+			if k == "publication_years" {
+				years := aggs[k].([]interface{})
+				nyears := make([]map[string]interface{}, 0)
+				for _, v := range years {
+					y := v.(map[string]interface{})
+					if int(y["key"].(float64)) <= 2022 {
+						nyears = append(nyears, y)
+					}
+				}
+				aggs[k] = nyears
+			}
 		}
 	}
 	return hits, result, aggs, TookInMillis
