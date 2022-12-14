@@ -83,6 +83,11 @@ func GetObjects2(index string, ids []string) (res map[string]interface{}, err er
 		      "W2148347826",
 		      "W2796700885"
 	*/
+	if len(ids) == 0 {
+		return map[string]interface{}{
+			"results": []interface{}{},
+		}, nil
+	}
 	url := "https://api.openalex.org/" + index + "?filter=openalex_id:"
 	for i, id := range ids {
 		if i != 0 {
