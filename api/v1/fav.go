@@ -5,8 +5,6 @@ import (
 	"IShare/model/response"
 	"IShare/service"
 	"IShare/utils"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -225,7 +223,7 @@ func ShowTagPaperList(c *gin.Context) {
 	}
 	var paper_list []interface{}
 	for _, id := range paper_ids {
-		fmt.Println(id)
+		//fmt.Println(id)
 		idx, err := utils.TransObjPrefix(id)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -235,8 +233,8 @@ func ShowTagPaperList(c *gin.Context) {
 			return
 		}
 		//res, err := service.GetObject("works", id)
-		res, err := service.GetObject(idx, id)
-		fmt.Println(res)
+		res, err, _ := service.GetObject2(idx, id)
+		//fmt.Println(res)
 		if err != nil {
 			c.JSON(404, gin.H{
 				"success": false,
@@ -246,11 +244,7 @@ func ShowTagPaperList(c *gin.Context) {
 			return
 		}
 		var tmp = make(map[string]interface{})
-		_ = json.Unmarshal(res.Source, &tmp)
-		referenced_works := tmp["referenced_works"].([]interface{})
-		tmp["referenced_works"] = TransRefs2Cited(referenced_works)
-		related_works := tmp["related_works"].([]interface{})
-		tmp["related_works"] = TransRefs2Intro(related_works)
+		tmp = res
 		tmp["star_num"], _ = service.GetPaperStarNum(id)
 		paper_list = append(paper_list, tmp)
 	}
