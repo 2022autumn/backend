@@ -75,7 +75,7 @@ func TransRefs2Intro(refs []interface{}) []map[string]interface{} {
 				"title":            work["title"],
 				"publication_year": work["publication_year"],
 			}
-			if work["host_venue"] != nil {
+			if work["host_venue"] != nil && work["host_venue"].(map[string]interface{})["display_name"] != nil {
 				host_venue := work["host_venue"].(map[string]interface{})
 				newRef["host_venue"] = host_venue["display_name"]
 			} else {
@@ -248,7 +248,9 @@ func GetObject2(c *gin.Context) {
 			}
 			if res["host_venue"] != nil {
 				host_venue := res["host_venue"].(map[string]interface{})
-				bh.HostVenue = host_venue["display_name"].(string)
+				if host_venue["display_name"] != nil {
+					bh.HostVenue = host_venue["display_name"].(string)
+				}
 			}
 			err := global.DB.Create(&bh).Error
 			if err != nil {

@@ -136,6 +136,7 @@ func RollWorks(c *gin.Context) {
 				works := res["results"].([]interface{})
 				for _, work := range works {
 					work := work.(map[string]interface{})
+					work["id"] = utils.RemovePrefix(work["id"].(string))
 					if work["abstract_inverted_index"] != nil {
 						work["abstract"] = utils.TransInvertedIndex2String(work["abstract_inverted_index"].(map[string]interface{}))
 						work["abstract_inverted_index"] = nil
@@ -170,6 +171,7 @@ func RollWorks(c *gin.Context) {
 			works := res["results"].([]interface{})
 			for _, work := range works {
 				work := work.(map[string]interface{})
+				work["id"] = utils.RemovePrefix(work["id"].(string))
 				if work["abstract_inverted_index"] != nil {
 					work["abstract"] = utils.TransInvertedIndex2String(work["abstract_inverted_index"].(map[string]interface{}))
 					work["abstract_inverted_index"] = nil
