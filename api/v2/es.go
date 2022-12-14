@@ -6,12 +6,11 @@ import (
 	"IShare/model/database"
 	"IShare/service"
 	"IShare/utils"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 func GetWorkCited(work map[string]interface{}) string {
@@ -115,6 +114,58 @@ func GetObject2(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"msg": "es & openalex not found"})
 		return
 	}
+	if userid != "" {
+		userid, _ := strconv.ParseUint(userid, 0, 64)
+		ucs, err := service.GetUserConcepts(userid)
+		if err != nil {
+			c.JSON(405, gin.H{"msg": "get user concepts err"})
+			return
+		}
+		var concepts []interface{}
+		if res["concepts"] != nil || res["x_concepts"] != nil {
+			if res["concepts"] != nil {
+				concepts = res["concepts"].([]interface{})
+			}
+			if res["x_concepts"] != nil {
+				concepts = res["x_concepts"].([]interface{})
+			}
+			for _, c := range concepts {
+				concept := c.(map[string]interface{})
+				conceptid := concept["id"].(string)
+				var flag = false
+				for i, uc := range ucs {
+					if conceptid == uc.ConceptID {
+						concept["islike"] = true
+						flag = true
+						ucs = append(ucs[:i], ucs[i+1:]...)
+						break
+					}
+				}
+				if flag == false {
+					concept["islike"] = false
+				}
+			}
+		}
+		if idx == "works" {
+			bh := database.BrowseHistory{
+				UserID:          userid,
+				WorkID:          id,
+				Title:           res["title"].(string),
+				PublicationYear: strconv.Itoa(int(res["publication_year"].(float64))),
+				BrowseTime:      time.Now(),
+			}
+			if res["host_venue"] != nil {
+				host_venue := res["host_venue"].(map[string]interface{})
+				if host_venue["display_name"] != nil {
+					bh.HostVenue = host_venue["display_name"].(string)
+				}
+			}
+			err := global.DB.Create(&bh).Error
+			if err != nil {
+				log.Println(err, "create browse history err")
+			}
+		}
+	}
 	if idx == "works" {
 		if source == 1 {
 			if res["abstract_inverted_index"] != nil {
@@ -203,58 +254,6 @@ func GetObject2(c *gin.Context) {
 			"status": 200,
 		})
 		return
-	}
-	if userid != "" {
-		userid, _ := strconv.ParseUint(userid, 0, 64)
-		ucs, err := service.GetUserConcepts(userid)
-		if err != nil {
-			c.JSON(405, gin.H{"msg": "get user concepts err"})
-			return
-		}
-		var concepts []interface{}
-		if res["concepts"] != nil || res["x_concepts"] != nil {
-			if res["concepts"] != nil {
-				concepts = res["concepts"].([]interface{})
-			}
-			if res["x_concepts"] != nil {
-				concepts = res["x_concepts"].([]interface{})
-			}
-			for _, c := range concepts {
-				concept := c.(map[string]interface{})
-				conceptid := concept["id"].(string)
-				var flag = false
-				for i, uc := range ucs {
-					if conceptid == uc.ConceptID {
-						concept["islike"] = true
-						flag = true
-						ucs = append(ucs[:i], ucs[i+1:]...)
-						break
-					}
-				}
-				if flag == false {
-					concept["islike"] = false
-				}
-			}
-		}
-		if idx == "works" {
-			bh := database.BrowseHistory{
-				UserID:          userid,
-				WorkID:          id,
-				Title:           res["title"].(string),
-				PublicationYear: strconv.Itoa(int(res["publication_year"].(float64))),
-				BrowseTime:      time.Now(),
-			}
-			if res["host_venue"] != nil {
-				host_venue := res["host_venue"].(map[string]interface{})
-				if host_venue["display_name"] != nil {
-					bh.HostVenue = host_venue["display_name"].(string)
-				}
-			}
-			err := global.DB.Create(&bh).Error
-			if err != nil {
-				log.Println(err, "create browse history err")
-			}
-		}
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"data":   res,
