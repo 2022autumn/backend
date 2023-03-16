@@ -42,8 +42,13 @@ func GetObject(index string, id string) (res *elastic.GetResult, err error) {
 func GetObject2(index string, id string) (data map[string]interface{}, err error, source int) {
 	res, err := global.ES.Get().Index(index).Id(id).Do(context.Background())
 	if err != nil {
+		log.Println("id", id)
 		//https://api.openalex.org/works/W2741809807
 		data, err := utils.GetByUrl("https://api.openalex.org/" + index + "/" + id)
+		if err != nil {
+			log.Println("<ERROR in GetObject2> GetByUrl error: ", err)
+			return nil, err, 1
+		}
 		if index == "works" {
 			workfilter := utils.InitWorksfilter()
 			utils.FilterData(&data, &workfilter)
@@ -55,6 +60,10 @@ func GetObject2(index string, id string) (data map[string]interface{}, err error
 	}
 	var data2 map[string]interface{}
 	err = json.Unmarshal(res.Source, &data2)
+	if err != nil {
+		log.Println("GetObjects2 Unmarshal error: ", err)
+		return nil, err, 0
+	}
 	return data2, err, 0
 }
 
@@ -83,6 +92,11 @@ func GetObjects2(index string, ids []string) (res map[string]interface{}, err er
 		      "W2148347826",
 		      "W2796700885"
 	*/
+	if len(ids) == 0 {
+		return map[string]interface{}{
+			"results": []interface{}{},
+		}, nil
+	}
 	url := "https://api.openalex.org/" + index + "?filter=openalex_id:"
 	for i, id := range ids {
 		if i != 0 {
@@ -175,26 +189,14 @@ func addAggToSearch(service *elastic.SearchService, aggNames map[string]bool) *e
 
 // 计算学者关系网络
 func ComputeAuthorRelationNet(author_id string) (Vertex_set []map[string]interface{}, Edge_set []map[string]interface{}, err error) {
-	// 1. 判断author_id类型
-	ty, err := utils.TransObjPrefix(author_id)
-	if err != nil {
-		log.Println("TransObjPrefix", err)
-		return nil, nil, err
-	}
-	if ty != "authors" {
-		log.Println("author_id is not an author id")
-		return nil, nil, errors.New("author_id is not an author id")
-	}
-	// 2. 获取author_id对应的author
-	res, err := GetObject(ty, author_id)
+	author_id = utils.RemovePrefix(author_id)
+	author_id = utils.RemovePrefix(author_id)
+	log.Println("author_id: ", author_id)
+	author_map, err, _ := GetObject2("authors", author_id)
 	if err != nil {
 		log.Println("GetObject err: ", err)
 		return nil, nil, err
 	}
-	author := res.Source
-	// 3. 反序列化author实体，获取实体中的display_name\ works_api_url
-	var author_map map[string]interface{}
-	_ = json.Unmarshal(author, &author_map)
 	display_name := author_map["display_name"].(string)
 	works_api_url := author_map["works_api_url"].(string)
 

@@ -11,14 +11,14 @@ import re
 # 由于openAlex数据冗余的情况比较明显，可能经过数据清洗后，我们的数据量会更小。后期可以再进行调整
 GB = 1024 * 1024 * 1024
 ALL = 400
-download_size = 400 * GB  # 160/330
+download_size = 102 * GB
 manifests_path = os.path.join('.', 'manifests')
 entries = []
 urls = []
 # 将所有json文件中的entries合并到一个list中
 # for directory, subdir_list, file_list in os.walk(manifests_path):
 #     for file in file_list:
-with open(os.path.join(manifests_path, "com.json"), 'r') as f:
+with open(os.path.join(manifests_path, "works.json"), 'r') as f:
     data = json.load(f)
     entries.extend(data['entries'])
 # 将entries按照url中updated_date=xxxx-xx-xx后的时间进行排序
@@ -35,7 +35,7 @@ for entry in entries:
         break
     urls.append(entry['url'])
 print('totol num', cuurent_num)
-exit(0)
+# exit(0)
 # 将url分类
 works_url = []
 authors_url = []

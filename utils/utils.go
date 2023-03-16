@@ -141,6 +141,17 @@ func NormalizationSearchResult(res *elastic.SearchResult) (hits int64, result []
 			var tmp = make(map[string]interface{})
 			_ = json.Unmarshal(by, &tmp)
 			aggs[k] = tmp["buckets"].([]interface{})
+			if k == "publication_years" {
+				years := aggs[k].([]interface{})
+				nyears := make([]map[string]interface{}, 0)
+				for _, v := range years {
+					y := v.(map[string]interface{})
+					if int(y["key"].(float64)) <= 2022 {
+						nyears = append(nyears, y)
+					}
+				}
+				aggs[k] = nyears
+			}
 		}
 	}
 	return hits, result, aggs, TookInMillis
@@ -202,6 +213,13 @@ func InitAuthorsfilter() map[string]interface{} {
 // 保证filter中的key在data中存在
 func FilterData(data *map[string]interface{}, filter *map[string]interface{}) {
 	for k, v := range *filter {
+		if k == "abstract_inverted_index" {
+			abstract := TransInvertedIndex2String((*data)[k])
+			// 删去abstract_inverted_index
+			delete(*data, "abstract_inverted_index")
+			// 添加abstract字段
+			(*data)["abstract"] = abstract
+		}
 		// 如果v为bool类型，若为true则修改，若为false则删除
 		if reflect.TypeOf(v).Kind() == reflect.Bool {
 			if v.(bool) {
@@ -256,16 +274,19 @@ func GetByUrl(urlstring string) (map[string]interface{}, error) {
 	resp, err := http.Get(u.String())
 	log.Println("- single get works_api_url time: ", time.Since(req_st_time))
 	if err != nil {
+		log.Println("<ERROR in GetByUrl> http get: ", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Println("<ERROR in GetByUrl> ioutil: ", err)
 		return nil, err
 	}
 	var result map[string]interface{}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
+		log.Println("<ERROR in GetByUrl> json unmarshal: ", err)
 		return nil, err
 	}
 	return result, nil

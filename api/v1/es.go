@@ -360,15 +360,40 @@ func BaseSearch(c *gin.Context) {
 	if err := c.ShouldBind(&d); err != nil {
 		panic(err)
 	}
-	boolQuery := elastic.NewBoolQuery()
-	tiQuery := elastic.NewMatchPhraseQuery("full", d.QueryWord)
-	abQuery := elastic.NewMatchPhraseQuery("full", d.QueryWord)
-	b2Query := elastic.NewBoolQuery()
-	b2Query.Should(tiQuery, abQuery)
-	boolQuery.Must(b2Query)
 	var aggs = make(map[string]bool)
 	var fields = make([]string, 0)
-	fields = append(fields, "title", "abstract")
+	boolQuery := elastic.NewBoolQuery()
+	if d.Kind == "string" {
+		tiQuery := elastic.NewMatchPhraseQuery("full", d.QueryWord)
+		b2Query := elastic.NewBoolQuery()
+		b2Query.Should(tiQuery)
+		boolQuery.Must(b2Query)
+		fields = append(fields, "title", "abstract")
+	} else if d.Kind == "title" {
+		tiQuery := elastic.NewMatchPhraseQuery("title", d.QueryWord)
+		b2Query := elastic.NewBoolQuery()
+		b2Query.Should(tiQuery)
+		boolQuery.Must(b2Query)
+		fields = append(fields, "title")
+	} else if d.Kind == "abstract" {
+		tiQuery := elastic.NewMatchPhraseQuery("abstract", d.QueryWord)
+		b2Query := elastic.NewBoolQuery()
+		b2Query.Should(tiQuery)
+		boolQuery.Must(b2Query)
+		fields = append(fields, "abstract")
+	} else if d.Kind == "venue" {
+		tiQuery := elastic.NewMatchPhraseQuery("host_venue.display_name", d.QueryWord)
+		b2Query := elastic.NewBoolQuery()
+		b2Query.Should(tiQuery)
+		boolQuery.Must(b2Query)
+		fields = append(fields, "host_venue.display_name")
+	} else if d.Kind == "institution" {
+		tiQuery := elastic.NewMatchPhraseQuery("authorships.institutions.display_name", d.QueryWord)
+		b2Query := elastic.NewBoolQuery()
+		b2Query.Should(tiQuery)
+		boolQuery.Must(b2Query)
+		fields = append(fields, "authorships.institutions.display_name")
+	}
 	var aggList = [6]string{"types", "authors", "institutions", "publishers", "venues", "publication_years"}
 	for _, k := range aggList {
 		aggs[k] = true
